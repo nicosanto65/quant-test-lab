@@ -504,24 +504,27 @@
       p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)}</span><h2>${esc(unit.title)}</h2></div>`;
       unit.concepts.forEach((c) => {
         const d = el('details', 'acc');
+        const levelWord = (lv) => lv === 1 ? 'Basic' : lv === 2 ? 'Intermediate' : 'Advanced';
         d.innerHTML = `<summary>${esc(c.name)}</summary>
           <div class="acc-body">
+            ${c.primer ? `<div class="reveal"><span class="eyebrow">Start from zero</span>${esc(c.primer)}</div>` : ''}
             <p><strong>Core idea.</strong> ${esc(c.core)}</p>
             <p><strong>When to use it.</strong> ${esc(c.when)}</p>
             <div class="eyebrow">Key formulas</div>
             <ul class="formula-list">${c.formulas.map((f) => `<li><span class="formula">${esc(f)}</span></li>`).join('')}</ul>
             <p><strong>Intuition.</strong> ${esc(c.intuition)}</p>
-            <div class="reveal"><span class="eyebrow">Worked example — simple</span>${esc(c.easy)}</div>
-            <div class="reveal"><span class="eyebrow">Worked example — harder</span>${esc(c.hard)}</div>
+            <div class="eyebrow" style="margin-top:10px">Worked examples</div>
+            ${(c.examples || []).map((ex) => `<div class="reveal"><span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${esc(ex.text)}</div>`).join('')}
             <div class="reveal"><span class="eyebrow">Common trap</span>${esc(c.trap)}</div>
-            <div class="eyebrow" style="margin-top:12px">Quick checks</div>
+            <div class="eyebrow" style="margin-top:12px">Practice — ${c.checks.length} questions, increasing difficulty</div>
             <div class="checks"></div>
           </div>`;
         const box = $('.checks', d);
         c.checks.forEach((chk, ci) => {
           const wrap = el('div');
           wrap.style.margin = '10px 0';
-          wrap.innerHTML = `<p style="margin-bottom:6px">${esc(chk.q)}</p>`;
+          const lv = chk.level || 1;
+          wrap.innerHTML = `<p style="margin-bottom:6px"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
             const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
             b.onclick = () => {
@@ -534,7 +537,7 @@
               wrap.appendChild(why);
               S.recordAttempt({
                 qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
-                topic: unit.topic, subtopic: c.name, difficulty: 1, correct: oi === chk.a, timeSec: 0,
+                topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
                 targetTime: 30, hintUsed: false, confidence: 'Medium'
               });
             };
