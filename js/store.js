@@ -37,9 +37,19 @@
         ]
       },
       sigCount: 20,
-      sigMinutes: 23
+      sigMinutes: 23,
+      track: 'quant'
     }
   };
+
+  const TRACKS = [
+    { id: 'quant', label: 'Quant trading' },
+    { id: 'reasoning', label: 'Reasoning speed' },
+    { id: 'ib', label: 'Investment Banking' },
+    { id: 'am', label: 'Asset Management' },
+    { id: 'wm', label: 'Wealth Management' },
+    { id: 'consulting', label: 'Consulting' }
+  ];
 
   function load() {
     try {
@@ -65,10 +75,41 @@
 
   /* ----------------------------- question engine ---------------------------- */
 
-  function allGenerators() {
-    return (global.QTL_GEN_PROB || []).concat(global.QTL_GEN_APPLIED || []);
+  /* Every track's generators/curated items live in their own global array so files can be
+     loaded independently; new tracks just register their array name here. Content with no
+     explicit `track` field (the original quant material) is treated as track:'quant'. */
+  const GEN_SOURCES = ['QTL_GEN_PROB', 'QTL_GEN_APPLIED', 'QTL_GEN_REASONING', 'QTL_GEN_IB', 'QTL_GEN_AM'];
+  const LESSON_SOURCES = ['QTL_LESSONS', 'QTL_LESSONS_REASONING', 'QTL_LESSONS_IB', 'QTL_LESSONS_WM', 'QTL_LESSONS_AM', 'QTL_LESSONS_CONSULTING'];
+
+  function activeTrack() { return state.settings.track || 'quant'; }
+  function tracks() { return TRACKS; }
+  function setTrack(t) {
+    if (!TRACKS.some((x) => x.id === t)) return;
+    state.settings.track = t; save();
   }
-  function curated() { return (global.QTL_BANK && global.QTL_BANK.questions) || []; }
+
+  /* track: omit for the active track, pass 'all' to bypass filtering entirely
+     (used when looking a specific question up by id regardless of which track is selected). */
+  function allGenerators(track) {
+    let list = [];
+    GEN_SOURCES.forEach((k) => { if (global[k]) list = list.concat(global[k]); });
+    if (track === 'all') return list;
+    const t = track || activeTrack();
+    return list.filter((g) => (g.track || 'quant') === t);
+  }
+  function curated(track) {
+    const list = (global.QTL_BANK && global.QTL_BANK.questions) || [];
+    if (track === 'all') return list;
+    const t = track || activeTrack();
+    return list.filter((q) => (q.track || 'quant') === t);
+  }
+  function allLessonUnits(track) {
+    let list = [];
+    LESSON_SOURCES.forEach((k) => { if (global[k]) list = list.concat(global[k]); });
+    if (track === 'all') return list;
+    const t = track || activeTrack();
+    return list.filter((u) => (u.track || 'quant') === t);
+  }
 
   function topics() {
     const set = new Set();
@@ -96,7 +137,7 @@
   }
 
   function similar(question) {
-    const gen = allGenerators().find((g) => g.id === question.baseId);
+    const gen = allGenerators('all').find((g) => g.id === question.baseId);
     if (!gen) return null;
     return instantiate(gen);
   }
@@ -386,6 +427,7 @@
   global.QTL_STORE = {
     get state() { return state; },
     save, reset, ERROR_TYPES, TECHNIQUES,
+    tracks, activeTrack, setTrack, allLessonUnits,
     topics, subtopics, buildSession, instantiate, similar, allGenerators, curated,
     recordAttempt, recordRecognition, recordMock, setErrorType, classifyError,
     summary, byKey, weakestTopics, strongestTopics, perDay, recognitionAccuracy,

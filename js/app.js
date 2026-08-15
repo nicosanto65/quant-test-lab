@@ -499,7 +499,7 @@
   /* ================================= LEARN ================================= */
 
   function viewLearn(root) {
-    global.QTL_LESSONS.forEach((unit) => {
+    S.allLessonUnits().forEach((unit) => {
       const p = el('div', 'panel');
       p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)}</span><h2>${esc(unit.title)}</h2></div>`;
       unit.concepts.forEach((c) => {
@@ -1245,9 +1245,23 @@
     if (k === 't') toggleTheme();
   }
 
+  function buildTrackSelect() {
+    const sel = $('#track-select');
+    if (!sel) return;
+    sel.innerHTML = S.tracks().map((t) => `<option value="${esc(t.id)}">${esc(t.label)}</option>`).join('');
+    sel.value = S.activeTrack();
+    sel.onchange = () => {
+      S.setTrack(sel.value);
+      drillState.topic = ''; drillState.subtopic = '';
+      go('dashboard');
+      toast('Track: ' + S.tracks().find((t) => t.id === sel.value).label);
+    };
+  }
+
   function init() {
     document.documentElement.setAttribute('data-theme', S.state.settings.theme || 'dark');
     buildNav();
+    buildTrackSelect();
     $('#theme-btn').onclick = toggleTheme;
     document.addEventListener('keydown', keys);
     window.addEventListener('beforeunload', () => S.save());
