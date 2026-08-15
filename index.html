@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d11">
+<meta name="description" content="Quant Test Lab — offline practice environment for quantitative trading and consulting assessments.">
+<title>Quant Test Lab</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0d11'/><text x='16' y='23' font-size='20' font-family='monospace' fill='%23e0a44a' text-anchor='middle'>Q</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">Quant Test <span>Lab</span></span>
+  <span class="spacer"></span>
+  <button class="topbar-btn" id="theme-btn" title="Toggle theme (T)">theme</button>
+</header>
+
+<div class="layout">
+  <nav class="sidenav" id="sidenav" aria-label="Sections"></nav>
+  <main id="main"></main>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
+
+<script src="js/util.js"></script>
+<script src="js/gen-prob.js"></script>
+<script src="js/gen-applied.js"></script>
+<script src="js/bank.js"></script>
+<script src="js/lessons.js"></script>
+<script src="js/formulas.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Optional offline cache. Fails silently on file:// where service workers are unavailable.
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* offline cache unavailable */ });
+    });
+  }
+</script>
+</body>
+</html>
