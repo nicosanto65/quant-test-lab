@@ -1,4 +1,4 @@
-/* QUANT TEST LAB — Learn mode content, expanded edition.
+/* QUANT TEST LAB — Learn mode content, expanded edition. 
    Each concept:
      primer   — explains the vocabulary from zero, assumes nothing
      core     — the one-line idea once vocabulary is established
