@@ -813,6 +813,196 @@
       solution: 'The EPS increase comes purely from a shrinking share count, not real earnings growth, while the new debt increases financial leverage and risk — a combination that is a legitimate point of scrutiny, especially for a company with limited genuine growth opportunities to invest in instead.',
       recognitionTechnique: 'Other', commonTrap: 'Evaluating the EPS improvement in isolation without considering how it was financed or where the improvement actually came from.',
       tags: ['buybacks', 'leverage']
+    },
+
+    /* ---------------------- Duration ---------------------- */
+    {
+      id: 'ib_b071', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'A bond has a duration of 7 and is priced at $1,000. Yields fall by 0.5% (50bp). What is the approximate new price?',
+      answerType: 'numeric', correctAnswer: 1035, tolerance: 2,
+      hint: '%ΔPrice ≈ −Duration × Δyield. A FALL in yields makes Δyield negative.',
+      approach: 'Compute %ΔPrice, then apply it to the current price.',
+      solution: '%ΔPrice ≈ −7 × (−0.5%) = +3.5%. New price ≈ 1000 × 1.035 = $1035.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Getting the sign backwards and computing a price decline instead of a rise for a fall in yields.',
+      tags: ['duration']
+    },
+    {
+      id: 'ib_b072', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'All else equal, which bond has HIGHER duration: a 15-year bond, or a 5-year bond with the same coupon rate?',
+      answerType: 'mc', options: ['The 15-year bond', 'The 5-year bond', 'They must have identical duration', 'Duration has nothing to do with maturity'], correctAnswer: 'The 15-year bond',
+      hint: 'Longer maturity means more of the bond\'s cash flows sit further in the future.',
+      approach: 'Duration rises with longer maturity, all else equal.',
+      solution: 'A longer maturity means more cash flows arrive further in the future, which are more sensitive (in percentage terms) to a change in the discount rate — so the 15-year bond has higher duration.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming duration depends only on coupon rate, ignoring the separate, equally important effect of maturity.',
+      tags: ['duration']
+    },
+    {
+      id: 'ib_b073', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a zero-coupon bond have the maximum possible duration for its maturity, compared to a coupon-paying bond of the same maturity?',
+      answerType: 'mc', options: [
+        'Zero-coupon bonds are always riskier for unrelated credit reasons',
+        'Its entire value arrives in one lump sum at maturity, while a coupon bond returns some value earlier, pulling its weighted-average cash-flow timing earlier and lowering its duration',
+        'Zero-coupon bonds pay a floating interest rate',
+        'This is false — they always have identical duration'
+      ], correctAnswer: 'Its entire value arrives in one lump sum at maturity, while a coupon bond returns some value earlier, pulling its weighted-average cash-flow timing earlier and lowering its duration',
+      hint: 'Duration is a weighted average of when cash flows arrive.',
+      approach: 'Compare the timing of cash flows for a zero-coupon bond versus a coupon-paying bond of the same maturity.',
+      solution: 'Duration reflects the weighted-average timing of a bond\'s cash flows; a zero-coupon bond concentrates 100% of its value at the single maturity date, while a coupon bond returns some value earlier via periodic coupons, pulling the weighted average (and therefore duration) earlier.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming duration is purely a function of stated maturity, ignoring the effect of coupon timing.',
+      tags: ['duration']
+    },
+
+    /* ---------------------- Yield mechanics ---------------------- */
+    {
+      id: 'ib_b074', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A bond has a $1,000 face value and a 7% coupon rate. It trades at $1,100 (a premium). What is the correct ordering of coupon rate, current yield, and YTM?',
+      answerType: 'mc', options: ['Coupon rate = Current yield = YTM', 'YTM > Current yield > Coupon rate', 'Coupon rate > Current yield > YTM'], correctAnswer: 'Coupon rate > Current yield > YTM',
+      hint: 'A premium bond gives up a capital loss by holding to maturity.',
+      approach: 'At a premium, holding to maturity means the price falls back to face value, a capital loss subtracted from YTM.',
+      solution: 'The bond trades above face value (a premium), so holding to maturity means giving up a capital loss as the price converges to $1,000 — this drags YTM below current yield, which is itself below the coupon rate since the price (denominator) exceeds face value: Coupon rate > Current yield > YTM.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming current yield alone represents total expected return, ignoring the capital loss embedded in a premium price.',
+      tags: ['ytm', 'current-yield']
+    },
+    {
+      id: 'ib_b075', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A bond pays a $45 annual coupon and trades at $900. What is its current yield?',
+      answerType: 'numeric', correctAnswer: 5, tolerance: 0.1,
+      hint: 'Current yield = annual coupon / current market price.',
+      approach: 'Divide the annual coupon by the current market price.',
+      solution: 'Current yield = 45/900 = 5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing the coupon by face value instead of the current market price.',
+      tags: ['current-yield']
+    },
+    {
+      id: 'ib_b076', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 3, targetTime: 90,
+      prompt: 'Why can quoting only a bond\'s current yield be misleading as a measure of total expected return?',
+      answerType: 'mc', options: [
+        'Current yield is always identical to YTM, so this concern is unfounded',
+        'Current yield ignores any capital gain or loss embedded in the gap between the purchase price and the face value received at maturity',
+        'Current yield only applies to bonds that pay no coupons',
+        'Current yield always overstates returns for discount bonds and understates them for premium bonds'
+      ], correctAnswer: 'Current yield ignores any capital gain or loss embedded in the gap between the purchase price and the face value received at maturity',
+      hint: 'Think about what current yield leaves out compared to YTM.',
+      approach: 'Current yield is a simple income-over-price snapshot; YTM captures the full return to maturity.',
+      solution: 'Current yield only measures income relative to today\'s price — it says nothing about the capital gain (for a discount bond) or capital loss (for a premium bond) the investor will realize as the price converges to face value by maturity, which YTM captures fully.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating current yield as a complete total-return measure.',
+      tags: ['ytm', 'current-yield']
+    },
+
+    /* ---------------------- Bond structures ---------------------- */
+    {
+      id: 'ib_b077', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 2, targetTime: 60,
+      prompt: 'A zero-coupon bond with $1,000 face value matures in 6 years at a 5% discount rate. What is its approximate price?',
+      answerType: 'numeric', correctAnswer: 746, tolerance: 5,
+      hint: 'Price = Face value / (1+yield)^n.',
+      approach: 'Discount the face value back n years at the given rate.',
+      solution: 'Price = 1000/(1.05)^6 = 1000/1.340 ≈ $746.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting there are no coupon cash flows to add — the entire price comes from discounting the single face-value payment.',
+      tags: ['zero-coupon']
+    },
+    {
+      id: 'ib_b078', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a callable bond typically offer a HIGHER yield than an otherwise-identical non-callable (straight) bond?',
+      answerType: 'mc', options: [
+        'Callable bonds always carry more default risk',
+        'Investors are compensated for the risk that the issuer calls the bond away (typically when rates fall), capping the investor\'s potential price appreciation',
+        'Callable bonds pay coupons less frequently',
+        'This is false — callable bonds always yield less'
+      ], correctAnswer: 'Investors are compensated for the risk that the issuer calls the bond away (typically when rates fall), capping the investor\'s potential price appreciation',
+      hint: 'Think about which side of the trade — issuer or investor — holds the call option.',
+      approach: 'The call option favors the issuer, so investors must be compensated with extra yield.',
+      solution: 'Since the issuer holds the right to redeem the bond early (typically exercised when rates fall, to refinance cheaper), investors\' potential upside is capped — the extra yield compensates them for giving up that upside.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any embedded bond option always raises yield, regardless of which side holds it.',
+      tags: ['callable-bonds']
+    },
+    {
+      id: 'ib_b079', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a convertible bond typically carry a LOWER coupon than an otherwise-identical straight bond?',
+      answerType: 'mc', options: [
+        'Convertible bonds are always safer from a default standpoint',
+        'The investor accepts less current income in exchange for the option to convert into the issuer\'s equity, offering potential upside if the stock performs well',
+        'Convertible bonds never actually pay any coupons',
+        'The issuer is legally required to reduce the coupon on any convertible security'
+      ], correctAnswer: 'The investor accepts less current income in exchange for the option to convert into the issuer\'s equity, offering potential upside if the stock performs well',
+      hint: 'Think about what valuable right the investor receives in exchange for the lower coupon.',
+      approach: 'The conversion option is valuable to the investor, who pays for it via a lower coupon.',
+      solution: 'The embedded right to convert into common shares is a valuable option that can pay off if the stock rallies; investors accept a lower coupon as the "price" of holding that option, similar to how option premiums work more broadly.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the lower coupon reflects lower risk rather than compensation traded for the embedded equity option.',
+      tags: ['convertible-bonds']
+    },
+
+    /* ---------------------- Creditor waterfall ---------------------- */
+    {
+      id: 'ib_b080', topic: 'Fixed Income', subtopic: 'Creditor waterfall', difficulty: 2, targetTime: 60,
+      prompt: 'A company liquidates for $90m, with $60m of secured debt and $50m of unsecured senior debt (no other claims). How much does unsecured senior debt recover?',
+      answerType: 'numeric', correctAnswer: 30, tolerance: 0.5,
+      hint: 'Secured debt is paid in full first.',
+      approach: 'Pay secured debt in full, then apply remaining proceeds to unsecured senior debt.',
+      solution: 'Secured debt paid in full: $60m, leaving 90−60 = $30m for the $50m unsecured senior claim — a partial recovery of $30m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Splitting proceeds proportionally across both tiers instead of following the strict, sequential priority order.',
+      tags: ['creditor-waterfall']
+    },
+    {
+      id: 'ib_b081', topic: 'Fixed Income', subtopic: 'Creditor waterfall', difficulty: 2, targetTime: 60,
+      prompt: 'In the standard liquidation waterfall, which of these is paid LAST?',
+      answerType: 'mc', options: ['Secured debt', 'Subordinated debt', 'Common equity', 'Unsecured senior debt'], correctAnswer: 'Common equity',
+      hint: 'The residual claimant is paid only after every other claim is satisfied in full.',
+      approach: 'Common equity is the most junior claim in the standard capital structure.',
+      solution: 'Common equity is the residual claimant, entitled only to whatever (if anything) remains after secured debt, unsecured senior debt, subordinated debt, and preferred equity have all been paid in full.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing preferred equity (paid ahead of common) with common equity.',
+      tags: ['creditor-waterfall']
+    },
+    {
+      id: 'ib_b082', topic: 'Fixed Income', subtopic: 'Creditor waterfall', difficulty: 3, targetTime: 90,
+      prompt: 'Why do required yields on debt generally rise the further DOWN the capital structure a claim sits?',
+      answerType: 'mc', options: [
+        'Yields have no relationship to a claim\'s seniority',
+        'A claim further down the waterfall faces greater risk of a shortfall in a liquidation, since more senior claims must be paid in full first, so lenders demand more yield to compensate',
+        'Junior debt is always backed by more collateral than senior debt',
+        'This pattern applies only to equity, never to debt'
+      ], correctAnswer: 'A claim further down the waterfall faces greater risk of a shortfall in a liquidation, since more senior claims must be paid in full first, so lenders demand more yield to compensate',
+      hint: 'Think about recovery risk at each successive tier.',
+      approach: 'More junior claims face more recovery risk in a liquidation, which is compensated with higher required yield.',
+      solution: 'Since each tier is paid in full only after all more senior tiers are satisfied, a more junior claim faces a materially higher chance of a partial or zero recovery — lenders require higher yield to compensate for that added risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming yield differences across the capital structure reflect something other than seniority-driven recovery risk.',
+      tags: ['creditor-waterfall']
+    },
+
+    /* ---------------------- Inflation & fixed income ---------------------- */
+    {
+      id: 'ib_b083', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'The real interest rate is 2%, and expected inflation is 4%. Using the Fisher approximation, what is the approximate nominal rate?',
+      answerType: 'numeric', correctAnswer: 6, tolerance: 0.2,
+      hint: 'Nominal rate ≈ real rate + expected inflation.',
+      approach: 'Add the real rate and expected inflation.',
+      solution: 'Nominal rate ≈ 2% + 4% = 6%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Subtracting inflation from the real rate instead of adding it.',
+      tags: ['fisher-equation']
+    },
+    {
+      id: 'ib_b084', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A TIPS bond has an original principal of $1,000 and a 2% coupon rate. After one year, cumulative inflation is 3%. What is that year\'s coupon payment?',
+      answerType: 'numeric', correctAnswer: 20.6, tolerance: 0.5,
+      hint: 'First adjust the principal upward by cumulative inflation, then apply the coupon rate to the ADJUSTED principal.',
+      approach: 'Adjusted principal = original × (1+inflation). Coupon = coupon rate × adjusted principal.',
+      solution: 'Adjusted principal = 1000×1.03 = $1030. Coupon = 2%×1030 = $20.60.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the coupon rate to the original, un-adjusted principal instead of the inflation-adjusted principal.',
+      tags: ['tips']
+    },
+    {
+      id: 'ib_b085', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 3, targetTime: 90,
+      prompt: 'Why do existing fixed-rate bond prices typically fall when inflation expectations rise, even before any inflation has actually occurred?',
+      answerType: 'mc', options: [
+        'Bond prices only respond to realized inflation, never to expectations',
+        'Rising inflation expectations push up the yields demanded on newly-issued bonds, making existing lower-yielding fixed-rate bonds comparatively less attractive, so their prices fall to compensate',
+        'Inflation expectations only affect equities, never bonds',
+        'This relationship is a myth — bond prices are unaffected by inflation expectations'
+      ], correctAnswer: 'Rising inflation expectations push up the yields demanded on newly-issued bonds, making existing lower-yielding fixed-rate bonds comparatively less attractive, so their prices fall to compensate',
+      hint: 'Think about the Fisher equation and the duration relationship together.',
+      approach: 'Higher inflation expectations raise required nominal yields (Fisher), which lowers existing bond prices (duration).',
+      solution: 'Per the Fisher equation, rising inflation expectations push up the nominal yields required on new debt; existing bonds paying their old, now relatively low coupons become less attractive at their old prices, so their prices fall (per the duration relationship) until their yields become competitive again.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming bond prices only respond to inflation once it is actually realized, ignoring the forward-looking nature of yields.',
+      tags: ['fisher-equation', 'inflation']
     }
   ];
 

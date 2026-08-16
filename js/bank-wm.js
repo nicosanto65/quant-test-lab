@@ -364,6 +364,196 @@
       solution: 'Commercial real estate is a physical, tangible asset, placing it in the "real assets" category, distinct from traditional financial instruments like stocks and bonds.',
       recognitionTechnique: 'Other', commonTrap: 'Confusing real estate investment trusts (publicly traded, liquid) with direct real estate ownership (illiquid, a genuine real asset) — both broadly relate to real estate but have very different liquidity profiles.',
       tags: ['real-assets']
+    },
+
+    /* ---------------------- Duration ---------------------- */
+    {
+      id: 'wm_b036', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond fund has a duration of 6. Rates rise by 0.75% (75bp). Approximately how much does the fund\'s value change?',
+      answerType: 'numeric', correctAnswer: -4.5, tolerance: 0.3,
+      hint: '%ΔValue ≈ −Duration × Δyield.',
+      approach: 'Multiply duration by the yield change (with the correct sign) to approximate the % value change.',
+      solution: '%ΔValue ≈ −6 × 0.75% = −4.5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting the negative sign — a rate rise should produce a value decline.',
+      tags: ['duration']
+    },
+    {
+      id: 'wm_b037', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'A client with a 2-year time horizon for a specific goal is choosing bond duration. Which is generally more appropriate?',
+      answerType: 'mc', options: ['A long-duration bond fund, for the higher stated yield', 'A short-duration bond fund, to limit the risk of a rate-driven price dip right when the funds are needed', 'Duration is irrelevant to a 2-year time horizon', 'An all-equity allocation instead of any bonds'], correctAnswer: 'A short-duration bond fund, to limit the risk of a rate-driven price dip right when the funds are needed',
+      hint: 'Think about how much time the client has to ride out a rate move.',
+      approach: 'Match bond duration to the client\'s time horizon to reduce the risk of being forced to sell at a depressed price.',
+      solution: 'A short time horizon means the client cannot easily wait out a rate-driven price swing, making the lower sensitivity of a short-duration bond fund the more appropriate match.',
+      recognitionTechnique: 'Other', commonTrap: 'Chasing the higher yield of longer-duration bonds without considering the client\'s actual time horizon.',
+      tags: ['duration', 'suitability']
+    },
+    {
+      id: 'wm_b038', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 3, targetTime: 90,
+      prompt: 'A client is upset that their "safe" bond fund lost value in a year when rates rose sharply, even though no underlying issuer had any credit trouble. What should a wealth manager explain?',
+      answerType: 'mc', options: [
+        'The fund must be poorly managed or fraudulent',
+        'This is a normal, mechanical consequence of interest-rate risk (duration), separate from credit risk, and the value can recover as rates stabilize or bonds mature at face value',
+        'Bonds should never be described as relatively lower-risk under any circumstances',
+        'This loss is permanent and has nothing to do with interest rates'
+      ], correctAnswer: 'This is a normal, mechanical consequence of interest-rate risk (duration), separate from credit risk, and the value can recover as rates stabilize or bonds mature at face value',
+      hint: 'Distinguish interest-rate risk from credit risk.',
+      approach: 'Explain the price decline as a normal duration-driven effect, not a sign of deteriorating credit quality.',
+      solution: 'The loss reflects interest-rate risk (duration), not credit risk — a normal, expected mechanical consequence of holding bonds with meaningful duration during a rising-rate environment, not a sign of financial distress at the underlying issuers.',
+      recognitionTechnique: 'Other', commonTrap: 'Conflating interest-rate risk with credit/default risk when communicating with a client.',
+      tags: ['duration', 'client-communication']
+    },
+
+    /* ---------------------- Yield mechanics ---------------------- */
+    {
+      id: 'wm_b039', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond pays a $35 annual coupon and trades at $700. What is its current yield?',
+      answerType: 'numeric', correctAnswer: 5, tolerance: 0.1,
+      hint: 'Current yield = annual coupon / current market price.',
+      approach: 'Divide the annual coupon by the current market price.',
+      solution: 'Current yield = 35/700 = 5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing by face value instead of the current market price.',
+      tags: ['current-yield']
+    },
+    {
+      id: 'wm_b040', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 3, targetTime: 90,
+      prompt: 'A wealth manager quotes a client only the current yield on a premium bond as "your expected return." What is missing from this explanation?',
+      answerType: 'mc', options: [
+        'Nothing — current yield is always a complete and accurate figure to quote',
+        'Current yield ignores the capital loss the client will realize as the premium bond\'s price converges to face value by maturity; YTM should be quoted as the accurate total-return figure',
+        'Premium bonds never lose any value by maturity',
+        'YTM is only relevant for discount bonds, not premium bonds'
+      ], correctAnswer: 'Current yield ignores the capital loss the client will realize as the premium bond\'s price converges to face value by maturity; YTM should be quoted as the accurate total-return figure',
+      hint: 'Think about what a premium bond\'s price does by maturity.',
+      approach: 'Current yield alone systematically overstates a premium bond\'s true expected return.',
+      solution: 'Current yield omits the built-in capital loss a premium bond gives back by maturity; YTM is the complete, client-appropriate figure that captures the bond\'s true total expected return.',
+      recognitionTechnique: 'Other', commonTrap: 'Presenting current yield alone as a client\'s full expected return.',
+      tags: ['ytm', 'current-yield', 'client-communication']
+    },
+    {
+      id: 'wm_b041', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond was purchased at exactly its face (par) value. What is true of its coupon rate, current yield, and YTM?',
+      answerType: 'mc', options: ['They are always different', 'They are all exactly equal', 'Only current yield and YTM match', 'Only coupon rate and current yield match'], correctAnswer: 'They are all exactly equal',
+      hint: 'At par, there is no capital gain or loss embedded.',
+      approach: 'A bond bought at par has no gap between purchase price and face value to create a gain or loss.',
+      solution: 'With price equal to face value, there is no capital gain or loss to maturity, so coupon rate, current yield, and YTM all collapse to the same figure.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming these three figures always differ, regardless of the bond\'s price relative to face value.',
+      tags: ['ytm', 'current-yield', 'coupon-rate']
+    },
+
+    /* ---------------------- Bond structures ---------------------- */
+    {
+      id: 'wm_b042', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 2, targetTime: 60,
+      prompt: 'A client needs exactly $40,000 in 8 years for a known future expense and wants to avoid reinvestment guesswork along the way. Which bond structure best matches this goal?',
+      answerType: 'mc', options: ['A callable bond', 'A zero-coupon bond', 'A convertible bond', 'A floating-rate bond'], correctAnswer: 'A zero-coupon bond',
+      hint: 'Think about which structure delivers its entire return as a single lump sum on a known date.',
+      approach: 'A zero-coupon bond delivers a single payment at maturity with no interim coupons to reinvest.',
+      solution: 'A zero-coupon bond purchased to mature at the target date delivers the full face value precisely when needed, with no interim coupons to reinvest or track — a clean match for a single, known future liability.',
+      recognitionTechnique: 'Other', commonTrap: 'Recommending a coupon-paying bond, which introduces reinvestment-rate uncertainty for the interim coupons.',
+      tags: ['zero-coupon', 'suitability']
+    },
+    {
+      id: 'wm_b043', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'A client is comparing a straight bond yielding 5.5% to a callable bond (callable after year 3) from the same issuer yielding 6.3%. Why might a wealth manager caution against assuming the callable bond is simply "the better deal"?',
+      answerType: 'mc', options: [
+        'Callable bonds always default more often',
+        'If rates fall after year 3, the issuer may call the bond away, forcing the client to reinvest at lower prevailing rates — undermining the cash-flow certainty the higher yield seemed to promise',
+        'Callable bonds pay no coupons at all',
+        'There is no reason for caution — the higher yield is simply better with no tradeoff'
+      ], correctAnswer: 'If rates fall after year 3, the issuer may call the bond away, forcing the client to reinvest at lower prevailing rates — undermining the cash-flow certainty the higher yield seemed to promise',
+      hint: 'Think about what happens to the client\'s cash flows if the bond gets called.',
+      approach: 'The call option benefits the issuer and can disrupt the client\'s expected income stream.',
+      solution: 'The extra yield compensates for the risk that the issuer calls the bond away if rates fall, forcing the client to reinvest at now-lower rates — a real risk to the cash-flow certainty the higher stated yield might suggest.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating a callable bond\'s higher yield as simply "more return for the same risk."',
+      tags: ['callable-bonds', 'suitability']
+    },
+    {
+      id: 'wm_b044', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'A client wants some equity-like upside potential but more downside protection than owning the stock directly. Which bond structure most directly addresses this goal?',
+      answerType: 'mc', options: ['A zero-coupon bond', 'A convertible bond', 'A putable bond', 'A callable bond'], correctAnswer: 'A convertible bond',
+      hint: 'Think about which structure lets the client participate in equity upside while keeping bond-like protection.',
+      approach: 'A convertible bond lets the client convert into equity if the stock performs well, while otherwise behaving like a bond.',
+      solution: 'A convertible bond combines bond-like downside protection (coupons, principal repayment if never converted) with the option to convert into equity if the stock rallies — directly matching this client\'s stated goal.',
+      recognitionTechnique: 'Other', commonTrap: 'Recommending a callable or putable bond, neither of which offers any equity upside participation.',
+      tags: ['convertible-bonds', 'suitability']
+    },
+
+    /* ---------------------- Creditor seniority ---------------------- */
+    {
+      id: 'wm_b045', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 2, targetTime: 60,
+      prompt: 'A client is comparing two bonds from the SAME issuer: a senior secured bond yielding 5%, and a subordinated bond yielding 8%. What explains the yield gap?',
+      answerType: 'mc', options: [
+        'The subordinated bond must have a typo in its yield',
+        'The subordinated bond is paid only after the senior secured bond (and other senior claims) are fully satisfied in a potential insolvency — a materially higher risk of an incomplete recovery',
+        'The two bonds must actually be from different issuers',
+        'Higher yield always means better value with no added risk'
+      ], correctAnswer: 'The subordinated bond is paid only after the senior secured bond (and other senior claims) are fully satisfied in a potential insolvency — a materially higher risk of an incomplete recovery',
+      hint: 'Think about where each bond sits in the liquidation priority order.',
+      approach: 'Seniority within the same issuer\'s capital structure can differ substantially between bonds.',
+      solution: 'The extra yield on the subordinated bond directly compensates for being paid only after senior claims are satisfied in full — a materially higher risk of an incomplete recovery, despite sharing the same issuer.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all bonds from the same issuer carry identical risk regardless of seniority.',
+      tags: ['creditor-waterfall', 'suitability']
+    },
+    {
+      id: 'wm_b046', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 2, targetTime: 60,
+      prompt: 'An issuer liquidates for $50m, with $30m of senior secured debt and $25m of subordinated debt (no other claims). What does the subordinated debt recover?',
+      answerType: 'numeric', correctAnswer: 20, tolerance: 0.5,
+      hint: 'Senior secured debt is paid in full first.',
+      approach: 'Pay senior secured in full, then apply remaining proceeds to subordinated debt.',
+      solution: 'Senior secured paid in full: $30m, leaving 50−30 = $20m for the $25m subordinated claim — a partial recovery of $20m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Splitting proceeds proportionally instead of following the strict, sequential priority order.',
+      tags: ['creditor-waterfall']
+    },
+    {
+      id: 'wm_b047', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 3, targetTime: 90,
+      prompt: 'A client, chasing yield, wants to buy only the highest-yielding bond from a well-known, financially healthy company, without checking anything else. Why should a wealth manager push back?',
+      answerType: 'mc', options: [
+        'Yield-chasing is always appropriate as long as the issuer is well-known',
+        'The high yield may simply reflect that this specific bond sits low in the issuer\'s capital structure (e.g., subordinated), meaning the client is taking on more structural risk than the issuer\'s reputation alone would suggest',
+        'Well-known issuers never offer bonds with varying seniority',
+        'Yield differences within one issuer are always due to maturity alone, never seniority'
+      ], correctAnswer: 'The high yield may simply reflect that this specific bond sits low in the issuer\'s capital structure (e.g., subordinated), meaning the client is taking on more structural risk than the issuer\'s reputation alone would suggest',
+      hint: 'Consider what a bond\'s yield can reveal about its seniority, independent of the issuer\'s overall reputation.',
+      approach: 'A complete risk assessment requires checking the specific bond\'s seniority, not just the issuer\'s name.',
+      solution: 'A yield premium from an otherwise solid issuer often reflects that the specific bond sits low in the capital structure (e.g., subordinated), not that the issuer itself is unusually risky — the client may be taking on more structural risk than realized.',
+      recognitionTechnique: 'Other', commonTrap: 'Relying on an issuer\'s general reputation instead of checking a specific bond\'s seniority.',
+      tags: ['creditor-waterfall', 'suitability']
+    },
+
+    /* ---------------------- Inflation & TIPS ---------------------- */
+    {
+      id: 'wm_b048', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s target real return is 3%, and expected inflation is 2.5%. Using the Fisher approximation, what nominal return do they need?',
+      answerType: 'numeric', correctAnswer: 5.5, tolerance: 0.2,
+      hint: 'Nominal rate ≈ real rate + expected inflation.',
+      approach: 'Add the target real return and expected inflation.',
+      solution: 'Nominal rate ≈ 3% + 2.5% = 5.5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Confusing the nominal and real return targets when discussing goals with a client.',
+      tags: ['fisher-equation']
+    },
+    {
+      id: 'wm_b049', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A client holds a TIPS bond with an original $8,000 principal and a 1.5% coupon rate. After one year, cumulative inflation is 3%. What is that year\'s coupon payment?',
+      answerType: 'numeric', correctAnswer: 123.6, tolerance: 2,
+      hint: 'First adjust the principal upward by cumulative inflation, then apply the coupon rate to the adjusted principal.',
+      approach: 'Adjusted principal = original × (1+inflation). Coupon = coupon rate × adjusted principal.',
+      solution: 'Adjusted principal = 8000×1.03 = $8240. Coupon = 1.5%×8240 = $123.60.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the coupon rate to the original, un-adjusted principal instead of the inflation-adjusted principal.',
+      tags: ['tips']
+    },
+    {
+      id: 'wm_b050', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 3, targetTime: 90,
+      prompt: 'A retired client, well into a 30-year retirement, is entirely invested in conventional nominal bonds and is confident their fixed coupon income is fully "safe" since the dollar amounts never change. What should a wealth manager flag?',
+      answerType: 'mc', options: [
+        'Nothing — nominal safety and real safety are the same thing',
+        'Over a long retirement, even moderate inflation compounds substantially, eroding the real purchasing power of fixed nominal payments even though the dollar figures never change — a case for allocating some fixed income to TIPS',
+        'Nominal bonds automatically convert into TIPS after enough years',
+        'This client should hold no bonds at all'
+      ], correctAnswer: 'Over a long retirement, even moderate inflation compounds substantially, eroding the real purchasing power of fixed nominal payments even though the dollar figures never change — a case for allocating some fixed income to TIPS',
+      hint: 'Distinguish nominal safety from real (purchasing-power) safety over a long horizon.',
+      approach: 'Inflation compounds meaningfully over decades, eroding real purchasing power even when nominal payments are reliable.',
+      solution: 'A long retirement gives inflation more time to compound and erode real purchasing power even while nominal payments remain perfectly reliable — a real risk to the client\'s long-run standard of living, which allocating part of the fixed-income sleeve to TIPS directly addresses.',
+      recognitionTechnique: 'Other', commonTrap: 'Reassuring a client that fixed nominal payments are fully safe without distinguishing nominal safety from real (inflation-adjusted) safety.',
+      tags: ['inflation', 'tips', 'client-communication']
     }
   ];
 

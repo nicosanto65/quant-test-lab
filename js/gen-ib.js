@@ -492,5 +492,56 @@
     }
   });
 
+  add({
+    id: 'ib_duration_price', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 3, targetTime: 90,
+    build(r) {
+      const duration = r.pick([3, 4, 5, 6, 7, 8, 9, 10]);
+      const yieldChangeBp = r.pick([25, 50, 75, 100, 150]);
+      const direction = r.pick([1, -1]);
+      const price = r.pick([900, 950, 1000, 1050, 1100]);
+      const yieldChangePct = yieldChangeBp / 100;
+      const pctChange = round(-duration * direction * yieldChangePct, 3);
+      const newPrice = round(price * (1 + pctChange / 100), 2);
+      const dirWord = direction === 1 ? 'rise' : 'fall';
+      return {
+        prompt: `A bond has a duration of ${duration} and is currently priced at $${price}. If yields ${dirWord} by ${yieldChangeBp} basis points, what is the approximate new price, in dollars (to 2 decimals)?`,
+        answerType: 'numeric', correctAnswer: newPrice, tolerance: 1,
+        hint: '%ΔPrice ≈ −Duration × Δyield. A yield rise means Δyield is positive; a yield fall means it is negative.',
+        approach: 'Compute the approximate percentage price change from duration, then apply it to the current price.',
+        solution: `Δyield = ${direction === 1 ? '+' : '−'}${yieldChangeBp}bp = ${direction === 1 ? '+' : '−'}${yieldChangePct}%. %ΔPrice ≈ −${duration} × (${direction === 1 ? '+' : '−'}${yieldChangePct}%) = ${pctChange}%. New price ≈ ${price} × (1 ${pctChange >= 0 ? '+' : '−'} ${Math.abs(pctChange)}%) = $${newPrice}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Getting the sign backwards — a RISE in yields should DECREASE the price (negative %ΔPrice), and a FALL in yields should INCREASE it.',
+        tags: ['duration', 'price-sensitivity']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_ytm_classification', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const faceValue = 1000;
+      const couponRate = r.pick([3, 4, 5, 6, 7, 8]);
+      const priceType = r.pick(['discount', 'premium', 'par']);
+      let price;
+      if (priceType === 'discount') price = faceValue - r.pick([40, 60, 80, 100]);
+      else if (priceType === 'premium') price = faceValue + r.pick([40, 60, 80, 100]);
+      else price = faceValue;
+      const coupon = round(faceValue * couponRate / 100, 2);
+      const currentYield = round((coupon / price) * 100, 3);
+      let answer;
+      if (priceType === 'par') answer = 'Coupon rate = Current yield = YTM';
+      else if (priceType === 'discount') answer = 'YTM > Current yield > Coupon rate';
+      else answer = 'Coupon rate > Current yield > YTM';
+      return {
+        prompt: `A bond has a $${faceValue} face value and a ${couponRate}% coupon rate. It currently trades at $${price}. What is the correct ordering of coupon rate, current yield, and YTM for this bond?`,
+        answerType: 'mc', options: ['Coupon rate = Current yield = YTM', 'YTM > Current yield > Coupon rate', 'Coupon rate > Current yield > YTM'], correctAnswer: answer,
+        hint: `Compare the bond's price ($${price}) to its face value ($${faceValue}) first — is it trading at a discount, at par, or at a premium?`,
+        approach: 'A bond at par has all three equal. A discount bond has YTM as the highest (capital gain to maturity added on). A premium bond has YTM as the lowest (capital loss to maturity subtracted off).',
+        solution: `The bond trades at $${price} versus a $${faceValue} face value, so it is trading at a ${priceType === 'par' ? 'exactly par' : priceType}. Current yield = ${coupon}/${price} ≈ ${currentYield}%. ${priceType === 'par' ? `Since price equals face value, coupon rate = current yield = YTM.` : priceType === 'discount' ? `Since the bond is below face value, holding to maturity captures a capital gain on top of the coupons, so YTM > Current yield > Coupon rate.` : `Since the bond is above face value, holding to maturity gives up a capital loss, so Coupon rate > Current yield > YTM.`}`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming current yield alone (income over price) is a complete measure of return, without accounting for the capital gain or loss embedded in a discount or premium price relative to face value.',
+        tags: ['ytm', 'current-yield', 'coupon-rate']
+      };
+    }
+  });
+
   global.QTL_GEN_IB = G;
 })(window);
