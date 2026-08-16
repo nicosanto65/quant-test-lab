@@ -570,6 +570,102 @@
       solution: 'No screening filter can guarantee future results with certainty — the real filters (insider ownership, analyst coverage, earnings surprise potential, relative valuation) surface candidates for further research, not guaranteed outcomes.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming a screening process can identify guaranteed outcomes rather than promising candidates.',
       tags: ['stock-pitch', 'screening']
+    },
+
+    /* ---------------------- TIPS ---------------------- */
+    {
+      id: 'am_c054', topic: 'Fixed Income', subtopic: 'TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A TIPS bond has an original principal of $1,000 and a 2% coupon rate. Cumulative CPI inflation over the period is 3%. What is the coupon payment?',
+      answerType: 'numeric', correctAnswer: 20.6, tolerance: 0.3,
+      hint: 'Adjust the principal first, then apply the coupon rate.',
+      approach: 'Adjusted principal = original × (1+inflation). Coupon = coupon rate × adjusted principal.',
+      solution: 'Adjusted principal = 1,000×1.03 = $1,030. Coupon = 2%×1,030 = $20.60.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the coupon rate to the original, un-adjusted principal.',
+      tags: ['tips']
+    },
+    {
+      id: 'am_c055', topic: 'Fixed Income', subtopic: 'TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A 10-year nominal Treasury yields 4.3%, and a 10-year TIPS of the same maturity yields 1.7%. What is the implied breakeven inflation rate?',
+      answerType: 'numeric', correctAnswer: 2.6, tolerance: 0.1,
+      hint: 'Breakeven inflation = nominal yield − TIPS real yield.',
+      approach: 'Subtract the TIPS real yield from the nominal Treasury yield.',
+      solution: 'Breakeven inflation = 4.3% − 1.7% = 2.6%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Adding the two yields instead of subtracting.',
+      tags: ['tips', 'breakeven-inflation']
+    },
+    {
+      id: 'am_c056', topic: 'Fixed Income', subtopic: 'TIPS', difficulty: 3, targetTime: 90,
+      prompt: 'Why does TIPS protection have a real, if narrow, limitation for any specific individual investor?',
+      answerType: 'mc', options: ['TIPS provide absolutely no inflation protection at all', 'TIPS specifically track the CPI index, which may not perfectly match that particular investor\'s own actual cost-of-living increases (e.g., above-CPI healthcare cost inflation)', 'TIPS only protect institutional investors, never individuals', 'TIPS principal can never actually increase under any circumstances'], correctAnswer: 'TIPS specifically track the CPI index, which may not perfectly match that particular investor\'s own actual cost-of-living increases (e.g., above-CPI healthcare cost inflation)',
+      hint: 'CPI is one specific, general measure of inflation.',
+      approach: 'TIPS hedge the CPI measure specifically, which can diverge from an individual\'s own experience.',
+      solution: 'TIPS hedge the CPI measure of inflation specifically, which can diverge from any one investor\'s own real spending-basket experience.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming TIPS provide perfect, personalized inflation protection.',
+      tags: ['tips']
+    },
+
+    /* ---------------------- YIELD CURVE DEEP DIVE ---------------------- */
+    {
+      id: 'am_c057', topic: 'Fixed Income', subtopic: 'Yield curve depth', difficulty: 3, targetTime: 90,
+      prompt: 'What does "term premium" specifically represent?',
+      answerType: 'mc', options: ['The Fed funds rate itself', 'The extra compensation investors demand for holding a longer-maturity bond, beyond what pure expectations of future short-term rates alone would justify', 'A synonym for the coupon rate', 'A tax paid on long-term bonds only'], correctAnswer: 'The extra compensation investors demand for holding a longer-maturity bond, beyond what pure expectations of future short-term rates alone would justify',
+      hint: 'Term premium is separate from pure rate expectations.',
+      approach: 'Term premium compensates for the added uncertainty of a longer commitment.',
+      solution: 'Term premium is the compensation for the ADDED uncertainty of a longer commitment, distinct from the pure rate-expectations component of a longer-maturity yield.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing term premium with the Fed funds rate or the coupon rate.',
+      tags: ['term-premium']
+    },
+    {
+      id: 'am_c058', topic: 'Fixed Income', subtopic: 'Yield curve depth', difficulty: 3, targetTime: 90,
+      prompt: 'Why can mortgage rates rise even after the Fed cuts its target rate?',
+      answerType: 'mc', options: ['This can never actually happen', 'Mortgage rates are priced primarily off the market-determined 10-year Treasury yield, which can rise independently of the Fed funds rate if the market prices in higher long-run growth or inflation expectations', 'The Fed directly sets mortgage rates, so this scenario is impossible', 'Mortgage rates are entirely unrelated to any Treasury yield'], correctAnswer: 'Mortgage rates are priced primarily off the market-determined 10-year Treasury yield, which can rise independently of the Fed funds rate if the market prices in higher long-run growth or inflation expectations',
+      hint: 'The Fed only directly controls the short end of the curve.',
+      approach: 'Mortgages price off the market-determined long end, which can diverge from Fed policy.',
+      solution: 'Since mortgages price off the market-determined long end of the curve, a Fed cut at the short end does not guarantee the long end (and therefore mortgage rates) falls too.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the Fed directly controls the entire yield curve.',
+      tags: ['yield-curve', 'mortgage-rates']
+    },
+    {
+      id: 'am_c059', topic: 'Fixed Income', subtopic: 'Yield curve depth', difficulty: 3, targetTime: 90,
+      prompt: 'A global shock occurs outside the US, yet both US Treasury yields fall AND the US dollar appreciates. Why do these two moves reflect genuinely distinct (though related) mechanisms?',
+      answerType: 'mc', options: ['They are actually the exact same mechanism described twice', 'Falling Treasury yields reflect direct buying pressure on Treasuries specifically (flight-to-quality); dollar appreciation reflects the currency\'s broader role as the world\'s deepest, most liquid safe-haven currency, drawing global capital into USD-denominated assets more broadly during any major stress event', 'Neither move has any relationship to the shock at all', 'Dollar appreciation only happens when the shock originates within the US'], correctAnswer: 'Falling Treasury yields reflect direct buying pressure on Treasuries specifically (flight-to-quality); dollar appreciation reflects the currency\'s broader role as the world\'s deepest, most liquid safe-haven currency, drawing global capital into USD-denominated assets more broadly during any major stress event',
+      hint: 'One mechanism is Treasury-specific, the other is about the dollar broadly.',
+      approach: 'These are related but distinct flows.',
+      solution: 'One mechanism is specific to Treasury demand; the other is the dollar\'s broader safe-haven role across a wider set of USD assets — related, reinforcing, but genuinely distinct flows.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating flight-to-quality and dollar safe-haven appreciation as the identical phenomenon.',
+      tags: ['flight-to-quality']
+    },
+
+    /* ---------------------- TREASURY RISK-FREE MYTH ---------------------- */
+    {
+      id: 'am_c060', topic: 'Fixed Income', subtopic: 'Treasury risk myth', difficulty: 2, targetTime: 60,
+      prompt: 'In what specific, narrow sense is a US Treasury bond accurately called "risk-free"?',
+      answerType: 'mc', options: ['It is completely free of every possible risk, including market value swings', 'It carries near-zero DEFAULT risk, since the issuer (the US government) can always meet a dollar-denominated obligation in nominal terms', 'It is free of interest rate risk specifically', 'It is free of inflation risk specifically'], correctAnswer: 'It carries near-zero DEFAULT risk, since the issuer (the US government) can always meet a dollar-denominated obligation in nominal terms',
+      hint: 'The label is narrower than it sounds.',
+      approach: 'Risk-free refers specifically to default risk.',
+      solution: 'The "risk-free" label refers specifically and narrowly to default risk — the issuer\'s ability to meet nominal dollar obligations, not to every other type of risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Interpreting "risk-free" as meaning free of every possible risk.',
+      tags: ['treasury-risk']
+    },
+    {
+      id: 'am_c061', topic: 'Fixed Income', subtopic: 'Treasury risk myth', difficulty: 2, targetTime: 60,
+      prompt: 'A Treasury bond yields 4%, and realized inflation over the holding period is 6%. What is the approximate real return, and what does this demonstrate?',
+      answerType: 'mc', options: ['+2%, demonstrating Treasuries are immune to inflation risk', '−2%, demonstrating that "risk-free" (default-free) does not mean risk-free in REAL, inflation-adjusted terms', '+10%, since nominal and real returns should be added together', '0%, since Treasuries are always inflation-neutral'], correctAnswer: '−2%, demonstrating that "risk-free" (default-free) does not mean risk-free in REAL, inflation-adjusted terms',
+      hint: 'Apply the Fisher relationship.',
+      approach: 'Real return ≈ nominal yield − inflation.',
+      solution: 'Real return ≈ 4%−6% = −2%, a real purchasing-power loss despite zero default risk — inflation risk is entirely separate from default risk.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming a bond that never misses a nominal payment cannot produce a negative real return.',
+      tags: ['treasury-risk', 'inflation-risk']
+    },
+    {
+      id: 'am_c062', topic: 'Fixed Income', subtopic: 'Treasury risk myth', difficulty: 3, targetTime: 90,
+      prompt: 'A foreign investor fully hedges the interest rate risk on a US Treasury holding using swaps. Does this hedge also protect against currency risk?',
+      answerType: 'mc', options: ['Yes, hedging interest rate risk automatically hedges currency risk too', 'No — interest rate hedging addresses rate risk specifically; currency risk (the impact of USD movements when converting back to the investor\'s home currency) is an entirely separate risk requiring its own hedge (e.g., FX forwards)', 'Currency risk does not exist for any Treasury investor', 'Foreign investors are exempt from all forms of risk when buying Treasuries'], correctAnswer: 'No — interest rate hedging addresses rate risk specifically; currency risk (the impact of USD movements when converting back to the investor\'s home currency) is an entirely separate risk requiring its own hedge (e.g., FX forwards)',
+      hint: 'Interest rate risk and currency risk are separate exposures.',
+      approach: 'Each risk category requires its own specific hedge.',
+      solution: 'Interest rate risk and currency risk are genuinely separate exposures, each requiring its own distinct hedging instrument.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming one hedge automatically covers every risk category.',
+      tags: ['treasury-risk', 'currency-risk']
     }
   ];
 
