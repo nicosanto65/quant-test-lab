@@ -1208,6 +1208,196 @@
       solution: 'Since the put is a right, not an obligation, the company lets it expire unused if the price rose (exercising would be unfavorable), losing only the premium while keeping the full benefit of the higher price.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming an option obligates its holder to exercise regardless of favorability.',
       tags: ['hedging', 'options']
+    },
+
+    /* ---------------------- Merger types ---------------------- */
+    {
+      id: 'ib_b101', topic: 'M&A Mechanics', subtopic: 'Merger types', difficulty: 2, targetTime: 60,
+      prompt: 'A merger between two direct competitors in the same industry is classified as:',
+      answerType: 'mc', options: ['Vertical', 'Horizontal', 'Conglomerate', 'None of these classifications apply to competitors'], correctAnswer: 'Horizontal',
+      hint: 'Think about the relationship between the two companies\' businesses.',
+      approach: 'Horizontal mergers combine direct competitors in the same market.',
+      solution: 'Horizontal mergers specifically combine companies that compete directly in the same industry and market.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing horizontal (competitors) with vertical (supply-chain) mergers.',
+      tags: ['merger-types']
+    },
+    {
+      id: 'ib_b102', topic: 'M&A Mechanics', subtopic: 'Merger types', difficulty: 2, targetTime: 60,
+      prompt: 'A retailer acquires one of its own key suppliers. What type of merger is this, and what direction of integration does it represent?',
+      answerType: 'mc', options: ['Horizontal', 'Vertical (backward integration)', 'Vertical (forward integration)', 'Conglomerate'], correctAnswer: 'Vertical (backward integration)',
+      hint: 'Acquiring a supplier moves the acquirer upstream in its own supply chain.',
+      approach: 'Vertical mergers combine different stages of the same supply chain; acquiring upstream is backward integration.',
+      solution: 'Acquiring a supplier moves the retailer upstream in its own supply chain — this is vertical, backward integration.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing backward integration (acquiring a supplier) with forward integration (acquiring a distributor or customer).',
+      tags: ['merger-types']
+    },
+    {
+      id: 'ib_b103', topic: 'M&A Mechanics', subtopic: 'Merger types', difficulty: 3, targetTime: 90,
+      prompt: 'Why do conglomerate mergers, despite typically facing the LEAST antitrust scrutiny of the three merger types, often draw the most skepticism from investors and analysts?',
+      answerType: 'mc', options: [
+        'Conglomerate mergers are always illegal',
+        'Clear operational synergies are much harder to identify between unrelated businesses, and the acquirer often lacks genuine expertise in the new, unrelated industry',
+        'Conglomerate mergers never actually close',
+        'Investors always prefer conglomerate mergers over the other two types'
+      ], correctAnswer: 'Clear operational synergies are much harder to identify between unrelated businesses, and the acquirer often lacks genuine expertise in the new, unrelated industry',
+      hint: 'Think about the strategic rationale (or lack thereof) for combining unrelated businesses.',
+      approach: 'Diversification alone is a weaker strategic rationale than market-share or supply-chain logic.',
+      solution: 'Without a competitive or supply-chain relationship, clear operational synergies are harder to identify, and the acquirer often lacks deep expertise in the new industry, adding execution risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming lower antitrust scrutiny means a deal is automatically well-received by investors.',
+      tags: ['merger-types']
+    },
+
+    /* ---------------------- Takeover defenses ---------------------- */
+    {
+      id: 'ib_b104', topic: 'M&A Mechanics', subtopic: 'Takeover defenses', difficulty: 2, targetTime: 60,
+      prompt: 'A "poison pill" defense works by:',
+      answerType: 'mc', options: ['Directly suing the hostile acquirer', 'Granting existing shareholders (other than the acquirer) the right to buy additional shares at a steep discount once an ownership threshold is crossed, diluting the acquirer\'s stake', 'Automatically firing the target\'s entire management team', 'Requiring the acquirer to pay a fine to the government'], correctAnswer: 'Granting existing shareholders (other than the acquirer) the right to buy additional shares at a steep discount once an ownership threshold is crossed, diluting the acquirer\'s stake',
+      hint: 'Think about what happens to the hostile acquirer\'s ownership percentage.',
+      approach: 'A poison pill dilutes the hostile acquirer\'s stake once a threshold is crossed without board approval.',
+      solution: 'A poison pill grants other shareholders the right to buy discounted shares once a threshold is crossed, massively diluting the hostile acquirer\'s stake and deterring the takeover.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing a poison pill with a lawsuit or a direct management termination.',
+      tags: ['takeover-defenses']
+    },
+    {
+      id: 'ib_b105', topic: 'M&A Mechanics', subtopic: 'Takeover defenses', difficulty: 2, targetTime: 60,
+      prompt: 'What is a "staggered board" defense designed to prevent?',
+      answerType: 'mc', options: ['Any board elections from ever occurring', 'A hostile acquirer with enough votes from replacing the ENTIRE board in a single election cycle', 'The company from ever being acquired under any circumstances', 'Shareholders from voting at all'], correctAnswer: 'A hostile acquirer with enough votes from replacing the ENTIRE board in a single election cycle',
+      hint: 'Only a fraction of directors is up for election each year.',
+      approach: 'Staggering board terms slows a hostile takeover of board control.',
+      solution: 'By only allowing a fraction of directors up for election each year, a staggered board prevents an immediate full board takeover, forcing a multi-year campaign instead.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a staggered board makes elections impossible rather than merely staggered.',
+      tags: ['takeover-defenses']
+    },
+    {
+      id: 'ib_b106', topic: 'M&A Mechanics', subtopic: 'Takeover defenses', difficulty: 3, targetTime: 90,
+      prompt: 'Why might a "golden parachute" actually help shareholders, despite sometimes being criticized as enriching management?',
+      answerType: 'mc', options: [
+        'It never has any positive effect on shareholders',
+        'By removing executives\' personal financial disincentive to lose their jobs, it can reduce the temptation for entrenched management to fight a genuinely value-creating deal purely for self-preservation',
+        'It guarantees the deal price will always be higher',
+        'Golden parachutes are illegal in every jurisdiction'
+      ], correctAnswer: 'By removing executives\' personal financial disincentive to lose their jobs, it can reduce the temptation for entrenched management to fight a genuinely value-creating deal purely for self-preservation',
+      hint: 'Think about what motivates management to resist a deal that might otherwise benefit shareholders.',
+      approach: 'A golden parachute can align management incentives with shareholders by removing a personal cost of losing their job.',
+      solution: 'Without a golden parachute, executives might resist a value-creating deal purely out of self-interest; the parachute removes that personal financial disincentive, potentially aligning management\'s incentives with shareholders\'.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming golden parachutes only ever harm shareholder interests.',
+      tags: ['takeover-defenses']
+    },
+
+    /* ---------------------- Stock vs cash consideration ---------------------- */
+    {
+      id: 'ib_b107', topic: 'M&A Mechanics', subtopic: 'Stock vs cash consideration', difficulty: 2, targetTime: 60,
+      prompt: 'A deal offers a 0.6 exchange ratio, and the acquirer trades at $95. What is the implied per-share value for a target shareholder at announcement?',
+      answerType: 'numeric', correctAnswer: 57, tolerance: 0.5,
+      hint: 'Implied value = exchange ratio × acquirer share price.',
+      approach: 'Multiply the exchange ratio by the acquirer\'s current share price.',
+      solution: 'Implied value = 0.6 × 95 = $57.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing instead of multiplying the exchange ratio by the acquirer share price.',
+      tags: ['stock-vs-cash']
+    },
+    {
+      id: 'ib_b108', topic: 'M&A Mechanics', subtopic: 'Stock vs cash consideration', difficulty: 2, targetTime: 60,
+      prompt: 'In an all-CASH acquisition, what happens to target shareholders from a tax perspective?',
+      answerType: 'mc', options: ['They face no tax consequences at all', 'They immediately realize a taxable capital gain or loss when the deal closes', 'Taxes are deferred indefinitely, exactly like a stock deal', 'Only the acquirer pays any tax in a cash deal'], correctAnswer: 'They immediately realize a taxable capital gain or loss when the deal closes',
+      hint: 'Cash consideration is treated as an immediate sale.',
+      approach: 'Receiving cash for shares realizes a taxable event right away.',
+      solution: 'Receiving cash for shares is treated as an immediate sale, realizing a taxable capital gain or loss in the year the deal closes.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming cash consideration is tax-deferred like stock consideration.',
+      tags: ['stock-vs-cash']
+    },
+    {
+      id: 'ib_b109', topic: 'M&A Mechanics', subtopic: 'Stock vs cash consideration', difficulty: 3, targetTime: 90,
+      prompt: 'A target shareholder accepts an all-stock deal at an announced implied value of $60/share, but the acquirer\'s stock falls sharply before the deal closes. What actually happens to the value the shareholder ultimately receives?',
+      answerType: 'mc', options: [
+        'The shareholder is guaranteed to still receive exactly $60/share worth of value regardless of the stock price move',
+        'The value the shareholder actually receives falls, since it is based on the exchange ratio applied to the acquirer\'s ACTUAL share price at closing, not the price at announcement',
+        'The deal is automatically canceled if the acquirer\'s stock falls',
+        'The target company must pay the shareholder the difference in cash'
+      ], correctAnswer: 'The value the shareholder actually receives falls, since it is based on the exchange ratio applied to the acquirer\'s ACTUAL share price at closing, not the price at announcement',
+      hint: 'Stock consideration value is not locked in at announcement.',
+      approach: 'The realized value in a stock deal fluctuates with the acquirer\'s actual share price.',
+      solution: 'Stock consideration value fluctuates with the acquirer\'s share price up to (and after) closing — the announced implied value is not a locked-in guarantee, unlike cash.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the announcement-date implied value of a stock deal as a fixed, guaranteed outcome.',
+      tags: ['stock-vs-cash']
+    },
+
+    /* ---------------------- Control premium ---------------------- */
+    {
+      id: 'ib_b110', topic: 'M&A Mechanics', subtopic: 'Control premium', difficulty: 2, targetTime: 60,
+      prompt: 'A company\'s undisturbed stock price is $55/share. An acquirer offers $71.50/share for full control. What is the control premium?',
+      answerType: 'numeric', correctAnswer: 30, tolerance: 1,
+      hint: 'Control premium = (offer price / undisturbed price − 1) × 100.',
+      approach: 'Divide the offer price by the undisturbed price, subtract 1, convert to a percentage.',
+      solution: 'Control premium = (71.50/55 − 1) × 100 = 30%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Computing the premium as a simple dollar difference instead of a percentage.',
+      tags: ['control-premium']
+    },
+    {
+      id: 'ib_b111', topic: 'M&A Mechanics', subtopic: 'Control premium', difficulty: 3, targetTime: 90,
+      prompt: 'Trading comps for an industry show a 7× median multiple; precedent transactions show 9.5× median. What best explains this gap?',
+      answerType: 'mc', options: [
+        'One of the two multiples must be a calculation error',
+        'The precedent transactions embed a control premium not present in ordinary minority-stake trading comps, for otherwise similar underlying business fundamentals',
+        'Precedent transactions always involve completely different types of companies',
+        'The gap is random and carries no systematic explanation'
+      ], correctAnswer: 'The precedent transactions embed a control premium not present in ordinary minority-stake trading comps, for otherwise similar underlying business fundamentals',
+      hint: 'Think about what precedent transactions reflect that trading comps do not.',
+      approach: 'Precedent transaction multiples embed the control premium acquirers actually paid.',
+      solution: 'This is the expected, systematic fingerprint of control-premium economics: precedent transactions reflect what acquirers paid for CONTROL, while trading comps reflect ordinary minority-stake pricing.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the gap between the two multiples as a calculation error rather than an expected structural difference.',
+      tags: ['control-premium']
+    },
+    {
+      id: 'ib_b112', topic: 'M&A Mechanics', subtopic: 'Control premium', difficulty: 3, targetTime: 90,
+      prompt: 'An analyst is valuing a company on a STAND-ALONE, minority-shareholder basis, with no acquisition actually occurring. Should they benchmark against trading comps or precedent transactions?',
+      answerType: 'mc', options: [
+        'Precedent transactions, since real acquirers\' prices are always more reliable',
+        'Trading comps, since these reflect ordinary minority-stake pricing that matches the stand-alone valuation being performed, without improperly embedding an unearned control premium',
+        'It makes no difference which is used',
+        'Neither approach is valid for a stand-alone valuation'
+      ], correctAnswer: 'Trading comps, since these reflect ordinary minority-stake pricing that matches the stand-alone valuation being performed, without improperly embedding an unearned control premium',
+      hint: 'Match the benchmark to whether control is actually being transferred.',
+      approach: 'Use trading comps for minority-stake valuations, precedent transactions for control valuations.',
+      solution: 'Using a control-inclusive precedent transaction multiple for a non-control, stand-alone valuation would improperly inflate the value with a control premium that does not actually apply.',
+      recognitionTechnique: 'Other', commonTrap: 'Using precedent transaction multiples for a valuation where no change of control is actually occurring.',
+      tags: ['control-premium']
+    },
+
+    /* ---------------------- Earnouts & NWC adjustments ---------------------- */
+    {
+      id: 'ib_b113', topic: 'M&A Mechanics', subtopic: 'Earnouts & NWC adjustments', difficulty: 2, targetTime: 60,
+      prompt: 'A deal assumes $18m of target NWC. Actual closing NWC comes in at $21m. What happens to the purchase price paid to the seller?',
+      answerType: 'numeric', correctAnswer: 3, tolerance: 0.2,
+      hint: 'The seller is paid more if actual NWC exceeds the target.',
+      approach: 'Purchase price adjustment = actual NWC − target NWC.',
+      solution: 'Adjustment = 21 − 18 = $3m additional payment to the seller, since more working capital was delivered than assumed.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming excess NWC delivered reduces the price rather than increasing it.',
+      tags: ['nwc-adjustment']
+    },
+    {
+      id: 'ib_b114', topic: 'M&A Mechanics', subtopic: 'Earnouts & NWC adjustments', difficulty: 2, targetTime: 60,
+      prompt: 'An "earnout" makes part of the purchase price contingent on:',
+      answerType: 'mc', options: ['The buyer\'s stock price after closing', 'The target business achieving specific future performance milestones after the deal has closed', 'How quickly the deal\'s legal paperwork is completed', 'The seller\'s personal creditworthiness'], correctAnswer: 'The target business achieving specific future performance milestones after the deal has closed',
+      hint: 'Earnouts are tied to the acquired business\'s own future performance.',
+      approach: 'Earnouts pay out contingent on the target hitting revenue or EBITDA milestones.',
+      solution: 'Earnouts are tied specifically to the acquired business\'s own future performance (commonly revenue or EBITDA targets), paid out if those targets are met.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing an earnout with a stock-price-contingent payment or an unrelated legal condition.',
+      tags: ['earnouts']
+    },
+    {
+      id: 'ib_b115', topic: 'M&A Mechanics', subtopic: 'Earnouts & NWC adjustments', difficulty: 3, targetTime: 90,
+      prompt: 'Why are earnouts especially common when buyer and seller genuinely disagree about a target\'s future growth prospects?',
+      answerType: 'mc', options: [
+        'Earnouts eliminate any need for the parties to agree on anything',
+        'An earnout lets the seller "bet on themselves" via a contingent future payment, bridging the valuation gap without either side simply having to accept the other\'s assumptions upfront',
+        'Earnouts are legally required whenever there is any disagreement',
+        'Earnouts guarantee the seller a higher price no matter what happens'
+      ], correctAnswer: 'An earnout lets the seller "bet on themselves" via a contingent future payment, bridging the valuation gap without either side simply having to accept the other\'s assumptions upfront',
+      hint: 'Think about how deferring part of the price resolves a forecasting disagreement.',
+      approach: 'An earnout defers part of the price to let the future outcome resolve the disagreement.',
+      solution: 'Deferring part of the price to a future, performance-contingent payment lets both sides avoid resolving a genuine forecasting disagreement immediately and upfront.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming an earnout guarantees the seller extra money regardless of actual performance.',
+      tags: ['earnouts']
     }
   ];
 

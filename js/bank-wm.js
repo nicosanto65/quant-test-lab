@@ -554,6 +554,171 @@
       solution: 'A long retirement gives inflation more time to compound and erode real purchasing power even while nominal payments remain perfectly reliable — a real risk to the client\'s long-run standard of living, which allocating part of the fixed-income sleeve to TIPS directly addresses.',
       recognitionTechnique: 'Other', commonTrap: 'Reassuring a client that fixed nominal payments are fully safe without distinguishing nominal safety from real (inflation-adjusted) safety.',
       tags: ['inflation', 'tips', 'client-communication']
+    },
+
+    /* ---------------------- Buyer types (business owner clients) ---------------------- */
+    {
+      id: 'wm_b051', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 2, targetTime: 60,
+      prompt: 'Why might a direct competitor (strategic, horizontal buyer) be willing to pay MORE for a client\'s business than a financial buyer?',
+      answerType: 'mc', options: ['Competitors are always required by law to overpay', 'The competitor can capture operational cost synergies (combined facilities, eliminated overhead) by merging operations, value a financial buyer typically cannot access', 'Financial buyers never have enough capital to make competitive offers', 'There is no typical pattern — offers are always random'], correctAnswer: 'The competitor can capture operational cost synergies (combined facilities, eliminated overhead) by merging operations, value a financial buyer typically cannot access',
+      hint: 'Think about what a competitor can do with the business that a financial buyer cannot.',
+      approach: 'Operational synergies from combining with a rival are a real, extractable source of extra value.',
+      solution: 'A competitor can extract real cost synergies by combining operations, a source of value a purely financial buyer generally cannot access, which is often reflected in a higher price.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all buyer types value a business identically.',
+      tags: ['buyer-types']
+    },
+    {
+      id: 'wm_b052', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 3, targetTime: 90,
+      prompt: 'A client receives a lower offer from a buyer that would preserve the company\'s brand and existing employees, versus a higher offer from a competitor that would likely eliminate both. How should a wealth manager frame this decision?',
+      answerType: 'mc', options: ['Always recommend the highest price regardless of any other factor', 'Help the client explicitly weigh how much the higher price is worth relative to their own priorities around brand and employee continuity — a decision only the client can ultimately make', 'Refuse to discuss any offer below the highest one received', 'Assume the client only cares about price and ignore their stated concerns'], correctAnswer: 'Help the client explicitly weigh how much the higher price is worth relative to their own priorities around brand and employee continuity — a decision only the client can ultimately make',
+      hint: 'This is a values-based tradeoff, not a purely financial calculation.',
+      approach: 'Help the client frame the tradeoff clearly rather than deciding it for them.',
+      solution: 'This is fundamentally a values-based tradeoff for the client; the wealth manager\'s role is to help frame the tradeoff clearly (price versus non-price priorities), not to decide it unilaterally.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the highest headline price is automatically the best outcome for every client.',
+      tags: ['buyer-types', 'suitability']
+    },
+    {
+      id: 'wm_b053', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s key supplier proposes acquiring the client\'s business. What is a likely motivation for this vertical acquirer?',
+      answerType: 'mc', options: ['Eliminating a direct competitor', 'Securing supply and capturing margin currently paid between the two companies', 'Diversifying into a completely unrelated industry', 'There is no typical strategic motivation for this type of buyer'], correctAnswer: 'Securing supply and capturing margin currently paid between the two companies',
+      hint: 'Think about the supply-chain relationship between the two companies.',
+      approach: 'A vertical acquirer is motivated by securing supply and capturing margin along the existing relationship.',
+      solution: 'A vertical (supply-chain) acquirer is typically motivated by securing supply and capturing margin along the existing supplier-customer relationship.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming only competitors have a strategic motivation to acquire a business.',
+      tags: ['buyer-types']
+    },
+
+    /* ---------------------- Takeover defenses (shareholder view) ---------------------- */
+    {
+      id: 'wm_b054', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 2, targetTime: 60,
+      prompt: 'From an ordinary shareholder\'s perspective, what is the main practical effect of a poison pill on a hostile takeover attempt?',
+      answerType: 'mc', options: ['It immediately cancels the shareholder\'s existing shares', 'It generally does not directly harm existing shareholders, and can force the hostile acquirer to negotiate directly with the board rather than accumulate control unilaterally', 'It automatically doubles the shareholder\'s tax liability', 'It guarantees the takeover will never happen under any circumstances'], correctAnswer: 'It generally does not directly harm existing shareholders, and can force the hostile acquirer to negotiate directly with the board rather than accumulate control unilaterally',
+      hint: 'Think about whether a poison pill directly harms an ordinary shareholder\'s existing rights.',
+      approach: 'A poison pill deters unilateral accumulation of control without directly harming ordinary shareholders.',
+      solution: 'A poison pill\'s main function is deterring unilateral accumulation of control, generally without directly harming existing shareholders\' rights, and can lead to a better-negotiated outcome.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a poison pill directly harms the shareholder\'s existing position.',
+      tags: ['takeover-defenses']
+    },
+    {
+      id: 'wm_b055', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 3, targetTime: 90,
+      prompt: 'A board resists a takeover bid for over a year with no competing offer ever emerging and no articulated value rationale. What should this pattern suggest to a wealth manager evaluating the client\'s position?',
+      answerType: 'mc', options: ['This is always a sign of excellent governance', 'This is a potential governance red flag, since it may indicate entrenchment rather than genuine shareholder value protection', 'This pattern has no relevance to the client\'s position', 'This always means the original bid was too low'], correctAnswer: 'This is a potential governance red flag, since it may indicate entrenchment rather than genuine shareholder value protection',
+      hint: 'Consider whether the defense is producing any measurable benefit for shareholders.',
+      approach: 'Prolonged resistance with no competing bid or rationale is a recognizable entrenchment pattern.',
+      solution: 'Prolonged resistance with no competing bid and no articulated value rationale is a recognizable pattern worth flagging as a possible governance concern for the client.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all takeover resistance is automatically in shareholders\' best interest.',
+      tags: ['takeover-defenses', 'governance']
+    },
+    {
+      id: 'wm_b056', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 2, targetTime: 60,
+      prompt: 'How can a "white knight" defense directly benefit a client holding stock in the target company?',
+      answerType: 'mc', options: ['It never benefits shareholders in any way', 'If it triggers competitive bidding, it can push the ultimate sale price higher than the original hostile bid, directly benefiting shareholders', 'It automatically cancels the deal entirely', 'It only benefits the target company\'s management, never shareholders'], correctAnswer: 'If it triggers competitive bidding, it can push the ultimate sale price higher than the original hostile bid, directly benefiting shareholders',
+      hint: 'Think about what happens when two acquirers compete for the same target.',
+      approach: 'Competitive bidding from a white knight search can raise the final price.',
+      solution: 'Competitive bidding driven by a white knight search can produce a measurably higher final price, a direct benefit to shareholders like the client.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a white knight defense only ever serves management\'s interests.',
+      tags: ['takeover-defenses']
+    },
+
+    /* ---------------------- Cash vs stock consideration (client planning) ---------------------- */
+    {
+      id: 'wm_b057', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why does receiving STOCK consideration create a concentration risk for a client selling their business?',
+      answerType: 'mc', options: ['Stock consideration never creates any concentration risk', 'The client ends up holding a large, often outsized position in a single stock (the acquirer\'s shares), directly conflicting with diversification unless deliberately reduced over time', 'Stock consideration is always split evenly across many different companies automatically', 'Concentration risk only applies to cash consideration, never stock'], correctAnswer: 'The client ends up holding a large, often outsized position in a single stock (the acquirer\'s shares), directly conflicting with diversification unless deliberately reduced over time',
+      hint: 'Think about what the client now holds after receiving stock consideration.',
+      approach: 'Stock consideration creates a new, potentially concentrated single-stock position.',
+      solution: 'A large single-stock position, even if tax-deferred, represents exactly the kind of concentration risk diversification is meant to avoid, unless actively managed down over time.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a stock-for-stock deal automatically achieves diversification.',
+      tags: ['stock-vs-cash', 'concentration-risk']
+    },
+    {
+      id: 'wm_b058', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why should a wealth manager plan for a client\'s cash-consideration tax bill BEFORE the deal closes, rather than after?',
+      answerType: 'mc', options: ['There is no benefit to planning ahead versus reacting afterward', 'Proactive planning avoids the client committing or spending funds that will actually be needed for a large, known upcoming tax liability', 'Tax bills from a business sale are always negligible and require no planning', 'Planning ahead is illegal under most tax regimes'], correctAnswer: 'Proactive planning avoids the client committing or spending funds that will actually be needed for a large, known upcoming tax liability',
+      hint: 'Think about what could go wrong if the tax bill is only addressed after cash has already arrived.',
+      approach: 'A large, foreseeable tax liability should be reserved for in advance.',
+      solution: 'A large, foreseeable tax liability should be reserved for in advance, not discovered as a surprise after cash has already been deployed elsewhere.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming tax planning can be deferred until after a large cash windfall has already been received and spent.',
+      tags: ['stock-vs-cash', 'tax-planning']
+    },
+    {
+      id: 'wm_b059', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 3, targetTime: 90,
+      prompt: 'A client receives stock consideration subject to a 12-month lock-up period. What should a wealth manager do regarding diversification planning?',
+      answerType: 'mc', options: ['Wait until the lock-up expires before doing any planning at all', 'Build a concrete diversification plan in advance (pace of future sales, tax coordination, any available interim risk-management options) so execution can begin as soon as the lock-up permits', 'Advise the client that nothing can be done about concentration risk until the lock-up ends, with no further planning needed', 'Recommend the client immediately violate the lock-up restriction'], correctAnswer: 'Build a concrete diversification plan in advance (pace of future sales, tax coordination, any available interim risk-management options) so execution can begin as soon as the lock-up permits',
+      hint: 'Proactive planning during a restriction period still adds value.',
+      approach: 'Planning ahead ensures the client is ready to act immediately once restrictions lift.',
+      solution: 'Proactive planning during the lock-up period ensures the client is ready to act immediately once restrictions lift, rather than starting the planning process late.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming nothing productive can be planned until a trading restriction formally expires.',
+      tags: ['stock-vs-cash', 'concentration-risk']
+    },
+
+    /* ---------------------- Control premium (business owner clients) ---------------------- */
+    {
+      id: 'wm_b060', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 2, targetTime: 60,
+      prompt: 'If similar public companies trade at 7× EBITDA, should a client selling their ENTIRE private business expect to receive exactly 7×?',
+      answerType: 'mc', options: ['Yes, this benchmark should be used exactly as-is with no adjustment', 'Not necessarily — since the client is transferring full control, a control premium above this minority-stake benchmark would reasonably be expected', 'The public benchmark is always completely irrelevant to a private sale', 'A private sale should always be valued at a discount to the public benchmark'], correctAnswer: 'Not necessarily — since the client is transferring full control, a control premium above this minority-stake benchmark would reasonably be expected',
+      hint: 'Think about what public trading multiples actually reflect versus a full-company sale.',
+      approach: 'Public multiples reflect minority-stake pricing; a full sale transfers control and reasonably commands a premium.',
+      solution: 'The public multiple reflects passive minority-stake pricing; a full-company sale transferring control reasonably commands a premium above it.',
+      recognitionTechnique: 'Other', commonTrap: 'Anchoring a client\'s expectations directly on an unadjusted public trading multiple.',
+      tags: ['control-premium', 'suitability']
+    },
+    {
+      id: 'wm_b061', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 3, targetTime: 90,
+      prompt: 'Why should a wealth manager caution a client against assuming an unlimited control premium simply because "control is valuable"?',
+      answerType: 'mc', options: ['Control premiums are never actually valuable in practice', 'The actual size of the premium a specific buyer will pay is bounded by how much real extra value that particular buyer can capture, not an unlimited amount', 'Every buyer always pays the exact same premium regardless of circumstances', 'Only public companies are ever subject to a control premium'], correctAnswer: 'The actual size of the premium a specific buyer will pay is bounded by how much real extra value that particular buyer can capture, not an unlimited amount',
+      hint: 'Think about what actually determines how large a premium a specific buyer will pay.',
+      approach: 'A realistic premium estimate must be grounded in the specific buyer\'s ability to extract extra value.',
+      solution: 'A realistic premium estimate is bounded by the specific buyer\'s actual ability to capture extra value (synergies, strategic fit), not treated as boundless.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming "control has value" implies an unlimited premium in every case.',
+      tags: ['control-premium', 'suitability']
+    },
+    {
+      id: 'wm_b062', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s undisturbed comparison benchmark implies $40/share, but the actual full-company acquisition offer is $52/share. What is the control premium?',
+      answerType: 'numeric', correctAnswer: 30, tolerance: 1,
+      hint: 'Control premium = (offer / benchmark − 1) × 100.',
+      approach: 'Divide the offer by the benchmark, subtract 1, convert to a percentage.',
+      solution: 'Control premium = (52/40 − 1) × 100 = 30%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Computing a simple dollar difference instead of a percentage premium.',
+      tags: ['control-premium']
+    },
+
+    /* ---------------------- Earnouts & NWC adjustments (client planning) ---------------------- */
+    {
+      id: 'wm_b063', topic: 'Business Owner & Liquidity Events', subtopic: 'Earnouts (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why should a wealth manager help a client plan near-term finances around the UPFRONT portion of a deal, rather than the full headline value including an earnout?',
+      answerType: 'mc', options: ['Earnouts are always guaranteed to be paid in full', 'The earnout is contingent on future performance targets being met, so it is not guaranteed — planning around it as if certain risks overcommitting the client\'s finances', 'Upfront payments are always smaller than earnouts and therefore irrelevant', 'There is no meaningful difference between upfront and earnout proceeds for planning purposes'], correctAnswer: 'The earnout is contingent on future performance targets being met, so it is not guaranteed — planning around it as if certain risks overcommitting the client\'s finances',
+      hint: 'Think about what happens if the earnout targets are ultimately missed.',
+      approach: 'Near-term financial commitments should be built around certain proceeds only.',
+      solution: 'An earnout\'s contingent nature means it should be treated as a potential bonus, not counted on for firm financial commitments, to avoid overcommitting the client\'s finances.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the full headline deal value, including a contingent earnout, as guaranteed.',
+      tags: ['earnouts', 'financial-planning']
+    },
+    {
+      id: 'wm_b064', topic: 'Business Owner & Liquidity Events', subtopic: 'Earnouts (client planning)', difficulty: 3, targetTime: 90,
+      prompt: 'A client is offered a deal requiring 3 more years of active operational involvement to help achieve an earnout, but had hoped to retire within 1 year. What should a wealth manager help the client evaluate?',
+      answerType: 'mc', options: ['Only the financial size of the potential earnout, ignoring the client\'s retirement timeline entirely', 'The explicit tradeoff between the additional (contingent) earnout proceeds and the real cost of delaying retirement, modeling the client\'s financial plan under both the "earnout achieved" and "earnout missed" scenarios', 'Automatically recommending the client reject any deal involving an earnout', 'Automatically recommending the client accept any deal with a larger total headline value'], correctAnswer: 'The explicit tradeoff between the additional (contingent) earnout proceeds and the real cost of delaying retirement, modeling the client\'s financial plan under both the "earnout achieved" and "earnout missed" scenarios',
+      hint: 'This decision involves both financial modeling and the client\'s own life priorities.',
+      approach: 'Surface both the financial and non-financial tradeoffs explicitly, under multiple scenarios.',
+      solution: 'This decision involves both financial modeling under multiple scenarios and the client\'s own non-financial priorities (retirement timing), both of which the wealth manager should help surface explicitly.',
+      recognitionTechnique: 'Other', commonTrap: 'Reducing this decision to a pure financial calculation, ignoring the client\'s life-timeline priorities.',
+      tags: ['earnouts', 'financial-planning']
+    },
+    {
+      id: 'wm_b065', topic: 'Business Owner & Liquidity Events', subtopic: 'NWC adjustments (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s deal assumes $5m of target NWC at closing; actual NWC delivered comes in at $5.3m. How should a wealth manager explain this to the client?',
+      answerType: 'mc', options: [
+        'This indicates a serious problem with the deal that requires renegotiation',
+        'This is a normal, expected mechanical true-up: the client delivered slightly more working capital than assumed, resulting in an additional $300,000 at closing',
+        'This means the deal must be canceled',
+        'This has no effect on the client\'s proceeds whatsoever'
+      ], correctAnswer: 'This is a normal, expected mechanical true-up: the client delivered slightly more working capital than assumed, resulting in an additional $300,000 at closing',
+      hint: 'NWC adjustments are a routine part of most deals.',
+      approach: 'Explain the NWC adjustment as a normal, expected mechanical true-up.',
+      solution: 'This is a normal, expected mechanical true-up of the client\'s closing proceeds, not a sign of any problem or a renegotiation.',
+      recognitionTechnique: 'Other', commonTrap: 'Alarming the client by treating a routine NWC true-up as a sign of deal trouble.',
+      tags: ['nwc-adjustment', 'client-communication']
     }
   ];
 
