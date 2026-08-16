@@ -666,6 +666,134 @@
       solution: 'Interest rate risk and currency risk are genuinely separate exposures, each requiring its own distinct hedging instrument.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming one hedge automatically covers every risk category.',
       tags: ['treasury-risk', 'currency-risk']
+    },
+
+    /* ---------------------- MACRO DRIVERS ---------------------- */
+    {
+      id: 'am_c063', topic: 'Economics, Trade & Macro', subtopic: 'Macro drivers', difficulty: 2, targetTime: 60,
+      prompt: 'What is the FAST ("valuation") channel through which Fed rate changes reach equity prices?',
+      answerType: 'mc', options: ['Changes in actual corporate hiring, which happens within minutes', 'A change in the discount rate immediately changes the present value of expected future cash flows in valuation models, repricing stocks quickly, before any real-economy effect occurs', 'There is no fast channel — all Fed policy effects take many months', 'Fed rate changes only affect bond prices, never equities'], correctAnswer: 'A change in the discount rate immediately changes the present value of expected future cash flows in valuation models, repricing stocks quickly, before any real-economy effect occurs',
+      hint: 'Think about what happens to a DCF model the instant the discount rate changes.',
+      approach: 'The valuation channel operates through discount-rate mechanics, near-instantly.',
+      solution: 'The valuation channel operates through discount-rate mechanics and can reprice assets almost immediately, distinct from the slower real-economy channel.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all Fed policy effects take many months to show up.',
+      tags: ['fed-policy']
+    },
+    {
+      id: 'am_c064', topic: 'Economics, Trade & Macro', subtopic: 'Macro drivers', difficulty: 3, targetTime: 90,
+      prompt: 'Why might a stronger-than-expected GDP growth report cause equities to FALL rather than rise?',
+      answerType: 'mc', options: ['Strong growth always causes stocks to rise with no exceptions', 'If growth is strong enough to raise fears the Fed will need to stay tighter for longer (or resume hiking) to control inflation, the resulting valuation-channel headwind can outweigh the positive earnings-outlook read', 'GDP growth has no relationship to equity prices', 'This scenario can never actually occur in practice'], correctAnswer: 'If growth is strong enough to raise fears the Fed will need to stay tighter for longer (or resume hiking) to control inflation, the resulting valuation-channel headwind can outweigh the positive earnings-outlook read',
+      hint: 'This is the "good news is bad news" dynamic.',
+      approach: 'Competing transmission channels can pull equity reactions in opposite directions.',
+      solution: 'This is the "good news is bad news" dynamic, driven by the Fed-policy implications of unusually strong growth data.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming strong economic data is always unambiguously positive for equities.',
+      tags: ['gdp-growth']
+    },
+    {
+      id: 'am_c065', topic: 'Economics, Trade & Macro', subtopic: 'Macro drivers', difficulty: 3, targetTime: 90,
+      prompt: 'Unemployment falls to a multi-decade low, yet wage growth and inflation remain surprisingly subdued. What does this suggest about the traditional Phillips curve relationship?',
+      answerType: 'mc', options: ['The Phillips curve has been definitively proven completely correct in all cases', 'This is a real-world example of the traditionally assumed link between tight labor markets and rising wages/inflation appearing weaker and more context-dependent than the simple textbook theory suggests', 'Employment data has become entirely irrelevant to macro analysis as a result', 'This outcome is impossible and indicates a data error'], correctAnswer: 'This is a real-world example of the traditionally assumed link between tight labor markets and rising wages/inflation appearing weaker and more context-dependent than the simple textbook theory suggests',
+      hint: 'Think about what modern evidence suggests about this classic relationship.',
+      approach: 'The Phillips curve relationship has weakened empirically in recent decades.',
+      solution: 'This scenario reflects the genuinely debated, empirically weakened Phillips curve relationship in recent decades, without implying employment data itself has become unimportant.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the traditional Phillips curve as a rigid, always-true law.',
+      tags: ['phillips-curve']
+    },
+
+    /* ---------------------- TARIFFS ---------------------- */
+    {
+      id: 'am_c066', topic: 'Economics, Trade & Macro', subtopic: 'Tariffs', difficulty: 2, targetTime: 60,
+      prompt: 'Who actually pays a tariff at the point it is imposed?',
+      answerType: 'mc', options: ['The foreign exporting company directly', 'The domestic IMPORTER bringing the goods into the country', 'The foreign government of the exporting country', 'No one — tariffs are purely symbolic with no actual cost'], correctAnswer: 'The domestic IMPORTER bringing the goods into the country',
+      hint: 'The tax is collected at the domestic border.',
+      approach: 'Tariffs are paid by the domestic importer, who then decides how to pass the cost on.',
+      solution: 'Mechanically, the tariff is a tax paid by the domestic importer at the border, who then decides whether and how to pass that cost onward.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the foreign exporter directly pays the tariff.',
+      tags: ['tariffs']
+    },
+    {
+      id: 'am_c067', topic: 'Economics, Trade & Macro', subtopic: 'Tariffs', difficulty: 2, targetTime: 60,
+      prompt: 'Why might a domestic steel producer benefit from a tariff on imported steel?',
+      answerType: 'mc', options: ['Tariffs have no effect on any domestic producer', 'Imported steel becomes relatively more expensive due to the tariff, making the domestic producer more price-competitive against that foreign competition', 'Domestic producers are exempt from all forms of competition regardless of tariffs', 'The tariff directly increases the domestic producer\'s own costs'], correctAnswer: 'Imported steel becomes relatively more expensive due to the tariff, making the domestic producer more price-competitive against that foreign competition',
+      hint: 'A tariff on a competitor\'s good changes relative pricing.',
+      approach: 'The tariff improves the relative competitiveness of the domestic alternative.',
+      solution: 'A tariff on a competing import directly improves the relative price competitiveness of the domestic alternative producing the same good.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming tariffs only ever hurt domestic producers.',
+      tags: ['tariffs']
+    },
+    {
+      id: 'am_c068', topic: 'Economics, Trade & Macro', subtopic: 'Tariffs', difficulty: 3, targetTime: 90,
+      prompt: 'Why can a tariff indirectly benefit domestic industrials and construction-related sectors, even if those specific sectors are not the tariff\'s direct target?',
+      answerType: 'mc', options: ['This indirect benefit never actually occurs in practice', 'Tariffs can trigger reshoring/nearshoring supply-chain restructuring, which requires real capital expenditure on new domestic manufacturing facilities — a genuine, if indirect, tailwind for suppliers to that capex wave', 'Industrials and construction are always the direct target of every tariff policy', 'Tariffs only ever affect the specific goods named in the policy, with no ripple effects elsewhere'], correctAnswer: 'Tariffs can trigger reshoring/nearshoring supply-chain restructuring, which requires real capital expenditure on new domestic manufacturing facilities — a genuine, if indirect, tailwind for suppliers to that capex wave',
+      hint: 'Think about what companies do to adapt to tariffs over time.',
+      approach: 'Supply-chain restructuring drives real capex, an indirect tailwind.',
+      solution: 'The capex wave triggered by supply-chain restructuring is a real, documented indirect channel through which non-targeted sectors can benefit from tariff policy.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming tariff effects are limited only to the directly-targeted goods and sectors.',
+      tags: ['tariffs', 'reshoring']
+    },
+
+    /* ---------------------- AI & AUTOMATION ---------------------- */
+    {
+      id: 'am_c069', topic: 'Economics, Trade & Macro', subtopic: 'AI & automation', difficulty: 2, targetTime: 60,
+      prompt: 'Why has AI infrastructure buildout significantly increased demand for electricity?',
+      answerType: 'mc', options: ['AI has no relationship to electricity demand', 'AI training and inference workloads are extremely power-intensive, driving new demand for generation capacity from utilities, nuclear, and natural gas', 'Electricity demand from AI is negligible compared to other uses', 'AI reduces electricity demand rather than increasing it'], correctAnswer: 'AI training and inference workloads are extremely power-intensive, driving new demand for generation capacity from utilities, nuclear, and natural gas',
+      hint: 'AI compute requires massive amounts of a specific physical input.',
+      approach: 'The computational intensity of AI translates directly into electricity demand.',
+      solution: 'The computational intensity of AI training and inference directly translates into substantial new electricity demand.',
+      recognitionTechnique: 'Other', commonTrap: 'Underestimating the physical resource intensity of AI infrastructure.',
+      tags: ['ai-automation']
+    },
+    {
+      id: 'am_c070', topic: 'Economics, Trade & Macro', subtopic: 'AI & automation', difficulty: 3, targetTime: 90,
+      prompt: 'Why can AI be simultaneously deflationary in one part of the economy and inflationary in another, at the same time?',
+      answerType: 'mc', options: ['This is a contradiction and cannot actually happen', 'AI reduces labor costs in analysis-heavy sectors (deflationary there) while simultaneously driving surging near-term demand for physically-constrained inputs like electricity and key metals (inflationary there), before broader productivity gains fully materialize and offset those input-cost pressures', 'AI is always purely one or the other, never both', 'Deflationary and inflationary effects can never coexist in the same economy'], correctAnswer: 'AI reduces labor costs in analysis-heavy sectors (deflationary there) while simultaneously driving surging near-term demand for physically-constrained inputs like electricity and key metals (inflationary there), before broader productivity gains fully materialize and offset those input-cost pressures',
+      hint: 'Two genuinely distinct channels can operate in opposite directions at once.',
+      approach: 'Labor-cost substitution and physical-input demand are distinct, coexisting channels.',
+      solution: 'These are genuinely distinct channels (labor-cost substitution versus physical-input demand) that can operate in opposite directions simultaneously, in different parts of the same economy.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a single technology must have one uniform, economy-wide directional effect.',
+      tags: ['ai-automation', 'inflation']
+    },
+    {
+      id: 'am_c071', topic: 'Economics, Trade & Macro', subtopic: 'AI & automation', difficulty: 3, targetTime: 90,
+      prompt: 'What is the appropriately nuanced lesson from comparing today\'s AI infrastructure buildout to the late-1990s technology buildout?',
+      answerType: 'mc', options: ['The comparison proves AI investment will definitely crash, exactly as the dot-com bubble did', 'Genuine long-run productivity gains from the earlier buildout DID eventually materialize, but prices ran ahead of realized earnings in the short run, creating real correction risk — the same timing-mismatch risk is worth weighing today, independent of whether the long-run technological thesis ultimately proves correct', 'The comparison is entirely irrelevant since AI and the internet are completely unrelated technologies', 'The 1990s buildout proves all technology-driven rallies are ultimately illusory and unprofitable'], correctAnswer: 'Genuine long-run productivity gains from the earlier buildout DID eventually materialize, but prices ran ahead of realized earnings in the short run, creating real correction risk — the same timing-mismatch risk is worth weighing today, independent of whether the long-run technological thesis ultimately proves correct',
+      hint: 'Separate the long-run technological outcome from the short-run pricing risk.',
+      approach: 'The nuanced lesson separates real long-run payoff from short-run price/earnings timing mismatch.',
+      solution: 'The genuinely nuanced lesson separates the (real) long-run technological payoff from the (separate, real) short-run risk of prices outrunning earnings realization.',
+      recognitionTechnique: 'Other', commonTrap: 'Drawing an overly simplistic "it will definitely crash" or "it will definitely be fine" conclusion from the historical parallel.',
+      tags: ['ai-automation']
+    },
+
+    /* ---------------------- FX FOR ALLOCATORS ---------------------- */
+    {
+      id: 'am_c072', topic: 'Economics, Trade & Macro', subtopic: 'FX & carry trade', difficulty: 2, targetTime: 60,
+      prompt: 'What is a "carry trade"?',
+      answerType: 'mc', options: ['Buying and selling the same currency simultaneously for no profit', 'Borrowing in a low-interest-rate currency and investing the proceeds in a higher-interest-rate currency, typically without hedging the currency risk, to pocket the rate differential', 'A trade that always guarantees a profit with no risk', 'A type of interest rate swap unrelated to currencies'], correctAnswer: 'Borrowing in a low-interest-rate currency and investing the proceeds in a higher-interest-rate currency, typically without hedging the currency risk, to pocket the rate differential',
+      hint: 'The trade exploits an interest rate gap, left unhedged.',
+      approach: 'Carry trades capture the rate differential by leaving currency risk uncovered.',
+      solution: 'The carry trade specifically exploits an interest rate differential between two currencies, left uncovered (unhedged) to capture the spread.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a carry trade is risk-free simply because it is a common, popular strategy.',
+      tags: ['carry-trade']
+    },
+    {
+      id: 'am_c073', topic: 'Economics, Trade & Macro', subtopic: 'FX & carry trade', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a carry trade carry a specific risk of a sudden, self-reinforcing "unwind"?',
+      answerType: 'mc', options: ['Carry trades have no meaningful risk of any kind', 'If the high-yielding currency depreciates sharply (often during a risk-off shock), leveraged carry positions rush to close simultaneously, and that forced buying-back of the funding currency itself accelerates the funding currency\'s appreciation, reinforcing the unwind', 'Carry trades only unwind gradually over many years, never suddenly', 'Unwinding only happens when interest rates in both countries are identical'], correctAnswer: 'If the high-yielding currency depreciates sharply (often during a risk-off shock), leveraged carry positions rush to close simultaneously, and that forced buying-back of the funding currency itself accelerates the funding currency\'s appreciation, reinforcing the unwind',
+      hint: 'Think about what happens when many leveraged positions close at once.',
+      approach: 'Simultaneous forced closing is a self-reinforcing mechanism.',
+      solution: 'The self-reinforcing nature of simultaneous forced position closing is what makes a carry trade unwind a distinct, sudden risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming carry trade risk only materializes gradually rather than in a sudden, self-reinforcing spiral.',
+      tags: ['carry-trade', 'risk']
+    },
+    {
+      id: 'am_c074', topic: 'Economics, Trade & Macro', subtopic: 'FX & carry trade', difficulty: 3, targetTime: 90,
+      prompt: 'Why might the Japanese yen appreciate by MORE than other traditional safe-haven currencies during a specific risk-off shock?',
+      answerType: 'mc', options: ['The yen never appreciates more than other safe havens under any circumstances', 'The yen often benefits from two reinforcing effects simultaneously: its own safe-haven status AND a wave of carry-trade unwinding, since it is so frequently used as the low-rate funding currency for carry trades globally', 'The yen is not actually considered a safe-haven currency at all', 'This phenomenon only applies to the US dollar, never the yen'], correctAnswer: 'The yen often benefits from two reinforcing effects simultaneously: its own safe-haven status AND a wave of carry-trade unwinding, since it is so frequently used as the low-rate funding currency for carry trades globally',
+      hint: 'The yen plays two distinct roles in global markets.',
+      approach: 'Safe-haven demand and carry-unwind buying can reinforce each other for the yen specifically.',
+      solution: 'The yen\'s dual role — both a safe haven AND the classic carry-trade funding currency — can produce reinforcing, additive appreciation pressure during a shock.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating all safe-haven currencies as appreciating by the same degree during any given crisis.',
+      tags: ['carry-trade', 'risk-off']
     }
   ];
 
