@@ -764,8 +764,41 @@
 
   /* ================================= MOCKS ================================= */
 
+  const sprintState = { seconds: 15, count: 15 };
+
   function viewMocks(root) {
-    /* --- Wincent --- */
+    const track = S.activeTrack();
+
+    /* --- Speed Sprint (reasoning track) --- */
+    if (track === 'reasoning') {
+      const sp = el('div', 'panel');
+      sp.innerHTML = `<div class="panel-head"><span class="eyebrow">Speed Sprint</span><h2>Fast numerical / abstract / logical / verbal reasoning</h2></div>
+        <p class="small muted">One question at a time, a short hard timer per question, no skipping back, no hints. This is the format real speed-reasoning assessments use — the clock is the whole point.</p>
+        <label class="field"><span>Seconds per question</span><select id="sprint-sec">
+          ${[12, 15, 18, 20].map((s) => `<option ${s === sprintState.seconds ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+        <label class="field"><span>Questions</span><select id="sprint-n">
+          ${[10, 15, 20, 25].map((n) => `<option ${n === sprintState.count ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`;
+      const spb = el('button', 'btn primary full', 'Start Speed Sprint');
+      spb.onclick = () => {
+        sprintState.seconds = +$('#sprint-sec', sp).value;
+        sprintState.count = +$('#sprint-n', sp).value;
+        const items = S.buildSession({ count: sprintState.count, difficulties: [1, 2, 3, 4, 5] });
+        if (!items.length) return toast('No reasoning-track questions available.');
+        startSession({
+          items, mode: 'Mock', testType: 'Speed Sprint', allowHelp: false, deferFeedback: true, noSkip: true,
+          perQuestion: sprintState.seconds, totalSeconds: items.length * sprintState.seconds,
+          title: 'SPEED SPRINT — ' + items.length + ' questions / ' + sprintState.seconds + 's each',
+          onFinish: (recs, elapsed) => finishMock('Speed Sprint', recs, elapsed)
+        });
+      };
+      sp.appendChild(spb);
+      root.appendChild(sp);
+    }
+
+    /* --- Wincent / SIG / IMC / McKinsey prep (quant track only — these mocks are defined
+       around quant-track topic names and have no matching content on other tracks) --- */
+    const set = S.state.settings;
+    if (track === 'quant') {
     const w = el('div', 'panel');
     w.innerHTML = `<div class="panel-head"><span class="eyebrow">Wincent mock</span><h2>12 questions · 100 minutes</h2></div>
       <p class="small muted">Substantial probability and mathematical reasoning. No hints, no solutions until submission. Target pace is roughly 8 minutes per question.</p>`;
@@ -776,6 +809,7 @@
         topics: ['Probability', 'Expected Value', 'Combinatorics', 'Order Statistics', 'Symmetry',
           'Recursion', 'Optimal Strategy', 'Information Problems', 'Variance', 'Distributions', 'Game Theory']
       });
+      if (!items.length) return toast('No questions match that combination.');
       startSession({
         items, mode: 'Mock', testType: 'Wincent', allowHelp: false, deferFeedback: true,
         totalSeconds: 100 * 60, title: 'WINCENT MOCK — 12 questions / 100 min',
@@ -785,8 +819,6 @@
     w.appendChild(wb);
     root.appendChild(w);
 
-    /* --- SIG --- */
-    const set = S.state.settings;
     const g = el('div', 'panel');
     g.innerHTML = `<div class="panel-head"><span class="eyebrow">SIG mock</span><h2>${set.sigMinutes} minutes · no skipping</h2></div>
       <p class="small muted">One total timer. Once an answer is submitted the test moves on and cannot go back. Speed and accuracy both count.</p>
@@ -800,6 +832,7 @@
         count: n, difficulties: [1, 2, 3],
         topics: ['Mental Maths', 'Finance', 'Data Interpretation', 'Logic', 'Probability', 'Expected Value', 'Market Making']
       });
+      if (!items.length) return toast('No questions match that combination.');
       startSession({
         items, mode: 'Mock', testType: 'SIG', allowHelp: false, deferFeedback: true, noSkip: true,
         totalSeconds: set.sigMinutes * 60, title: 'SIG MOCK — ' + n + ' questions / ' + set.sigMinutes + ' min',
@@ -854,6 +887,7 @@
     });
     k.appendChild(krow);
     root.appendChild(k);
+    }
 
     /* --- history --- */
     const hist = S.state.mocks.slice().reverse();
