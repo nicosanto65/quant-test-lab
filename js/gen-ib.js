@@ -543,5 +543,44 @@
     }
   });
 
+  add({
+    id: 'ib_option_itm', topic: 'Currencies & Derivatives', subtopic: 'Options mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const optType = r.pick(['call', 'put']);
+      const strike = r.pick([40, 50, 60, 70, 80, 90, 100]);
+      const offset = r.pick([-15, -10, -5, 5, 10, 15]);
+      const underlying = strike + offset;
+      const mode = r.pick(['intrinsic', 'classify']);
+      const intrinsic = optType === 'call' ? Math.max(underlying - strike, 0) : Math.max(strike - underlying, 0);
+      if (mode === 'intrinsic') {
+        return {
+          prompt: `A ${optType} option has a strike price of $${strike}. The underlying is currently trading at $${underlying}. What is this option's intrinsic value, in dollars?`,
+          answerType: 'numeric', correctAnswer: intrinsic, tolerance: 0.5,
+          hint: optType === 'call' ? 'Call intrinsic value = max(underlying − strike, 0).' : 'Put intrinsic value = max(strike − underlying, 0).',
+          approach: optType === 'call' ? 'Intrinsic value = max(underlying price − strike price, 0).' : 'Intrinsic value = max(strike price − underlying price, 0).',
+          solution: optType === 'call'
+            ? `Intrinsic value = max(${underlying} − ${strike}, 0) = $${intrinsic}.`
+            : `Intrinsic value = max(${strike} − ${underlying}, 0) = $${intrinsic}.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Using the wrong direction of subtraction for a put versus a call, or forgetting intrinsic value is never negative (floored at zero).',
+          tags: ['options', 'intrinsic-value']
+        };
+      }
+      let classification;
+      if (optType === 'call') classification = underlying > strike ? 'In-the-money (ITM)' : 'Out-of-the-money (OTM)';
+      else classification = underlying < strike ? 'In-the-money (ITM)' : 'Out-of-the-money (OTM)';
+      return {
+        prompt: `A ${optType} option has a strike price of $${strike}. The underlying is currently trading at $${underlying}. Is this option in-the-money or out-of-the-money?`,
+        answerType: 'mc', options: ['In-the-money (ITM)', 'Out-of-the-money (OTM)'], correctAnswer: classification,
+        hint: optType === 'call' ? 'A call is ITM when the underlying price exceeds the strike.' : 'A put is ITM when the underlying price is below the strike.',
+        approach: optType === 'call' ? 'Call: ITM if underlying > strike.' : 'Put: ITM if underlying < strike.',
+        solution: optType === 'call'
+          ? `The underlying ($${underlying}) is ${underlying > strike ? 'above' : 'at or below'} the strike ($${strike}), so this call is ${classification}.`
+          : `The underlying ($${underlying}) is ${underlying < strike ? 'below' : 'at or above'} the strike ($${strike}), so this put is ${classification}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the call\'s ITM rule (price above strike) to a put, which uses the opposite direction.',
+        tags: ['options', 'moneyness']
+      };
+    }
+  });
+
   global.QTL_GEN_IB = G;
 })(window);

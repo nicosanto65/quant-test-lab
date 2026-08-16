@@ -1003,6 +1003,211 @@
       solution: 'Per the Fisher equation, rising inflation expectations push up the nominal yields required on new debt; existing bonds paying their old, now relatively low coupons become less attractive at their old prices, so their prices fall (per the duration relationship) until their yields become competitive again.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming bond prices only respond to inflation once it is actually realized, ignoring the forward-looking nature of yields.',
       tags: ['fisher-equation', 'inflation']
+    },
+
+    /* ---------------------- Spot/forward FX & IRP ---------------------- */
+    {
+      id: 'ib_b086', topic: 'Currencies & Derivatives', subtopic: 'Spot/forward FX & IRP', difficulty: 3, targetTime: 90,
+      prompt: 'Domestic 1-year interest rate is 4%, foreign 1-year interest rate is 7%, spot rate is 1.30 (domestic per foreign unit). Using Interest Rate Parity, what is the approximate 1-year forward rate?',
+      answerType: 'numeric', correctAnswer: 1.264, tolerance: 0.01,
+      hint: 'Forward = Spot × (1+domestic rate)/(1+foreign rate).',
+      approach: 'Apply the IRP formula directly.',
+      solution: 'Forward = 1.30 × (1.04/1.07) ≈ 1.30 × 0.9720 ≈ 1.264.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Inverting the ratio (foreign rate over domestic rate) instead of domestic over foreign.',
+      tags: ['irp', 'forward-fx']
+    },
+    {
+      id: 'ib_b087', topic: 'Currencies & Derivatives', subtopic: 'Spot/forward FX & IRP', difficulty: 2, targetTime: 60,
+      prompt: 'A currency has a HIGHER interest rate than its counterpart currency. Under Interest Rate Parity, how does it typically trade in the forward market relative to spot?',
+      answerType: 'mc', options: ['At a forward premium (stronger)', 'At a forward discount (weaker)', 'Exactly at the spot rate', 'IRP does not apply to interest rate differences'], correctAnswer: 'At a forward discount (weaker)',
+      hint: 'Think about what prevents a riskless arbitrage between the two currencies.',
+      approach: 'The higher-rate currency must trade at a forward discount to prevent covered interest arbitrage.',
+      solution: 'The higher-interest-rate currency trades at a forward discount, offsetting its rate advantage so that no risk-free arbitrage profit is available from borrowing low and investing high.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a higher interest rate currency should trade at a forward premium instead of a discount.',
+      tags: ['irp']
+    },
+    {
+      id: 'ib_b088', topic: 'Currencies & Derivatives', subtopic: 'Spot/forward FX & IRP', difficulty: 3, targetTime: 90,
+      prompt: 'Why is it incorrect to interpret the forward FX rate as the market\'s forecast of the future spot rate?',
+      answerType: 'mc', options: [
+        'The forward rate actually is always an accurate forecast of the future spot rate',
+        'The forward rate is mechanically derived from the current interest rate differential via Interest Rate Parity, a no-arbitrage pricing relationship, not a prediction of where the spot rate will actually be',
+        'Forward rates are set randomly with no underlying logic',
+        'Forward rates only exist for currencies with identical interest rates'
+      ], correctAnswer: 'The forward rate is mechanically derived from the current interest rate differential via Interest Rate Parity, a no-arbitrage pricing relationship, not a prediction of where the spot rate will actually be',
+      hint: 'Think about what actually determines the forward rate mathematically.',
+      approach: 'IRP ties the forward rate to today\'s interest rates, not to any forecast.',
+      solution: 'The forward rate is set by IRP to prevent arbitrage based on TODAY\'s interest rate differential — it reflects current rates, not necessarily anyone\'s actual expectation of the future spot rate.',
+      recognitionTechnique: 'Other', commonTrap: 'Conflating a mechanically-derived forward discount/premium with a market forecast.',
+      tags: ['irp']
+    },
+
+    /* ---------------------- FX drivers ---------------------- */
+    {
+      id: 'ib_b089', topic: 'Currencies & Derivatives', subtopic: 'FX drivers', difficulty: 2, targetTime: 60,
+      prompt: 'All else equal, what tends to happen to a currency when its central bank unexpectedly raises interest rates?',
+      answerType: 'mc', options: ['It tends to weaken', 'It tends to strengthen, as higher rates attract capital inflows', 'Interest rates have no effect on currency values', 'It becomes fixed to another currency'], correctAnswer: 'It tends to strengthen, as higher rates attract capital inflows',
+      hint: 'Think about where capital flows when a currency offers a better return.',
+      approach: 'Higher rates attract capital seeking a better return, increasing demand for that currency.',
+      solution: 'A higher interest rate makes holding that currency more attractive to investors seeking yield, increasing demand and typically strengthening it, all else equal.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming interest rates have no bearing on currency demand.',
+      tags: ['fx-drivers']
+    },
+    {
+      id: 'ib_b090', topic: 'Currencies & Derivatives', subtopic: 'FX drivers', difficulty: 2, targetTime: 60,
+      prompt: 'A country runs a persistent, large trade deficit. All else equal, what does this tend to do to its currency over time?',
+      answerType: 'mc', options: ['Strengthen it over time', 'Weaken it over time, due to continuously supplying more currency to pay for imports', 'Have no effect at all', 'Automatically cause a default'], correctAnswer: 'Weaken it over time, due to continuously supplying more currency to pay for imports',
+      hint: 'Think about what a trade deficit requires the country to keep doing with its own currency.',
+      approach: 'A trade deficit means continuously supplying more domestic currency to pay for excess imports.',
+      solution: 'Financing a persistent trade deficit requires continuously supplying more of the domestic currency internationally to pay for excess imports, which tends to weaken it over time, all else equal.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming trade balances have no bearing on currency value.',
+      tags: ['fx-drivers']
+    },
+    {
+      id: 'ib_b091', topic: 'Currencies & Derivatives', subtopic: 'FX drivers', difficulty: 3, targetTime: 90,
+      prompt: 'A currency strengthens sharply during a global risk-off event, despite that country currently running a modest trade deficit and having unremarkable interest rates. What best explains this?',
+      answerType: 'mc', options: [
+        'This outcome is impossible and indicates an error',
+        'Safe-haven flows — investors seeking safety and liquidity during stress — can dominate and overwhelm the currency\'s usual trade-balance or rate-driven dynamics, at least in the short run',
+        'Trade deficits always cause a currency to strengthen',
+        'Risk-off events always weaken every currency equally'
+      ], correctAnswer: 'Safe-haven flows — investors seeking safety and liquidity during stress — can dominate and overwhelm the currency\'s usual trade-balance or rate-driven dynamics, at least in the short run',
+      hint: 'Multiple FX drivers act simultaneously — which one might dominate during acute market stress?',
+      approach: 'Identify which driver is most likely to dominate during a risk-off event specifically.',
+      solution: 'During acute global risk-off periods, flight-to-safety flows toward perceived safe-haven currencies can dominate and overwhelm the currency\'s usual trade-balance or interest-rate-driven dynamics, at least in the short run.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming only one FX driver can ever be relevant at a time, ignoring that multiple forces act simultaneously with varying dominance.',
+      tags: ['fx-drivers']
+    },
+
+    /* ---------------------- Options mechanics ---------------------- */
+    {
+      id: 'ib_b092', topic: 'Currencies & Derivatives', subtopic: 'Options mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A call option has a $70 strike. The underlying is currently at $85. What is its intrinsic value?',
+      answerType: 'numeric', correctAnswer: 15, tolerance: 0.5,
+      hint: 'Call intrinsic value = max(underlying − strike, 0).',
+      approach: 'Subtract the strike from the underlying price, floored at zero.',
+      solution: 'Intrinsic value = max(85 − 70, 0) = $15.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Subtracting in the wrong direction (strike minus underlying) for a call.',
+      tags: ['options', 'intrinsic-value']
+    },
+    {
+      id: 'ib_b093', topic: 'Currencies & Derivatives', subtopic: 'Options mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'What is the maximum possible loss for an option BUYER (holder), regardless of how unfavorably the underlying moves?',
+      answerType: 'mc', options: ['Unlimited, the same as the seller', 'The premium paid for the option', 'Always exactly zero', 'The full value of the underlying asset'], correctAnswer: 'The premium paid for the option',
+      hint: 'The buyer holds a right, not an obligation.',
+      approach: 'The buyer can always simply let an unfavorable option expire worthless.',
+      solution: 'Since the buyer holds a right, not an obligation, they can always let an unfavorable option expire worthless, capping their total loss at the premium already paid.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing the buyer\'s capped risk with the seller\'s potentially unlimited risk.',
+      tags: ['options']
+    },
+    {
+      id: 'ib_b094', topic: 'Currencies & Derivatives', subtopic: 'Options mechanics', difficulty: 3, targetTime: 90,
+      prompt: 'An option\'s premium is $9, and its intrinsic value is currently $6. What does the remaining $3 represent?',
+      answerType: 'mc', options: [
+        'A pricing error that will be corrected immediately',
+        'The option\'s time value, which decays toward zero as expiration approaches',
+        'Additional intrinsic value not yet recognized',
+        'This only applies to put options, never calls'
+      ], correctAnswer: 'The option\'s time value, which decays toward zero as expiration approaches',
+      hint: 'Premium = intrinsic value + time value.',
+      approach: 'Subtract intrinsic value from the total premium to isolate time value.',
+      solution: 'Premium = intrinsic value + time value, so the remaining $3 is the option\'s time value, which decays toward zero as expiration approaches (time decay).',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming the entire premium is intrinsic value with no separate time-value component.',
+      tags: ['options', 'time-value']
+    },
+
+    /* ---------------------- Forwards, futures, swaps ---------------------- */
+    {
+      id: 'ib_b095', topic: 'Currencies & Derivatives', subtopic: 'Forwards, futures, swaps', difficulty: 2, targetTime: 60,
+      prompt: 'What is the key structural difference between a forward and a futures contract?',
+      answerType: 'mc', options: [
+        'They are identical in every respect',
+        'A futures contract is standardized, exchange-traded, and marked-to-market daily; a forward is a private, customized OTC agreement settled only at the final date',
+        'Forwards are always larger in size than futures',
+        'Futures never have an expiration date'
+      ], correctAnswer: 'A futures contract is standardized, exchange-traded, and marked-to-market daily; a forward is a private, customized OTC agreement settled only at the final date',
+      hint: 'Think about standardization, exchange trading, and settlement frequency.',
+      approach: 'Compare the defining structural features of each instrument.',
+      solution: 'Futures are standardized, exchange-traded, and settled daily via mark-to-market; forwards are private, customizable OTC agreements with no interim settlement, carrying more counterparty risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating "forward" and "future" as interchangeable terms.',
+      tags: ['forwards-futures']
+    },
+    {
+      id: 'ib_b096', topic: 'Currencies & Derivatives', subtopic: 'Forwards, futures, swaps', difficulty: 2, targetTime: 60,
+      prompt: 'In a standard interest rate swap, what is actually exchanged between the two parties on the notional principal amount?',
+      answerType: 'mc', options: [
+        'The full notional principal itself, at the start of the swap',
+        'Only the interest payments (e.g., fixed for floating) calculated on the notional — the notional itself is never exchanged',
+        'Nothing is ever exchanged in a swap',
+        'Only the notional principal, at the end of the swap, with no interim payments'
+      ], correctAnswer: 'Only the interest payments (e.g., fixed for floating) calculated on the notional — the notional itself is never exchanged',
+      hint: 'The notional is a reference amount, not a transferred sum.',
+      approach: 'Identify what is actually exchanged versus what is merely a calculation base.',
+      solution: 'The notional principal is purely a reference amount used to calculate the periodic interest cash flows exchanged between the parties; it is never itself transferred.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the notional principal itself changes hands, like in a loan.',
+      tags: ['swaps']
+    },
+    {
+      id: 'ib_b097', topic: 'Currencies & Derivatives', subtopic: 'Forwards, futures, swaps', difficulty: 3, targetTime: 90,
+      prompt: 'A company with floating-rate debt enters a swap to pay fixed and receive floating on a notional equal to its debt balance. How does this convert its effective interest rate exposure to fixed, without modifying the underlying loan?',
+      answerType: 'mc', options: [
+        'It does not actually change anything about the company\'s exposure',
+        'The floating payments received from the swap offset the floating interest actually owed on the debt, leaving the company\'s net cash outflow equal to just the fixed rate paid in the swap',
+        'The swap automatically refinances the underlying loan into a fixed-rate loan',
+        'Swaps can only be used to change currency exposure, never interest rate exposure'
+      ], correctAnswer: 'The floating payments received from the swap offset the floating interest actually owed on the debt, leaving the company\'s net cash outflow equal to just the fixed rate paid in the swap',
+      hint: 'The swap\'s floating leg is designed to cancel out the debt\'s floating interest payments.',
+      approach: 'Net the swap\'s floating receipt against the debt\'s floating interest expense.',
+      solution: 'The floating-rate payments received from the swap roughly cancel the floating interest owed on the debt, leaving the company effectively paying only the fixed rate agreed in the swap, entirely through the swap\'s cash flows.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a swap must modify the terms of the underlying loan itself to change exposure.',
+      tags: ['swaps']
+    },
+
+    /* ---------------------- Hedging strategies ---------------------- */
+    {
+      id: 'ib_b098', topic: 'Currencies & Derivatives', subtopic: 'Hedging strategies', difficulty: 2, targetTime: 60,
+      prompt: 'A forward/futures hedge locks in a future rate. What is the key tradeoff of this approach?',
+      answerType: 'mc', options: [
+        'It requires paying a premium but offers no protection',
+        'It provides complete symmetric certainty — no downside risk, but also no ability to benefit from a favorable market move',
+        'It only protects against downside, never against upside forgone',
+        'It provides protection with no tradeoff of any kind'
+      ], correctAnswer: 'It provides complete symmetric certainty — no downside risk, but also no ability to benefit from a favorable market move',
+      hint: 'Locking in a rate works in both directions.',
+      approach: 'A forward hedge eliminates uncertainty symmetrically.',
+      solution: 'Locking in a rate via a forward/future removes uncertainty in BOTH directions — protection from an unfavorable move comes paired with giving up any favorable move.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a forward hedge only protects against downside with no cost to potential upside.',
+      tags: ['hedging']
+    },
+    {
+      id: 'ib_b099', topic: 'Currencies & Derivatives', subtopic: 'Hedging strategies', difficulty: 3, targetTime: 90,
+      prompt: 'Why is it incorrect to conclude that a forward hedge is simply "better" than an options hedge because it has no upfront premium cost?',
+      answerType: 'mc', options: [
+        'This conclusion is actually correct in every case',
+        'The forward\'s lack of an upfront cost comes paired with giving up ALL potential upside from a favorable market move, a real economic cost that only becomes apparent after the fact',
+        'Options hedges are always cheaper than forward hedges once all costs are considered',
+        'Forward hedges never actually provide any real protection'
+      ], correctAnswer: 'The forward\'s lack of an upfront cost comes paired with giving up ALL potential upside from a favorable market move, a real economic cost that only becomes apparent after the fact',
+      hint: 'Think about the hidden opportunity cost of a "free" hedge.',
+      approach: 'A complete cost comparison must include the forgone-upside cost of a forward.',
+      solution: 'The forward\'s "free" hedge has a real, sometimes large, hidden opportunity cost (forgone upside) that only becomes visible if the market later moves favorably — a complete comparison must weigh this against the option\'s visible upfront premium.',
+      recognitionTechnique: 'Other', commonTrap: 'Comparing only the visible upfront cost of each hedge, ignoring the forward\'s hidden opportunity cost.',
+      tags: ['hedging']
+    },
+    {
+      id: 'ib_b100', topic: 'Currencies & Derivatives', subtopic: 'Hedging strategies', difficulty: 2, targetTime: 60,
+      prompt: 'A company buys a put option to hedge against a price decline in an asset it holds. If the asset\'s price RISES instead, what happens?',
+      answerType: 'mc', options: [
+        'The company is forced to sell at the lower strike price anyway',
+        'The company simply lets the put expire unused, losing only the premium paid, and keeps the benefit of the higher price',
+        'The company must pay an additional penalty',
+        'The put automatically converts into a forward contract'
+      ], correctAnswer: 'The company simply lets the put expire unused, losing only the premium paid, and keeps the benefit of the higher price',
+      hint: 'An option is a right, not an obligation.',
+      approach: 'If exercising would be unfavorable, the holder simply lets the option expire.',
+      solution: 'Since the put is a right, not an obligation, the company lets it expire unused if the price rose (exercising would be unfavorable), losing only the premium while keeping the full benefit of the higher price.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming an option obligates its holder to exercise regardless of favorability.',
+      tags: ['hedging', 'options']
     }
   ];
 
