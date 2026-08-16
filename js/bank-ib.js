@@ -608,6 +608,211 @@
       solution: 'WACC implicitly assumes a roughly stable capital structure; in an LBO, debt shrinks substantially and predictably each year, which would require a new WACC every year under that approach. APV avoids this by valuing the business unlevered once, then separately modeling the shrinking tax shield year by year.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming APV and WACC are simply two equally-valid ways to reach the identical answer with no practical difference in when each is appropriate.',
       tags: ['apv', 'wacc']
+    },
+
+    /* ---------------------- Beta and cost of equity ---------------------- */
+    {
+      id: 'ib_b056', topic: 'Equity & Capital Markets', subtopic: 'Beta and cost of equity', difficulty: 3, targetTime: 90,
+      prompt: 'A peer has a levered beta of 1.35, a debt-to-equity ratio of 0.6, and faces a 25% tax rate. What is its unlevered beta (to 3 decimals)?',
+      answerType: 'numeric', correctAnswer: 0.931, tolerance: 0.01,
+      hint: 'Unlever: βu = βl / [1 + (1−t)(D/E)].',
+      approach: 'βu = βl / [1 + (1−t) × (D/E)].',
+      solution: 'Bracket = 1 + (0.75×0.6) = 1.45. βu = 1.35 / 1.45 ≈ 0.931.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Multiplying by the bracket term instead of dividing when unlevering.',
+      tags: ['beta', 'hamada']
+    },
+    {
+      id: 'ib_b057', topic: 'Equity & Capital Markets', subtopic: 'Beta and cost of equity', difficulty: 3, targetTime: 90,
+      prompt: 'A peer-average unlevered beta is 0.85. The target has a debt-to-equity ratio of 0.5 and a 20% tax rate. What is the target\'s relevered beta (to 3 decimals)?',
+      answerType: 'numeric', correctAnswer: 1.19, tolerance: 0.01,
+      hint: 'Relever using the TARGET\'s own D/E: βl = βu × [1 + (1−t)(D/E)].',
+      approach: 'βl = βu × [1 + (1−t) × (D/E)].',
+      solution: 'Bracket = 1 + (0.80×0.5) = 1.40. βl = 0.85 × 1.40 = 1.19.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Using a peer\'s D/E ratio instead of the target\'s own D/E ratio during relevering.',
+      tags: ['beta', 'hamada']
+    },
+    {
+      id: 'ib_b058', topic: 'Equity & Capital Markets', subtopic: 'Beta and cost of equity', difficulty: 2, targetTime: 60,
+      prompt: 'Why must peer betas be unlevered before averaging them across a comp set with different debt levels?',
+      answerType: 'mc', options: [
+        'Unlevering is not actually necessary; raw levered betas can always be averaged directly',
+        'Each peer\'s levered beta reflects its own capital structure, so averaging raw levered betas mixes business risk with financing-driven risk differences across peers',
+        'Unlevering is only a legal requirement, with no economic rationale',
+        'Because unlevered beta is always exactly 1.0 for every company'
+      ], correctAnswer: 'Each peer\'s levered beta reflects its own capital structure, so averaging raw levered betas mixes business risk with financing-driven risk differences across peers',
+      hint: 'Think about what debt does to equity risk, independent of the underlying business.',
+      approach: 'Debt amplifies equity risk; unlevering strips that effect out to isolate comparable business risk.',
+      solution: 'Debt amplifies equity risk beyond the underlying business risk, so two peers with identical businesses but different leverage will show different levered betas. Unlevering removes this financing noise, making the betas genuinely comparable before averaging.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming beta is a pure measure of business risk regardless of capital structure.',
+      tags: ['beta', 'hamada']
+    },
+
+    /* ---------------------- Systematic vs unsystematic risk / CAPM ---------------------- */
+    {
+      id: 'ib_b059', topic: 'Equity & Capital Markets', subtopic: 'Systematic risk & CAPM', difficulty: 2, targetTime: 60,
+      prompt: 'Which of these is an example of UNSYSTEMATIC (diversifiable) risk?',
+      answerType: 'mc', options: [
+        'A global recession reducing consumer spending across nearly every industry',
+        'A central bank raising interest rates economy-wide',
+        'One company\'s factory suffering an isolated equipment failure that halts production for a month',
+        'A broad geopolitical shock affecting global equity markets'
+      ], correctAnswer: 'One company\'s factory suffering an isolated equipment failure that halts production for a month',
+      hint: 'Diversifiable risk is firm-specific, not something affecting the whole market at once.',
+      approach: 'Unsystematic risk is idiosyncratic to one company or narrow situation, not market-wide.',
+      solution: 'An isolated equipment failure at one company\'s factory is firm-specific and largely uncorrelated with other companies\' fortunes — it can be diversified away by holding many stocks. The other three options all describe market-wide, undiversifiable systematic risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing "large in magnitude for one company" with "systematic" — systematic risk is defined by breadth (market-wide), not size.',
+      tags: ['risk', 'capm']
+    },
+    {
+      id: 'ib_b060', topic: 'Equity & Capital Markets', subtopic: 'Systematic risk & CAPM', difficulty: 2, targetTime: 60,
+      prompt: 'A stock has a beta of 1.25. The risk-free rate is 4.5%, and the equity risk premium is 5.5%. What is its CAPM cost of equity?',
+      answerType: 'numeric', correctAnswer: 11.375, tolerance: 0.05,
+      hint: 'Cost of equity = Rf + β × ERP.',
+      approach: 'Apply the CAPM formula directly.',
+      solution: 'Cost of equity = 4.5% + 1.25×5.5% = 4.5% + 6.875% = 11.375%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Adding the risk-free rate to the market return instead of the equity risk premium (Rm − Rf).',
+      tags: ['capm']
+    },
+    {
+      id: 'ib_b061', topic: 'Equity & Capital Markets', subtopic: 'Systematic risk & CAPM', difficulty: 3, targetTime: 90,
+      prompt: 'Why does CAPM compensate investors only for systematic risk, ignoring unsystematic risk entirely, even for a company with a very large firm-specific risk exposure?',
+      answerType: 'mc', options: [
+        'Because unsystematic risk never actually affects stock prices',
+        'Because unsystematic risk can be eliminated for free through diversification, so a well-diversified investor does not need to be compensated for bearing a risk they could have avoided at no cost',
+        'Because CAPM only applies to companies with no firm-specific risks at all',
+        'Because unsystematic risk is always smaller than systematic risk for every company'
+      ], correctAnswer: 'Because unsystematic risk can be eliminated for free through diversification, so a well-diversified investor does not need to be compensated for bearing a risk they could have avoided at no cost',
+      hint: 'Think about what a diversified investor can accomplish for free.',
+      approach: 'CAPM assumes a diversified investor, so only undiversifiable risk merits a return premium.',
+      solution: 'Since unsystematic risk can be diversified away at no cost by holding a broad portfolio, the market does not need to reward investors for bearing it — only the undiversifiable, market-wide (systematic) portion, captured by beta, earns a return premium under CAPM.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any large risk, regardless of type, must be priced into required returns.',
+      tags: ['risk', 'capm']
+    },
+
+    /* ---------------------- Short selling ---------------------- */
+    {
+      id: 'ib_b062', topic: 'Equity & Capital Markets', subtopic: 'Short selling', difficulty: 2, targetTime: 60,
+      prompt: 'An investor shorts 150 shares at $40 each. The stock falls to $28 and they cover. What is the profit, ignoring fees, in dollars?',
+      answerType: 'numeric', correctAnswer: 1800, tolerance: 1,
+      hint: 'Profit = (price sold at − price bought back at) × shares.',
+      approach: 'Proceeds from the initial sale minus the cost to buy back and cover.',
+      solution: 'Proceeds = 150×40 = $6000. Buyback cost = 150×28 = $4200. Profit = 6000 − 4200 = $1800.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Reversing the subtraction and getting a negative number for a position that actually profited.',
+      tags: ['short-selling']
+    },
+    {
+      id: 'ib_b063', topic: 'Equity & Capital Markets', subtopic: 'Short selling', difficulty: 3, targetTime: 90,
+      prompt: 'Why is a short position\'s maximum possible loss theoretically unlimited, while a long position\'s maximum loss is capped at 100% of the amount invested?',
+      answerType: 'mc', options: [
+        'Short sellers are charged unlimited fees by their broker over time',
+        'A stock price has no upper ceiling, so the cost to buy back and cover a short position can keep rising indefinitely; a long position\'s loss is bounded because price cannot fall below zero',
+        'Short positions are always larger in dollar size than long positions',
+        'This is a common misconception — both position types have identical, symmetric risk'
+      ], correctAnswer: 'A stock price has no upper ceiling, so the cost to buy back and cover a short position can keep rising indefinitely; a long position\'s loss is bounded because price cannot fall below zero',
+      hint: 'Think about the floor and ceiling of a stock price.',
+      approach: 'Compare the bounds on how far a stock price can fall (long risk) versus rise (short risk).',
+      solution: 'A long position\'s downside is capped since a stock price has a floor of zero, but a short position\'s downside is driven by the stock RISING, and there is no ceiling on how high a price can go — hence the theoretically unlimited loss potential for a short.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming short and long positions have mirror-image, symmetric risk profiles.',
+      tags: ['short-selling']
+    },
+    {
+      id: 'ib_b064', topic: 'Equity & Capital Markets', subtopic: 'Short selling', difficulty: 3, targetTime: 90,
+      prompt: 'What specifically drives a "short squeeze"?',
+      answerType: 'mc', options: [
+        'A steady, gradual decline in a heavily shorted stock\'s price over many months',
+        'A sharp price rise forcing short sellers to buy back shares to limit losses, and that forced buying itself adds further upward pressure, forcing even more covering',
+        'A company voluntarily announcing a stock split',
+        'Short sellers coordinating to sell even more shares short at once'
+      ], correctAnswer: 'A sharp price rise forcing short sellers to buy back shares to limit losses, and that forced buying itself adds further upward pressure, forcing even more covering',
+      hint: 'The squeeze is a self-reinforcing cycle driven by forced buying.',
+      approach: 'Rising prices trigger covering (buying), which itself pushes prices higher, triggering more covering.',
+      solution: 'A short squeeze begins with a sharp price increase that forces short sellers to buy back shares (cover) to cap mounting losses; that wave of forced buying adds further demand, pushing the price up even more and forcing additional shorts to cover in a reinforcing spiral.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing a short squeeze with an ordinary price decline.',
+      tags: ['short-selling']
+    },
+
+    /* ---------------------- Liquidity premium ---------------------- */
+    {
+      id: 'ib_b065', topic: 'Equity & Capital Markets', subtopic: 'Liquidity premium', difficulty: 2, targetTime: 60,
+      prompt: 'A public comparable company is valued at $350m. Applying a 25% discount for lack of marketability (DLOM) to an economically similar private company, what is its estimated value, in $ millions?',
+      answerType: 'numeric', correctAnswer: 262.5, tolerance: 1,
+      hint: 'Multiply the public comparable value by (1 − DLOM).',
+      approach: 'Private value ≈ public comparable value × (1 − DLOM).',
+      solution: '350 × (1 − 0.25) = 350 × 0.75 = $262.5m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Adding the DLOM to the public value instead of applying it as a discount.',
+      tags: ['liquidity-premium', 'dlom']
+    },
+    {
+      id: 'ib_b066', topic: 'Equity & Capital Markets', subtopic: 'Liquidity premium', difficulty: 2, targetTime: 60,
+      prompt: 'Why must an illiquid alternative investment (like a locked-up private equity fund) offer a higher expected return than an otherwise-comparable liquid public equity investment?',
+      answerType: 'mc', options: [
+        'It is a regulatory requirement with no underlying economic logic',
+        'If it offered the same expected return as a liquid asset, no rational investor would accept being unable to exit on demand for no additional compensation',
+        'Illiquid investments are always managed by better investment teams',
+        'Illiquid investments never carry any additional business risk'
+      ], correctAnswer: 'If it offered the same expected return as a liquid asset, no rational investor would accept being unable to exit on demand for no additional compensation',
+      hint: 'Think about what a rational investor would demand for giving up the ability to exit on demand.',
+      approach: 'The liquidity premium compensates investors specifically for illiquidity, above and beyond business risk.',
+      solution: 'Being locked into an investment for years is itself a real cost to an investor; without extra expected return to compensate for that cost, there would be no rational reason to accept illiquidity over an equally-returning liquid alternative.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming illiquid investments only need to compensate for business risk, ignoring the separate cost of being unable to exit.',
+      tags: ['liquidity-premium']
+    },
+    {
+      id: 'ib_b067', topic: 'Equity & Capital Markets', subtopic: 'Liquidity premium', difficulty: 3, targetTime: 90,
+      prompt: 'A client has a high likelihood of needing a large lump sum of cash within 18 months. Why is a large allocation to a fund with a 7-year lockup inappropriate for this client, even if the fund\'s expected return looks attractive?',
+      answerType: 'mc', options: [
+        'Funds with lockups always perform worse than liquid investments',
+        'The lockup could prevent access to capital exactly when the client needs it; the liquidity premium compensates for illiquidity in general over a long horizon, not for a specific, known, near-term cash need',
+        'This client should never invest in any alternative asset under any circumstance',
+        'The fund\'s expected return becomes irrelevant to every client in every situation'
+      ], correctAnswer: 'The lockup could prevent access to capital exactly when the client needs it; the liquidity premium compensates for illiquidity in general over a long horizon, not for a specific, known, near-term cash need',
+      hint: 'Think about what a liquidity premium actually compensates for, versus what this specific client needs.',
+      approach: 'Match investment liquidity terms to the client\'s actual liquidity needs and time horizon.',
+      solution: 'A liquidity premium rewards investors, on average, over a long horizon — it does not solve a specific, known, near-term cash need, which a multi-year lockup can turn into a genuine access problem rather than a mere inconvenience.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating an attractive expected return as sufficient justification regardless of a client\'s actual liquidity needs.',
+      tags: ['liquidity-premium', 'suitability']
+    },
+
+    /* ---------------------- Stock buybacks ---------------------- */
+    {
+      id: 'ib_b068', topic: 'Equity & Capital Markets', subtopic: 'Stock buybacks', difficulty: 2, targetTime: 60,
+      prompt: 'A company has $90m of net income and 45m shares outstanding (EPS $2.00). It spends $120m buying back shares at $30 each, with net income unchanged. What is the new EPS?',
+      answerType: 'numeric', correctAnswer: 2.20, tolerance: 0.02,
+      hint: 'Shares repurchased = dollars spent / price per share. New EPS = net income / remaining shares.',
+      approach: 'Repurchased shares = 120/30 = 4m. Remaining shares = 45−4 = 41m. New EPS = 90/41.',
+      solution: 'Shares repurchased = 120/30 = 4m, leaving 45−4 = 41m shares. New EPS = 90/41 ≈ $2.20, up from $2.00 purely from the shrinking share count.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to first compute how many shares were actually repurchased from the dollar amount spent.',
+      tags: ['buybacks', 'eps']
+    },
+    {
+      id: 'ib_b069', topic: 'Equity & Capital Markets', subtopic: 'Stock buybacks', difficulty: 2, targetTime: 60,
+      prompt: 'An analyst notices a company\'s EPS grew 10% year-over-year, but net income was completely flat. What is the most likely explanation, and what does it imply?',
+      answerType: 'mc', options: [
+        'The tax rate must have fallen to zero, explaining the EPS growth',
+        'A share buyback likely shrank the share count, mechanically raising EPS with no real underlying earnings growth — this should not be read as improving business fundamentals',
+        'This combination is mathematically impossible and indicates an error',
+        'Depreciation must have increased substantially'
+      ], correctAnswer: 'A share buyback likely shrank the share count, mechanically raising EPS with no real underlying earnings growth — this should not be read as improving business fundamentals',
+      hint: 'EPS = net income / shares — if net income is flat but EPS rose, what must have changed?',
+      approach: 'Flat net income with rising EPS is the classic fingerprint of a shrinking share count from a buyback.',
+      solution: 'Since EPS = net income / shares outstanding, flat net income paired with rising EPS points directly to a shrinking share count (most likely from a buyback), not genuine business growth.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any EPS growth reflects real improvement in the underlying business.',
+      tags: ['buybacks', 'eps']
+    },
+    {
+      id: 'ib_b070', topic: 'Equity & Capital Markets', subtopic: 'Stock buybacks', difficulty: 3, targetTime: 90,
+      prompt: 'A mature company with slowing growth borrows heavily specifically to fund an aggressive buyback program that boosts EPS with no change to operating performance. What is the strongest criticism of this strategy?',
+      answerType: 'mc', options: [
+        'Buybacks are illegal when funded with debt',
+        'The EPS growth is financial engineering rather than real earnings growth, and the new debt raises the company\'s leverage and financial risk purely to produce a cosmetic per-share metric improvement',
+        'Buybacks funded with debt always immediately bankrupt the company',
+        'There is no valid criticism — debt-funded buybacks carry no distinct risk versus cash-funded ones'
+      ], correctAnswer: 'The EPS growth is financial engineering rather than real earnings growth, and the new debt raises the company\'s leverage and financial risk purely to produce a cosmetic per-share metric improvement',
+      hint: 'Consider both the source of the EPS growth and the balance-sheet consequence of borrowing to fund it.',
+      approach: 'Distinguish real earnings growth from share-count-driven EPS growth, and note the added leverage risk from debt funding.',
+      solution: 'The EPS increase comes purely from a shrinking share count, not real earnings growth, while the new debt increases financial leverage and risk — a combination that is a legitimate point of scrutiny, especially for a company with limited genuine growth opportunities to invest in instead.',
+      recognitionTechnique: 'Other', commonTrap: 'Evaluating the EPS improvement in isolation without considering how it was financed or where the improvement actually came from.',
+      tags: ['buybacks', 'leverage']
     }
   ];
 

@@ -458,5 +458,39 @@
     }
   });
 
+  add({
+    id: 'ib_beta_relever', topic: 'Equity & Capital Markets', subtopic: 'Beta and cost of equity', difficulty: 4, targetTime: 120,
+    build(r) {
+      const betaL = r.pick([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]);
+      const deRatio = r.pick([0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0]);
+      const tax = r.pick([0.20, 0.25, 0.30]);
+      const mode = r.pick(['unlever', 'relever']);
+      if (mode === 'unlever') {
+        const denom = round(1 + (1 - tax) * deRatio, 4);
+        const betaU = round(betaL / denom, 3);
+        return {
+          prompt: `A company has a levered (observed) beta of ${betaL}, a debt-to-equity ratio of ${deRatio}, and faces a ${round(tax * 100, 0)}% tax rate. Using the Hamada equation, what is its UNLEVERED beta (to 3 decimals)?`,
+          answerType: 'numeric', correctAnswer: betaU, tolerance: 0.01,
+          hint: 'Unlever: βu = βl / [1 + (1−t)(D/E)]. Compute the bracket term first.',
+          approach: 'βu = βl / [1 + (1−t) × (D/E)].',
+          solution: `Bracket = 1 + (1−${round(tax * 100, 0)}%)×${deRatio} = 1 + ${round((1 - tax) * deRatio, 4)} = ${denom}. βu = ${betaL} / ${denom} = ${betaU}.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Multiplying by the bracket term instead of dividing by it when UNLEVERING (multiplying is for relevering, which goes the other direction).',
+          tags: ['beta', 'hamada']
+        };
+      }
+      const factor = round(1 + (1 - tax) * deRatio, 4);
+      const betaRelevered = round(betaL * factor, 3);
+      return {
+        prompt: `A peer group's average UNLEVERED beta is ${betaL}. The target company itself has a debt-to-equity ratio of ${deRatio} and faces a ${round(tax * 100, 0)}% tax rate. Using the Hamada equation, what is the target's RELEVERED beta (to 3 decimals)?`,
+        answerType: 'numeric', correctAnswer: betaRelevered, tolerance: 0.01,
+        hint: 'Relever: βl = βu × [1 + (1−t)(D/E)], using the TARGET\'s own D/E.',
+        approach: 'βl = βu × [1 + (1−t) × (D/E)].',
+        solution: `Bracket = 1 + (1−${round(tax * 100, 0)}%)×${deRatio} = 1 + ${round((1 - tax) * deRatio, 4)} = ${factor}. βl = ${betaL} × ${factor} = ${betaRelevered}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Using a peer\'s D/E instead of the target\'s own D/E when relevering, or dividing instead of multiplying (dividing is for unlevering, which goes the other direction).',
+        tags: ['beta', 'hamada']
+      };
+    }
+  });
+
   global.QTL_GEN_IB = G;
 })(window);
