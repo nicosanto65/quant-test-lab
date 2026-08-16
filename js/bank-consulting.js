@@ -490,6 +490,310 @@
     }
   );
 
+  /* ---------------------------- BUSINESS FRAMEWORKS ---------------------------- */
+  items.push(
+    {
+      id: 'con_b034', topic: 'Business Frameworks', subtopic: 'Profit Equation', difficulty: 2, targetTime: 75,
+      prompt: 'Under the Profit Equation framework, the Revenue branch is typically split into which two top-level sub-drivers?',
+      answerType: 'mc', options: ['Volume and Price', 'Fixed and Variable', 'COGS and SG&A', 'Domestic and International'], correctAnswer: 'Volume and Price',
+      hint: 'Revenue is Volume multiplied by Price — the sub-driver menu splits it into exactly these two factors.',
+      approach: 'The Profit Equation framework proactively lists the standard sub-drivers under Revenue and Costs before any data is shared.',
+      solution: 'Revenue = Volume × Price, so the standard sub-driver menu splits Revenue into Volume (further: new vs. existing customers) and Price (list price, discounting, product mix). Fixed/Variable and COGS/SG&A are Cost-side splits, not Revenue-side.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing the Cost-side sub-driver menu (Fixed/Variable, COGS/SG&A) with the Revenue-side menu (Volume, Price).',
+      tags: ['frameworks', 'profit-equation']
+    },
+    {
+      id: 'con_b035', topic: 'Business Frameworks', subtopic: 'Profit Equation', difficulty: 3, targetTime: 90,
+      prompt: 'A candidate is told membership volume at a gym chain is flat, but revenue still fell. Using the Price sub-driver menu, which of the following is NOT one of the specific checks the candidate should propose?',
+      answerType: 'mc', options: [
+        'Did the list price change?',
+        'Did average discounting or promotional activity increase?',
+        'Did the mix of membership tiers shift toward cheaper tiers even with total volume flat?',
+        'Did the number of gym locations change?'
+      ], correctAnswer: 'Did the number of gym locations change?',
+      hint: 'The Price sub-driver menu narrows specifically into list price, discounting, and product mix — not physical footprint.',
+      approach: 'With Volume ruled out, Revenue = Volume × Price means the cause must sit in Price, and the sub-driver menu (list price, discounting, mix) narrows this further into specific checkable pieces.',
+      solution: 'List price, discounting, and mix shift are all specific sub-drivers of the Price branch. The number of gym locations is a capacity/footprint question, not one of the Price sub-drivers, and would not directly explain a revenue decline with volume already confirmed flat.',
+      recognitionTechnique: 'Other', commonTrap: 'Reaching for a plausible-sounding business detail (location count) that does not actually belong to the specific sub-driver menu implied by the branch already ruled relevant (Price).',
+      tags: ['frameworks', 'profit-equation']
+    },
+    {
+      id: 'con_b036', topic: 'Business Frameworks', subtopic: 'Profit Equation', difficulty: 2, targetTime: 75,
+      prompt: 'Which Cost-side split separates costs directly tied to producing/delivering the product from the general overhead of running the business?',
+      answerType: 'mc', options: ['Fixed vs. Variable', 'COGS vs. SG&A', 'New vs. Existing customers', 'Price vs. Promotion'], correctAnswer: 'COGS vs. SG&A',
+      hint: 'One of these cost splits is about what the cost IS FOR, not whether it scales with volume.',
+      approach: 'COGS (cost of goods sold) ties directly to production/delivery; SG&A (selling, general & administrative) is the overhead of running the business itself.',
+      solution: 'COGS vs. SG&A separates production/delivery costs from business overhead — a distinction Fixed vs. Variable (which is about whether a cost scales with volume) does not capture on its own.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating Fixed/Variable and COGS/SG&A as interchangeable splits, when they classify costs along two different, non-overlapping dimensions.',
+      tags: ['frameworks', 'profit-equation']
+    },
+    {
+      id: 'con_b037', topic: 'Business Frameworks', subtopic: 'Five Forces', difficulty: 2, targetTime: 75,
+      prompt: 'Which of Porter\'s Five Forces is directly weakened when a customer segment could easily satisfy the same underlying need with a completely different type of product (e.g. video calling instead of business travel)?',
+      answerType: 'mc', options: ['Threat of new entrants', 'Bargaining power of suppliers', 'Threat of substitutes', 'Rivalry among existing competitors'], correctAnswer: 'Threat of substitutes',
+      hint: 'A different product category meeting the same underlying need is the definition of this specific force.',
+      approach: 'Substitutes cap industry pricing power by offering an alternate way to meet the same customer need, without being a direct, same-category competitor.',
+      solution: 'A strong substitute (a different product category meeting the same need) directly increases the "threat of substitutes" force, capping how much the industry can charge before customers simply switch to the substitute.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing threat of substitutes with rivalry among existing competitors, which is about direct, same-category competitors rather than a different type of product entirely.',
+      tags: ['frameworks', 'five-forces']
+    },
+    {
+      id: 'con_b038', topic: 'Business Frameworks', subtopic: 'Five Forces', difficulty: 3, targetTime: 90,
+      prompt: 'An industry has low, stagnant growth and high exit barriers (expensive, specialized equipment that cannot be repurposed). What effect does this combination tend to have on rivalry among existing competitors?',
+      answerType: 'mc', options: [
+        'It intensifies rivalry, since firms are stuck competing over a fixed or shrinking pie rather than able to exit',
+        'It reduces rivalry, since firms have less incentive to compete',
+        'It has no effect on rivalry at all',
+        'It eliminates the threat of new entrants entirely'
+      ], correctAnswer: 'It intensifies rivalry, since firms are stuck competing over a fixed or shrinking pie rather than able to exit',
+      hint: 'Firms that cannot easily leave an industry, in a market that is not growing, are forced to fight over the same limited demand.',
+      approach: 'Slow growth removes the option to grow alongside the market; high exit barriers remove the option to leave — both push firms toward fighting harder over existing share.',
+      solution: 'Slow growth forces firms to compete for share rather than growing alongside an expanding market, and high exit barriers keep unprofitable competitors in the fight rather than exiting, both of which intensify rivalry among existing competitors.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming exit barriers and growth rate only affect a firm\'s own individual decisions, rather than recognizing their combined effect on the whole industry\'s competitive intensity.',
+      tags: ['frameworks', 'five-forces']
+    },
+    {
+      id: 'con_b039', topic: 'Business Frameworks', subtopic: 'Five Forces', difficulty: 3, targetTime: 90,
+      prompt: 'A firm underperforms its own historical profitability, but so does every other competitor in its industry, across several years. What does the Five Forces framework suggest is the most likely explanation?',
+      answerType: 'mc', options: [
+        'This firm\'s management must be uniquely incompetent',
+        'A structural, industry-wide shift in one or more of the five forces is likely squeezing every competitor, not just this one firm',
+        'This pattern is impossible and must reflect a data error',
+        'The five forces framework cannot explain industry-wide profitability trends'
+      ], correctAnswer: 'A structural, industry-wide shift in one or more of the five forces is likely squeezing every competitor, not just this one firm',
+      hint: 'When an entire industry underperforms at once, look for a cause that affects the whole industry, not just one firm.',
+      approach: 'Five Forces is a structural, industry-level lens — a pattern affecting every competitor simultaneously points to a structural cause rather than individual firm-level failure.',
+      solution: 'When an entire industry underperforms simultaneously, a structural, industry-level cause (e.g. new low-cost entrants, or a strong emerging substitute) is far more plausible than every individual competitor independently mismanaging their own strategy at the same time.',
+      recognitionTechnique: 'Other', commonTrap: 'Diagnosing an industry-wide profitability decline as a firm-specific management failure, missing the structural, industry-level pattern.',
+      tags: ['frameworks', 'five-forces']
+    },
+    {
+      id: 'con_b040', topic: 'Business Frameworks', subtopic: '3 C\'s', difficulty: 1, targetTime: 60,
+      prompt: 'What do the "3 C\'s" in the case-interview situational framework stand for?',
+      answerType: 'mc', options: ['Company, Customers, Competitors', 'Cost, Capital, Cash flow', 'Clarify, Construct, Conclude', 'Channels, Context, Cost'], correctAnswer: 'Company, Customers, Competitors',
+      hint: 'This framework scans a business situation from three angles: internal, demand-side, and rival-side.',
+      approach: 'The 3 C\'s is a fast, qualitative situational scan used to orient thinking early in a case.',
+      solution: 'The 3 C\'s stand for Company (internal position), Customers (demand side), and Competitors (rival firms) — a fast qualitative first-pass scan of a business situation.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing the 3 C\'s with the 4 P\'s or with the common "4th C" extensions (Channels, Context/Cost).',
+      tags: ['frameworks', '3cs']
+    },
+    {
+      id: 'con_b041', topic: 'Business Frameworks', subtopic: '3 C\'s', difficulty: 2, targetTime: 75,
+      prompt: 'Why is the 3 C\'s framework often especially useful very early in an OPEN-ENDED case, before the interviewer has shared much specific data?',
+      answerType: 'mc', options: [
+        'It requires extensive financial data to apply',
+        'It is a fast, qualitative scan that works even before detailed data is available, making it useful for generating early clarifying questions',
+        'It is only usable at the very end of a case',
+        'It automatically replaces the need for any further analysis'
+      ], correctAnswer: 'It is a fast, qualitative scan that works even before detailed data is available, making it useful for generating early clarifying questions',
+      hint: 'Think about what tool works when almost nothing specific is known yet about the situation.',
+      approach: 'A detailed, quantitative framework needs data to hang on its branches; a qualitative scan does not.',
+      solution: 'Because the 3 C\'s does not depend on detailed data, it can generate broadly relevant clarifying questions ("what does the client\'s business look like? who are the customers? who are the competitors?") right from the start of Clarify, before a more data-dependent framework could usefully be applied.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming every useful framework requires data to be shared first, missing the specific value of a qualitative first-pass tool.',
+      tags: ['frameworks', '3cs']
+    },
+    {
+      id: 'con_b042', topic: 'Business Frameworks', subtopic: '3 C\'s', difficulty: 2, targetTime: 75,
+      prompt: 'A candidate uses only the 3 C\'s scan for an ENTIRE case, even after detailed financial data becomes available midway through. What is the main risk of this approach?',
+      answerType: 'mc', options: [
+        'There is no risk — the 3 C\'s is always sufficient on its own',
+        'The analysis stays too shallow, since the 3 C\'s is a qualitative first pass, not a precise diagnostic tool suited to detailed, data-driven analysis',
+        'The 3 C\'s framework becomes mathematically invalid once data is available',
+        'This guarantees the strongest possible case performance'
+      ], correctAnswer: 'The analysis stays too shallow, since the 3 C\'s is a qualitative first pass, not a precise diagnostic tool suited to detailed, data-driven analysis',
+      hint: 'A tool built for a fast qualitative scan is not the same as a tool built for precise, data-driven diagnosis.',
+      approach: 'The 3 C\'s trades precision for speed and breadth — appropriate early, but not as the sole tool once real data is available.',
+      solution: 'Once real data is available, sticking with a deliberately broad, qualitative scan instead of transitioning to a sharper, more quantitative framework (like a profitability tree or Five Forces) leaves the analysis shallower than it should be.',
+      recognitionTechnique: 'Other', commonTrap: 'Never transitioning from an appropriate early-case tool (3 C\'s) to a more precise, data-driven framework once the case actually provides data to analyze.',
+      tags: ['frameworks', '3cs']
+    },
+    {
+      id: 'con_b043', topic: 'Business Frameworks', subtopic: '4 P\'s', difficulty: 1, targetTime: 60,
+      prompt: 'What do the 4 P\'s (Product, Price, Promotion, Placement) framework primarily structure?',
+      answerType: 'mc', options: [
+        'The tactical decisions involved in bringing a product to market',
+        'A company\'s internal organizational alignment',
+        'An industry\'s overall structural attractiveness',
+        'A portfolio of business units by growth and share'
+      ], correctAnswer: 'The tactical decisions involved in bringing a product to market',
+      hint: 'This framework operates at a more granular, execution-focused level than a broad strategic or industry framework.',
+      approach: 'The 4 P\'s addresses the specific go-to-market mix: what is sold, at what price, how demand is generated, and through which channels.',
+      solution: 'The 4 P\'s structures the tactical go-to-market mix (Product, Price, Promotion, Placement), distinct from broader strategic tools like Five Forces (industry structure) or 7S (organizational alignment).',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing the 4 P\'s tactical go-to-market focus with a broader strategic or organizational framework.',
+      tags: ['frameworks', '4ps']
+    },
+    {
+      id: 'con_b044', topic: 'Business Frameworks', subtopic: '4 P\'s', difficulty: 2, targetTime: 75,
+      prompt: 'A well-reviewed product with competitive pricing and active advertising still sells poorly because it is only stocked in a handful of stores far from where target customers actually shop. Which P is the isolated weak link?',
+      answerType: 'mc', options: ['Product', 'Price', 'Promotion', 'Placement'], correctAnswer: 'Placement',
+      hint: 'Product, Price, and Promotion are all functioning well in this scenario — the gap is in how the product actually reaches customers.',
+      approach: 'The 4 P\'s lets a candidate rule three P\'s in as functioning well and isolate the one genuine weak link.',
+      solution: 'Product quality, pricing, and promotion are all confirmed to be working — the specific gap is Placement, the channels through which the product physically reaches its target customers.',
+      recognitionTechnique: 'Other', commonTrap: 'Diagnosing a vague "go-to-market problem" without isolating which specific P is actually responsible.',
+      tags: ['frameworks', '4ps']
+    },
+    {
+      id: 'con_b045', topic: 'Business Frameworks', subtopic: '4 P\'s', difficulty: 2, targetTime: 75,
+      prompt: 'A B2B software company has a strong product, competitive price, and good distribution, but potential customers report never having heard of it before a sales rep contacted them directly. Which P is the weak link?',
+      answerType: 'mc', options: ['Product', 'Price', 'Promotion', 'Placement'], correctAnswer: 'Promotion',
+      hint: 'The issue is a lack of inbound awareness before any direct sales contact — think about which P covers demand generation and communication.',
+      approach: 'Promotion covers how customers learn about and are persuaded to buy the product, distinct from how it is distributed (Placement).',
+      solution: 'No inbound awareness (advertising, content marketing, PR) building demand ahead of direct sales contact points specifically to a Promotion gap, not a Placement, Price, or Product issue, all three of which are already confirmed strong.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing lack of awareness (a Promotion issue) with a distribution/access issue (Placement).',
+      tags: ['frameworks', '4ps']
+    },
+    {
+      id: 'con_b046', topic: 'Business Frameworks', subtopic: 'Value Chain', difficulty: 1, targetTime: 60,
+      prompt: 'In the simplified value chain, which stage comes immediately after "Operations"?',
+      answerType: 'mc', options: ['Inbound Logistics', 'Outbound Logistics', 'Marketing & Sales', 'Service'], correctAnswer: 'Outbound Logistics',
+      hint: 'The chain runs from receiving inputs, through transforming them, to getting the finished product out.',
+      approach: 'Simplified value chain: Inbound Logistics → Operations → Outbound Logistics → Marketing & Sales → Service.',
+      solution: 'After Operations (transforming inputs into the finished product), the next stage is Outbound Logistics — getting the finished product to the point of sale or delivery.',
+      recognitionTechnique: 'Other', commonTrap: 'Reversing the order of Outbound Logistics and Marketing & Sales in the sequence.',
+      tags: ['frameworks', 'value-chain']
+    },
+    {
+      id: 'con_b047', topic: 'Business Frameworks', subtopic: 'Value Chain', difficulty: 3, targetTime: 90,
+      prompt: 'A manufacturer\'s cost problem is not found in any of the five primary value-chain activities when checked individually, but stems from uncoordinated, decentralized purchasing across the whole company, missing volume-discount leverage. Which category does this issue belong to?',
+      answerType: 'mc', options: [
+        'Outbound Logistics, since purchasing involves moving goods',
+        'The Procurement support activity, which cuts across all primary activities',
+        'Marketing & Sales, since purchasing affects final pricing',
+        'This scenario cannot occur under the value chain framework'
+      ], correctAnswer: 'The Procurement support activity, which cuts across all primary activities',
+      hint: 'This issue does not sit inside any single sequential stage — it cuts across all of them at once.',
+      approach: 'The Porter-style value chain adds four cross-cutting support activities (Firm Infrastructure, HR Management, Technology Development, Procurement) alongside the five primary activities.',
+      solution: 'Uncoordinated purchasing across the whole company is a Procurement issue — a support activity that cuts across every primary activity, which is exactly why it can be the source of a cost problem even when every individual primary activity looks fine on its own.',
+      recognitionTechnique: 'Other', commonTrap: 'Only checking the five primary activities and concluding no issue exists, missing that a cross-cutting support activity can still be the actual source.',
+      tags: ['frameworks', 'value-chain']
+    },
+    {
+      id: 'con_b048', topic: 'Business Frameworks', subtopic: 'Value Chain', difficulty: 2, targetTime: 75,
+      prompt: 'Customer complaints center specifically on slow post-purchase issue resolution and returns handling, not on product quality or availability. Which value-chain stage does this point to?',
+      answerType: 'mc', options: ['Inbound Logistics', 'Operations', 'Service', 'Firm Infrastructure'], correctAnswer: 'Service',
+      hint: 'Post-purchase support and issue resolution fall under the final stage of the primary activities.',
+      approach: 'Walking the chain stage by stage narrows a vague complaint pattern down to the specific stage actually responsible.',
+      solution: 'Post-purchase support and returns handling fall under the Service stage of the primary activities, distinct from Operations (production) or Inbound Logistics (receiving inputs).',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing a post-purchase support issue (Service) with a product-quality issue (Operations).',
+      tags: ['frameworks', 'value-chain']
+    },
+    {
+      id: 'con_b049', topic: 'Business Frameworks', subtopic: 'BCG Matrix', difficulty: 1, targetTime: 60,
+      prompt: 'In the BCG Growth-Share Matrix, a business unit with LOW market growth and HIGH relative market share is classified as a:', answerType: 'mc',
+      options: ['Star', 'Question Mark', 'Cash Cow', 'Dog'], correctAnswer: 'Cash Cow',
+      hint: 'This quadrant describes a mature, dominant business that no longer needs heavy reinvestment to maintain its position.',
+      approach: 'BCG quadrants: high growth/high share = Star; high growth/low share = Question Mark; low growth/high share = Cash Cow; low growth/low share = Dog.',
+      solution: 'Low growth combined with high relative market share is the Cash Cow quadrant — a mature, dominant business generating more cash than it needs to maintain its position.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing Cash Cow (low growth, high share) with Star (high growth, high share) — both involve high share, but differ on growth.',
+      tags: ['frameworks', 'bcg']
+    },
+    {
+      id: 'con_b050', topic: 'Business Frameworks', subtopic: 'BCG Matrix', difficulty: 2, targetTime: 75,
+      prompt: 'A business unit sits in a high-growth market but holds only a distant #4 market share position behind three larger competitors. Which BCG quadrant is this, and what is the central strategic question it raises?',
+      answerType: 'mc', options: [
+        'Cash Cow — whether to maintain its dominant position',
+        'Question Mark — whether further investment could realistically win a leading position, or whether to divest instead',
+        'Dog — whether to wind it down immediately with no further consideration',
+        'Star — how best to defend its already-dominant position'
+      ], correctAnswer: 'Question Mark — whether further investment could realistically win a leading position, or whether to divest instead',
+      hint: 'High growth but low relative share is a distinct quadrant from both Star and Dog.',
+      approach: 'Question Marks sit in attractive, fast-growing markets without yet having won a leading position.',
+      solution: 'High growth combined with low relative share is the Question Mark quadrant, and the open strategic question is precisely whether investment could realistically build a leading position, or whether the unit should be divested instead.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any business unit in a high-growth market is automatically a Star, without checking its relative market share.',
+      tags: ['frameworks', 'bcg']
+    },
+    {
+      id: 'con_b051', topic: 'Business Frameworks', subtopic: 'BCG Matrix', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a Star, despite strong revenue and leading market share, often still require significant continued cash investment rather than being a pure source of surplus cash like a Cash Cow?',
+      answerType: 'mc', options: [
+        'Stars never actually require any investment',
+        'A Star sits in a still-growing market, so maintaining and defending its leading position typically requires continued spending on capacity, R&D, or marketing to keep pace with that growth',
+        'Stars always have negative revenue',
+        'This is only true for technology companies'
+      ], correctAnswer: 'A Star sits in a still-growing market, so maintaining and defending its leading position typically requires continued spending on capacity, R&D, or marketing to keep pace with that growth',
+      hint: 'The key difference from a Cash Cow is whether the underlying market is still expanding.',
+      approach: 'A Star\'s market is still growing, unlike a Cash Cow\'s mature, no-longer-growing market.',
+      solution: 'Because the market is still growing, defending a leading position usually requires continued investment (capacity, R&D, marketing) to keep pace — unlike a Cash Cow, whose mature, flat market requires little further investment to maintain its position.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming high market share alone (regardless of growth rate) implies a business unit generates pure surplus cash.',
+      tags: ['frameworks', 'bcg']
+    },
+    {
+      id: 'con_b052', topic: 'Business Frameworks', subtopic: 'Ansoff Matrix', difficulty: 1, targetTime: 60,
+      prompt: 'Under Ansoff\'s Matrix, which growth strategy (existing product, existing market) is generally considered the LOWEST-risk?',
+      answerType: 'mc', options: ['Market Penetration', 'Product Development', 'Market Development', 'Diversification'], correctAnswer: 'Market Penetration',
+      hint: 'This strategy requires no new product development and no unfamiliar market.',
+      approach: 'Ansoff classifies growth strategies by product (existing/new) × market (existing/new).',
+      solution: 'Market Penetration (existing product, existing market) requires no new product development and no unfamiliar market, making it the lowest-risk of the four Ansoff strategies.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing Market Penetration with Market Development, which involves an existing product but a NEW, unfamiliar market.',
+      tags: ['frameworks', 'ansoff']
+    },
+    {
+      id: 'con_b053', topic: 'Business Frameworks', subtopic: 'Ansoff Matrix', difficulty: 2, targetTime: 75,
+      prompt: 'A coffee chain sells its existing, unchanged café format and menu in a brand-new international market it has never entered before. Which Ansoff strategy is this?',
+      answerType: 'mc', options: ['Market Penetration', 'Product Development', 'Market Development', 'Diversification'], correctAnswer: 'Market Development',
+      hint: 'The product is unchanged; only the market is new.',
+      approach: 'Existing product combined with a new market is Market Development.',
+      solution: 'Existing product, new market is Market Development — moderate risk concentrated in market/cultural unfamiliarity, since the product itself is already proven domestically.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing Market Development (existing product, new market) with Product Development (new product, existing market) — the two moderate-risk quadrants are easy to mix up.',
+      tags: ['frameworks', 'ansoff']
+    },
+    {
+      id: 'con_b054', topic: 'Business Frameworks', subtopic: 'Ansoff Matrix', difficulty: 3, targetTime: 90,
+      prompt: 'Why is Diversification (new product, new market) considered the HIGHEST-risk of the four Ansoff strategies, rather than merely "somewhat riskier" than the other three?',
+      answerType: 'mc', options: [
+        'It is not actually the highest-risk strategy',
+        'It compounds two fully independent sources of uncertainty simultaneously — an unproven product AND an unfamiliar market — whereas the other three quadrants each introduce at most one new source of uncertainty',
+        'Diversification always fails, with no exceptions',
+        'Risk level has nothing to do with how many things are new at once'
+      ], correctAnswer: 'It compounds two fully independent sources of uncertainty simultaneously — an unproven product AND an unfamiliar market — whereas the other three quadrants each introduce at most one new source of uncertainty',
+      hint: 'Compare how many things are genuinely unknown at once in each quadrant.',
+      approach: 'Product Development and Market Development each hold one side of the equation familiar and proven; Diversification has neither anchor.',
+      solution: 'Product Development and Market Development each keep one side (product or market) familiar and proven, while Diversification stacks both sources of uncertainty at once, with no familiar anchor on either side.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating all four Ansoff quadrants as roughly equally risky simply because they are all labeled "growth strategies."',
+      tags: ['frameworks', 'ansoff']
+    },
+    {
+      id: 'con_b055', topic: 'Business Frameworks', subtopic: '7S / Fallbacks', difficulty: 2, targetTime: 75,
+      prompt: 'In the McKinsey 7S framework, which element sits at the CENTER of the classic diagram, influencing all the others?',
+      answerType: 'mc', options: ['Strategy', 'Shared Values', 'Systems', 'Structure'], correctAnswer: 'Shared Values',
+      hint: 'This is one of the four "soft" elements, and it is positioned as the core the other six elements surround.',
+      approach: 'McKinsey 7S splits into 3 "hard" elements (Strategy, Structure, Systems) and 4 "soft" elements (Shared Values, Skills, Staff, Style).',
+      solution: 'Shared Values (the core culture and beliefs) sits at the center of the classic 7S diagram, positioned as influencing all six other elements.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming Strategy, as the most commonly discussed element, must be the one at the center of the diagram.',
+      tags: ['frameworks', '7s']
+    },
+    {
+      id: 'con_b056', topic: 'Business Frameworks', subtopic: '7S / Fallbacks', difficulty: 2, targetTime: 75,
+      prompt: 'A retailer\'s new strategy emphasizes exceptional in-store customer service, but its sales-staff rewards system pays commission purely on total sales volume, with nothing tied to customer satisfaction. What does this illustrate?',
+      answerType: 'mc', options: [
+        'A pricing error unrelated to organizational alignment',
+        'A misalignment between the Rewards (or Systems) element and the stated Strategy, a common cause of failed initiatives',
+        'An industry structural weakness best addressed with Five Forces',
+        'A market-sizing error'
+      ], correctAnswer: 'A misalignment between the Rewards (or Systems) element and the stated Strategy, a common cause of failed initiatives',
+      hint: 'Staff respond to the incentives they actually operate under, not to what the strategy document says.',
+      approach: 'The Star Diagram\'s Rewards point (or 7S\'s Systems element) can pull against the stated Strategy if incentives are not aligned with it.',
+      solution: 'Employees respond to the actual incentives they operate under day to day — a rewards system that incentivizes pure sales volume works against a strategy emphasizing service quality, exactly the kind of misalignment 7S/the Star Diagram is designed to surface.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a well-designed strategy will succeed regardless of whether the surrounding incentive systems actually support it.',
+      tags: ['frameworks', '7s', 'star-diagram']
+    },
+    {
+      id: 'con_b057', topic: 'Business Frameworks', subtopic: '7S / Fallbacks', difficulty: 2, targetTime: 75,
+      prompt: 'When should SWOT or Cost-Benefit Analysis generally be used as the framework of choice for a case?',
+      answerType: 'mc', options: [
+        'As the first choice for every single case, regardless of type',
+        'As a fallback, specifically when no more tailored, specific framework (like Five Forces or a profitability tree) clearly fits the situation',
+        'Never — these frameworks should never be used in a case interview',
+        'Only for cases explicitly about nonprofit organizations'
+      ], correctAnswer: 'As a fallback, specifically when no more tailored, specific framework (like Five Forces or a profitability tree) clearly fits the situation',
+      hint: 'These two frameworks are intentionally general-purpose, which is exactly what makes them useful as a specific kind of tool.',
+      approach: 'SWOT and Cost-Benefit are less diagnostic than a tailored framework, which is why they are positioned as fallbacks rather than first choices.',
+      solution: 'SWOT and Cost-Benefit are intentionally general-purpose and less diagnostic than a tailored framework, making them most appropriate specifically when nothing more specific applies — not as the default first choice for every case.',
+      recognitionTechnique: 'Other', commonTrap: 'Reaching for SWOT or Cost-Benefit as the first-choice framework even when a more specific, better-fitting framework (like Five Forces) clearly applies to the situation.',
+      tags: ['frameworks', 'swot', 'cost-benefit']
+    }
+  );
+
   items.forEach((q) => { q.track = 'consulting'; });
   global.QTL_BANK.addMany(items);
 })(window);
