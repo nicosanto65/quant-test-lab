@@ -421,6 +421,193 @@
       solution: 'Exit EV = 91×8 = $728m. Exit equity = 728−160 = $568m.',
       recognitionTechnique: 'Direct calculation', commonTrap: 'Using the entry multiple or entry EBITDA instead of the exit figures — exit equity value must be built entirely from exit-year numbers.',
       tags: ['lbo', 'returns']
+    },
+
+    /* ---------------------- GOODWILL & PURCHASE ACCOUNTING ---------------------- */
+    {
+      id: 'ib_b041', topic: 'M&A Mechanics', subtopic: 'Purchase accounting', difficulty: 3, targetTime: 90,
+      prompt: 'An acquirer pays $650m for a target. Fair-value identifiable assets are $580m and assumed liabilities are $90m. How much goodwill is created, in $ millions?',
+      answerType: 'numeric', correctAnswer: 160, tolerance: 1,
+      hint: 'Net the identifiable assets against liabilities first, then compare to purchase price.',
+      approach: 'Goodwill = Purchase price − (Fair value identifiable assets − liabilities assumed).',
+      solution: 'Net identifiable assets = 580 − 90 = $490m. Goodwill = 650 − 490 = $160m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to subtract the assumed liabilities before comparing identifiable assets to the purchase price.',
+      tags: ['goodwill']
+    },
+    {
+      id: 'ib_b042', topic: 'M&A Mechanics', subtopic: 'Purchase accounting', difficulty: 2, targetTime: 60,
+      prompt: 'A company records a $25m goodwill impairment charge (non-cash, no tax benefit assumed). What is the DIRECT, immediate effect on cash?',
+      answerType: 'mc', options: ['Cash falls by $25m', 'Cash rises by $25m', 'Cash is unaffected'], correctAnswer: 'Cash is unaffected',
+      hint: 'The cash for the original purchase was already spent when the acquisition closed.',
+      approach: 'Goodwill impairment is a non-cash re-assessment of an already-spent purchase price, just like a depreciation write-down.',
+      solution: 'The impairment reduces net income and the goodwill asset on the balance sheet, but no new cash leaves the company at the moment it is recorded — cash is unaffected.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any charge that reduces net income must also reduce cash immediately.',
+      tags: ['goodwill', 'impairment']
+    },
+    {
+      id: 'ib_b043', topic: 'M&A Mechanics', subtopic: 'Purchase accounting', difficulty: 3, targetTime: 75,
+      prompt: 'Why does goodwill typically arise in an acquisition, rather than the purchase price simply equaling the fair value of the target\'s identifiable assets and liabilities?',
+      answerType: 'mc', options: [
+        'Because acquirers always overpay by mistake',
+        'Because the acquirer is paying for the whole functioning business, including brand, workforce, customer relationships and expected synergies — none of which are individually identifiable assets on their own',
+        'Because goodwill is required by law in every deal regardless of price',
+        'Because fair value is always lower than book value'
+      ], correctAnswer: 'Because the acquirer is paying for the whole functioning business, including brand, workforce, customer relationships and expected synergies — none of which are individually identifiable assets on their own',
+      hint: 'Think about what value exists in a business beyond its individually identifiable, separately-sellable assets.',
+      approach: 'Goodwill captures the value of everything paid for beyond individually identifiable net assets.',
+      solution: 'A functioning business is worth more than the sum of its individually identifiable parts — the acquirer is also paying for brand, workforce, customer relationships and expected synergies, none of which can be separately valued as an identifiable asset, so this excess shows up as goodwill.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming goodwill signals a mistake or overpayment rather than a normal, expected feature of most acquisitions.',
+      tags: ['goodwill']
+    },
+
+    /* ---------------------- NET WORKING CAPITAL ---------------------- */
+    {
+      id: 'ib_b044', topic: 'Accounting Flows', subtopic: 'Working capital flow-through', difficulty: 3, targetTime: 90,
+      prompt: 'This quarter, receivables rise $9m, inventory rises $4m, and payables rise $6m. What is the impact on free cash flow, in $ millions?',
+      answerType: 'numeric', correctAnswer: -7, tolerance: 0.2,
+      hint: 'Rising assets use cash; rising liabilities free up cash.',
+      approach: 'ΔNWC = ΔReceivables + ΔInventory − ΔPayables. FCF impact = −ΔNWC.',
+      solution: 'ΔNWC = 9 + 4 − 6 = +7. FCF impact = −7, i.e. FCF falls by $7m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Treating rising payables as a use of cash instead of a source.',
+      tags: ['working-capital']
+    },
+    {
+      id: 'ib_b045', topic: 'Accounting Flows', subtopic: 'Working capital flow-through', difficulty: 3, targetTime: 90,
+      prompt: 'In an M&A agreement, why do buyers typically insist on a "normalized" NWC target with a post-closing purchase price true-up?',
+      answerType: 'mc', options: [
+        'To make the closing process simpler',
+        'To prevent the seller from artificially stripping working capital out of the business right before closing, which would leave the buyer with an under-cushioned business',
+        'Because working capital has no real effect on the business',
+        'It is purely a formality with no financial consequence'
+      ], correctAnswer: 'To prevent the seller from artificially stripping working capital out of the business right before closing, which would leave the buyer with an under-cushioned business',
+      hint: 'Think about what a seller could do to inflate their own cash position right before a deal closes.',
+      approach: 'The NWC target-and-true-up mechanism protects the buyer against last-minute working-capital manipulation.',
+      solution: 'Without a target and true-up, a seller could aggressively collect receivables, delay paying suppliers, or run down inventory right before closing to inflate their own cash proceeds — the true-up mechanism adjusts the purchase price if actual NWC delivered falls short of the agreed normalized target.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the NWC adjustment as a minor technicality rather than a real economic protection for the buyer.',
+      tags: ['working-capital', 'm&a']
+    },
+    {
+      id: 'ib_b046', topic: 'Accounting Flows', subtopic: 'Working capital flow-through', difficulty: 2, targetTime: 60,
+      prompt: 'Which of the following describes a HIGHER Days Payable Outstanding (DPO)?',
+      answerType: 'mc', options: [
+        'The company collects from its customers faster',
+        'The company takes longer, on average, to pay its own suppliers',
+        'The company holds inventory for a shorter time',
+        'The company has no accounts payable at all'
+      ], correctAnswer: 'The company takes longer, on average, to pay its own suppliers',
+      hint: 'DPO measures the payables side, not receivables or inventory.',
+      approach: 'DPO = (Accounts Payable / COGS) × 365 — a higher figure means slower payment to suppliers.',
+      solution: 'A higher DPO means the company is taking longer to pay suppliers, which — within reason — is generally favorable for the company\'s own cash position, though pushed too far it can strain supplier relationships.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing DPO (payables) with DSO (receivables) or DIO (inventory) — all three measure different things.',
+      tags: ['working-capital', 'dpo']
+    },
+
+    /* ---------------------- IRR AS DECISION CRITERION ---------------------- */
+    {
+      id: 'ib_b047', topic: 'DCF Valuation', subtopic: 'Investment decision criteria', difficulty: 2, targetTime: 60,
+      prompt: 'A project requires a $100 investment today and returns $128 in exactly one year, with no other cash flows. What is its IRR?',
+      answerType: 'numeric', correctAnswer: 28, tolerance: 0.2,
+      hint: 'IRR is the rate that makes NPV exactly zero.',
+      approach: '−100 + 128/(1+r) = 0 → 1+r = 1.28 → r = 28%.',
+      solution: 'IRR = (128/100) − 1 = 28%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Reporting the raw dollar gain ($28) instead of converting it to a percentage rate.',
+      tags: ['irr']
+    },
+    {
+      id: 'ib_b048', topic: 'DCF Valuation', subtopic: 'Investment decision criteria', difficulty: 4, targetTime: 120,
+      prompt: 'A project has cash flows that change sign more than once over its life (e.g. an outflow, then inflows, then a large outflow again). What specific problem can this create for using IRR as a decision tool?',
+      answerType: 'mc', options: [
+        'No problem — IRR is always reliable regardless of the cash flow pattern',
+        'The IRR equation can have multiple mathematically valid solutions, making "the IRR" ambiguous as a single decision number',
+        'NPV can no longer be computed for this project',
+        'The project automatically has negative NPV'
+      ], correctAnswer: 'The IRR equation can have multiple mathematically valid solutions, making "the IRR" ambiguous as a single decision number',
+      hint: 'Think about how many different discount rates could make a more complex cash flow pattern equal zero.',
+      approach: 'Multiple sign changes in a cash flow stream can produce multiple valid roots to the IRR equation.',
+      solution: 'With more than one sign change, the equation defining IRR can have more than one valid solution — in ambiguous cases like this, NPV (computed directly at the actual hurdle rate) is the more reliable decision criterion.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming IRR is always a single, unambiguous number regardless of the cash flow pattern.',
+      tags: ['irr', 'npv']
+    },
+    {
+      id: 'ib_b049', topic: 'DCF Valuation', subtopic: 'Investment decision criteria', difficulty: 3, targetTime: 90,
+      prompt: 'Fund A achieves a 2.0× MOIC in 2 years. Fund B achieves the same 2.0× MOIC in 6 years. Which fund has the better IRR?',
+      answerType: 'mc', options: ['Fund A (shorter hold)', 'Fund B (longer hold)', 'They have identical IRR', 'IRR cannot be compared across different hold periods'], correctAnswer: 'Fund A (shorter hold)',
+      hint: 'IRR annualizes the return — the same total multiple achieved faster implies a higher annual rate.',
+      approach: 'IRR = MOIC^(1/years) − 1; for a fixed MOIC, a shorter hold period produces a higher annualized IRR.',
+      solution: 'Fund A: 2.0^(1/2) − 1 ≈ 41.4%. Fund B: 2.0^(1/6) − 1 ≈ 12.2%. Despite identical MOIC, Fund A\'s much shorter hold period gives it a dramatically higher IRR.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming identical MOIC means identical performance — IRR reveals that TIME matters, which MOIC alone ignores.',
+      tags: ['irr', 'moic']
+    },
+
+    /* ---------------------- OPERATING LEVERAGE ---------------------- */
+    {
+      id: 'ib_b050', topic: 'Accounting Flows', subtopic: 'Operating leverage', difficulty: 3, targetTime: 90,
+      prompt: 'Fixed costs are $300m. Variable cost is $25/unit. At 8m units sold and a $65 price, what is operating income, in $ millions?',
+      answerType: 'numeric', correctAnswer: 20, tolerance: 1,
+      hint: 'Revenue minus variable costs gives contribution margin; subtract fixed costs from that.',
+      approach: 'Operating income = Revenue − Variable costs − Fixed costs.',
+      solution: 'Revenue = 8m×$65 = $520m. Variable costs = 8m×$25 = $200m. Operating income = 520 − 200 − 300 = $20m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to subtract the fixed cost component after computing the contribution margin.',
+      tags: ['operating-leverage']
+    },
+    {
+      id: 'ib_b051', topic: 'Accounting Flows', subtopic: 'Operating leverage', difficulty: 3, targetTime: 90,
+      prompt: 'Two companies have identical revenue and identical operating income this year. Company X has mostly FIXED costs; Company Y has mostly VARIABLE costs. If both experience a 15% revenue decline next year, which company\'s operating income falls by a LARGER percentage?',
+      answerType: 'mc', options: ['Company X (mostly fixed costs)', 'Company Y (mostly variable costs)', 'Both fall by exactly the same percentage', 'Neither company\'s operating income is affected by revenue changes'], correctAnswer: 'Company X (mostly fixed costs)',
+      hint: 'Fixed costs do not shrink along with a revenue decline; variable costs do.',
+      approach: 'High operating leverage (mostly fixed costs) amplifies the percentage swing in operating income relative to revenue, in both directions.',
+      solution: 'Company X\'s fixed costs stay the same even as revenue falls, eating into a shrinking base — its operating income falls by a much larger percentage than its revenue does. Company Y\'s costs shrink roughly in proportion to the revenue decline, cushioning the impact on operating income.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming both companies are affected equally just because their starting revenue and operating income are identical.',
+      tags: ['operating-leverage', 'risk']
+    },
+
+    /* ---------------------- TREASURY STOCK METHOD ---------------------- */
+    {
+      id: 'ib_b052', topic: 'M&A Mechanics', subtopic: 'Share count mechanics', difficulty: 3, targetTime: 90,
+      prompt: '6 million options have a $12 strike price. The current market price is $20. Using the treasury stock method, how many NET new shares does this tranche add?',
+      answerType: 'numeric', correctAnswer: 2.4, tolerance: 0.05,
+      hint: 'Work out exercise proceeds first, then how many shares that cash could hypothetically repurchase.',
+      approach: 'Net new shares = options exercised − (options × strike / market price).',
+      solution: 'Proceeds = 6m×$12 = $72m. Shares repurchased = $72m/$20 = 3.6m. Net new shares = 6m − 3.6m = 2.4m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Treating all 6 million options as pure dilution without netting off the hypothetical share repurchase.',
+      tags: ['treasury-stock-method']
+    },
+    {
+      id: 'ib_b053', topic: 'M&A Mechanics', subtopic: 'Share count mechanics', difficulty: 2, targetTime: 60,
+      prompt: '3 million options have a $45 strike price. The current market price is $38. How many net new shares does the treasury stock method add for this tranche?',
+      answerType: 'numeric', correctAnswer: 0, tolerance: 0.01,
+      hint: 'Compare the strike price to the market price before doing any arithmetic.',
+      approach: 'Out-of-the-money options (strike above market price) are excluded entirely from the treasury stock method.',
+      solution: 'Since the $45 strike price exceeds the $38 market price, these options are out-of-the-money — a rational holder would not exercise them, so they add 0 net new shares.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Running the exercise/repurchase mechanics anyway without first checking whether the options are even in-the-money.',
+      tags: ['treasury-stock-method']
+    },
+
+    /* ---------------------- APV vs WACC ---------------------- */
+    {
+      id: 'ib_b054', topic: 'DCF Valuation', subtopic: 'APV', difficulty: 3, targetTime: 75,
+      prompt: 'A company\'s unlevered value is $420m. The present value of its interest tax shield is $30m. What is its APV, in $ millions?',
+      answerType: 'numeric', correctAnswer: 450, tolerance: 1,
+      hint: 'APV simply adds the two pieces together.',
+      approach: 'APV = unlevered value + PV of interest tax shield.',
+      solution: '420 + 30 = $450m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Subtracting the tax shield instead of adding it — the tax shield is a genuine value BENEFIT of debt financing.',
+      tags: ['apv']
+    },
+    {
+      id: 'ib_b055', topic: 'DCF Valuation', subtopic: 'APV', difficulty: 4, targetTime: 120,
+      prompt: 'Why would a private equity analyst modeling an LBO with aggressive, scheduled debt paydown generally prefer APV over a standard WACC-based DCF?',
+      answerType: 'mc', options: [
+        'APV always produces a lower valuation, which sponsors prefer',
+        'A single WACC assumes a roughly stable capital structure, but the LBO\'s debt (and its tax shield) shrinks predictably every year — APV values the tax shield as its own explicit, separately-modeled stream instead of requiring a new WACC every year',
+        'APV does not require any assumptions about future cash flows',
+        'WACC cannot be used for any company with debt'
+      ], correctAnswer: 'A single WACC assumes a roughly stable capital structure, but the LBO\'s debt (and its tax shield) shrinks predictably every year — APV values the tax shield as its own explicit, separately-modeled stream instead of requiring a new WACC every year',
+      hint: 'Think about what happens to the correct WACC each year as an LBO\'s debt balance shrinks.',
+      approach: 'APV separates unlevered business value from the tax-shield benefit, sidestepping the need to recompute WACC as capital structure changes.',
+      solution: 'WACC implicitly assumes a roughly stable capital structure; in an LBO, debt shrinks substantially and predictably each year, which would require a new WACC every year under that approach. APV avoids this by valuing the business unlevered once, then separately modeling the shrinking tax shield year by year.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming APV and WACC are simply two equally-valid ways to reach the identical answer with no practical difference in when each is appropriate.',
+      tags: ['apv', 'wacc']
     }
   ];
 

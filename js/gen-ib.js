@@ -362,5 +362,101 @@
     }
   });
 
+  /* ============================ GOODWILL & WORKING CAPITAL ============================ */
+
+  add({
+    id: 'ib_goodwill_calc', topic: 'M&A Mechanics', subtopic: 'Purchase accounting', difficulty: 3, targetTime: 90,
+    build(r) {
+      const price = r.pick([400, 500, 600, 750, 900]);
+      const identAssets = r.pick([350, 420, 500, 600]);
+      const liabilities = r.pick([40, 60, 80, 100]);
+      const netIdent = identAssets - liabilities;
+      const goodwill = round(price - netIdent, 1);
+      return {
+        prompt: `An acquirer pays $${price}m for a target. A fair-value appraisal finds the target's identifiable assets are worth $${identAssets}m and its liabilities are $${liabilities}m. What goodwill is created, in $ millions?`,
+        answerType: 'numeric', correctAnswer: goodwill, tolerance: 0.5,
+        hint: 'First net the identifiable assets against liabilities, then compare to the purchase price.',
+        approach: 'Goodwill = Purchase Price − (Fair Value of Identifiable Assets − Liabilities Assumed).',
+        solution: `Net identifiable assets = ${identAssets} − ${liabilities} = $${netIdent}m. Goodwill = ${price} − ${netIdent} = $${goodwill}m.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Subtracting the purchase price from the identifiable assets alone, forgetting to first net out the assumed liabilities.',
+        tags: ['goodwill', 'purchase-accounting']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_nwc_impact', topic: 'Accounting Flows', subtopic: 'Working capital flow-through', difficulty: 3, targetTime: 90,
+    build(r) {
+      const dAR = r.pick([4, 8, 12, 16]), dInv = r.pick([2, 5, 9, 14]), dAP = r.pick([3, 7, 11, 15]);
+      const arDir = r.pick([1, -1]), invDir = r.pick([1, -1]), apDir = r.pick([1, -1]);
+      const dNWC = arDir * dAR + invDir * dInv - apDir * dAP;
+      const fcfImpact = -dNWC;
+      const arWord = arDir === 1 ? 'increased' : 'decreased';
+      const invWord = invDir === 1 ? 'increased' : 'decreased';
+      const apWord = apDir === 1 ? 'increased' : 'decreased';
+      return {
+        prompt: `This year, accounts receivable ${arWord} by $${dAR}m, inventory ${invWord} by $${dInv}m, and accounts payable ${apWord} by $${dAP}m. Assuming no other changes, what is the resulting impact on FREE CASH FLOW, in $ millions (negative if FCF falls)?`,
+        answerType: 'numeric', correctAnswer: round(fcfImpact, 1), tolerance: 0.1,
+        hint: 'A rise in an operating asset (AR, inventory) ties up cash; a rise in an operating liability (AP) frees up cash. Falls work the opposite way.',
+        approach: 'ΔNWC = Δ(receivables) + Δ(inventory) − Δ(payables), each signed by whether it rose or fell. FCF impact = −ΔNWC.',
+        solution: `ΔNWC = ${arDir === 1 ? '+' : '−'}${dAR} ${invDir === 1 ? '+' : '−'} ${dInv} ${apDir === 1 ? '−' : '+'} ${dAP} = ${round(dNWC, 1)}. FCF impact = −ΔNWC = ${round(fcfImpact, 1)}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the "rising = use of cash" rule to a FALLING balance without flipping the sign, or mixing up the direction for accounts payable versus the two asset lines.',
+        tags: ['working-capital', 'fcf']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_irr_decision', topic: 'DCF Valuation', subtopic: 'Investment decision criteria', difficulty: 3, targetTime: 90,
+    build(r) {
+      const irr = r.pick([6, 8, 10, 12, 15, 18, 20]);
+      let hurdle = r.pick([8, 9, 10, 11, 12, 14]);
+      while (hurdle === irr) hurdle = r.pick([8, 9, 10, 11, 12, 14]);
+      const decision = irr > hurdle ? 'Invest' : 'Reject';
+      return {
+        prompt: `A project has an IRR of ${irr}%. The company's hurdle rate (WACC) is ${hurdle}%. Based on the standard IRR decision rule, should the company invest in this project?`,
+        answerType: 'mc', options: ['Invest', 'Reject', 'Impossible to decide without the initial investment amount', 'Impossible to decide without the exact cash flow schedule'], correctAnswer: decision,
+        hint: 'Compare IRR directly to the hurdle rate — no other information is needed for this decision rule.',
+        approach: 'Standard rule: IRR > hurdle rate ⇒ invest (positive NPV at that hurdle rate); IRR < hurdle rate ⇒ reject.',
+        solution: `IRR (${irr}%) is ${irr > hurdle ? 'ABOVE' : 'BELOW'} the hurdle rate (${hurdle}%), so the project is expected to ${irr > hurdle ? 'create' : 'destroy'} value relative to the cost of capital. Decision: ${decision}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Trying to bring in the initial investment size or exact cash flow schedule — once IRR and the hurdle rate are both known, the decision rule needs nothing else.',
+        tags: ['irr', 'decision-rule']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_treasury_stock', topic: 'M&A Mechanics', subtopic: 'Share count mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const options = r.pick([2, 3, 4, 5, 6]);
+      const strike = r.pick([20, 25, 30, 35, 40]);
+      const priceOffset = r.pick([5, 8, 10, 12, -5, -8]);
+      const price = strike + priceOffset;
+      if (price <= strike) {
+        return {
+          prompt: `${options} million options are outstanding with a $${strike} strike price. The current share price is $${price}. Using the treasury stock method, how many net new shares (in millions) do these options add to the fully diluted share count?`,
+          answerType: 'numeric', correctAnswer: 0, tolerance: 0.01,
+          hint: 'Compare the strike price to the market price before doing any arithmetic.',
+          approach: 'Out-of-the-money options (strike ≥ market price) are excluded entirely from the treasury stock method — they add 0 shares.',
+          solution: `Since the $${strike} strike price is at or above the $${price} market price, these options are out-of-the-money — a rational holder would not exercise them, so they add 0 net new shares.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Running the exercise/repurchase mechanics anyway without first checking whether the options are even in-the-money.',
+          tags: ['treasury-stock-method']
+        };
+      }
+      const proceeds = round(options * strike, 2);
+      const sharesRepurchased = round(proceeds / price, 3);
+      const netNewShares = round(options - sharesRepurchased, 2);
+      return {
+        prompt: `${options} million options are outstanding with a $${strike} strike price. The current share price is $${price}. Using the treasury stock method, how many net new shares (in millions, to 2 decimals) do these options add to the fully diluted share count?`,
+        answerType: 'numeric', correctAnswer: netNewShares, tolerance: 0.03,
+        hint: 'Step 1: exercise proceeds = options × strike. Step 2: shares that proceeds could hypothetically buy back at the market price. Step 3: net new shares = options exercised − shares repurchased.',
+        approach: 'TSM: proceeds = shares × strike; hypothetical buyback = proceeds ÷ market price; net new shares = options − buyback shares.',
+        solution: `Exercise proceeds = ${options}m × $${strike} = $${proceeds}m. Hypothetical buyback = ${proceeds} ÷ ${price} = ${sharesRepurchased}m shares. Net new shares = ${options} − ${sharesRepurchased} = ${netNewShares}m.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Adding all the option shares to the share count directly instead of netting out the hypothetical buyback funded by the exercise proceeds.',
+        tags: ['treasury-stock-method']
+      };
+    }
+  });
+
   global.QTL_GEN_IB = G;
 })(window);
