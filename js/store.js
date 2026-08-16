@@ -78,7 +78,7 @@
   /* Every track's generators/curated items live in their own global array so files can be
      loaded independently; new tracks just register their array name here. Content with no
      explicit `track` field (the original quant material) is treated as track:'quant'. */
-  const GEN_SOURCES = ['QTL_GEN_PROB', 'QTL_GEN_APPLIED', 'QTL_GEN_REASONING', 'QTL_GEN_IB', 'QTL_GEN_AM'];
+  const GEN_SOURCES = ['QTL_GEN_PROB', 'QTL_GEN_APPLIED', 'QTL_GEN_REASONING', 'QTL_GEN_IB', 'QTL_GEN_AM', 'QTL_GEN_CONSULTING'];
   const LESSON_SOURCES = ['QTL_LESSONS', 'QTL_LESSONS_REASONING', 'QTL_LESSONS_IB', 'QTL_LESSONS_WM', 'QTL_LESSONS_AM', 'QTL_LESSONS_CONSULTING'];
 
   function activeTrack() { return state.settings.track || 'quant'; }
