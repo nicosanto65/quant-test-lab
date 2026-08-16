@@ -719,6 +719,245 @@
       solution: 'This is a normal, expected mechanical true-up of the client\'s closing proceeds, not a sign of any problem or a renegotiation.',
       recognitionTechnique: 'Other', commonTrap: 'Alarming the client by treating a routine NWC true-up as a sign of deal trouble.',
       tags: ['nwc-adjustment', 'client-communication']
+    },
+
+    /* ---------------------- Mean-variance optimization / efficient frontier ---------------------- */
+    {
+      id: 'wm_b066', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 2, targetTime: 60,
+      prompt: 'Why can combining two assets that are NOT perfectly correlated produce a portfolio with LOWER risk than a simple weighted average of their individual risks?',
+      answerType: 'mc', options: ['This is not actually possible under any circumstances', 'Because their individual price swings partially offset rather than reinforce each other, since they do not move in perfect lockstep', 'Because diversification always eliminates all risk entirely', 'Because combining assets always increases expected return with no change to risk'], correctAnswer: 'Because their individual price swings partially offset rather than reinforce each other, since they do not move in perfect lockstep',
+      hint: 'Think about what imperfect correlation means for combined price movements.',
+      approach: 'Imperfect correlation allows gains in one asset to offset losses in another.',
+      solution: 'Imperfect correlation means gains in one asset can offset losses in another, producing a combined risk level below the simple weighted average of the parts.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming diversification benefits require assets to be negatively correlated, when merely imperfect (less than perfect) correlation is enough to help.',
+      tags: ['mean-variance', 'efficient-frontier']
+    },
+    {
+      id: 'wm_b067', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 2, targetTime: 60,
+      prompt: 'Portfolio A has 12% volatility and 7% expected return. Portfolio B has the same 7% expected return but only 9% volatility. Which portfolio is more likely to sit on the efficient frontier?',
+      answerType: 'mc', options: ['Portfolio A', 'Portfolio B, since it achieves the same return with less risk', 'They are equally likely to be on the frontier', 'Neither can ever be on the efficient frontier'], correctAnswer: 'Portfolio B, since it achieves the same return with less risk',
+      hint: 'For the same return, less risk is always preferable.',
+      approach: 'A portfolio dominated by another offering the same return at lower risk is sub-optimal.',
+      solution: 'For the same expected return, the lower-risk portfolio (B) is more efficient — A is sub-optimal since B achieves the identical return with less risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming higher volatility is automatically compensated by proportionally higher return.',
+      tags: ['efficient-frontier']
+    },
+    {
+      id: 'wm_b068', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 3, targetTime: 90,
+      prompt: 'A mean-variance optimization recommends putting 65% of a portfolio into a single obscure asset class. What is the most likely explanation, and appropriate response?',
+      answerType: 'mc', options: [
+        'This must be the objectively correct allocation and should be implemented exactly as calculated',
+        'This is likely a symptom of input estimation error (especially in that asset\'s expected return); the output should be treated as one input among several, with practical constraints applied rather than implemented directly',
+        'Mean-variance optimization should never be used again after this result',
+        'This result proves the asset class is definitely undervalued by the broader market'
+      ], correctAnswer: 'This is likely a symptom of input estimation error (especially in that asset\'s expected return); the output should be treated as one input among several, with practical constraints applied rather than implemented directly',
+      hint: 'Think about the optimizer\'s known sensitivity to small input errors.',
+      approach: 'Extreme, concentrated outputs are a well-known symptom of input sensitivity.',
+      solution: 'Extreme, concentrated outputs are a well-known symptom of the optimizer\'s sensitivity to input error, calling for practical constraints rather than blind implementation.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating an optimizer\'s raw output as a final, ready-to-implement recommendation.',
+      tags: ['mean-variance']
+    },
+
+    /* ---------------------- Risk budgeting ---------------------- */
+    {
+      id: 'wm_b069', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 2, targetTime: 60,
+      prompt: 'Why can a 60% equity / 40% bond portfolio have its TOTAL RISK overwhelmingly dominated by the equity sleeve, despite equities being only 60% of the capital?',
+      answerType: 'mc', options: ['This is impossible — risk always matches capital weights exactly', 'Equities are typically far more volatile than bonds, so they contribute a disproportionately larger share of total portfolio risk per dollar invested than their capital weight alone would suggest', 'Bonds always have zero risk in every portfolio', 'The 60/40 split only applies to returns, never to risk'], correctAnswer: 'Equities are typically far more volatile than bonds, so they contribute a disproportionately larger share of total portfolio risk per dollar invested than their capital weight alone would suggest',
+      hint: 'Think about volatility differences between the two asset classes.',
+      approach: 'Higher volatility means a disproportionately larger risk contribution per dollar.',
+      solution: 'Higher volatility means a disproportionately larger risk contribution per dollar, which is exactly the gap between capital allocation and risk allocation.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a portfolio\'s capital split accurately describes its risk split.',
+      tags: ['risk-budgeting']
+    },
+    {
+      id: 'wm_b070', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 2, targetTime: 60,
+      prompt: 'A "risk parity" approach aims to:',
+      answerType: 'mc', options: ['Allocate equal DOLLAR amounts to every asset class, regardless of volatility', 'Allocate dollar amounts so that each asset class contributes roughly EQUAL risk to the total portfolio', 'Only ever hold a single asset class', 'Maximize total portfolio volatility'], correctAnswer: 'Allocate dollar amounts so that each asset class contributes roughly EQUAL risk to the total portfolio',
+      hint: 'Risk parity targets risk contribution, not dollar weights.',
+      approach: 'Risk parity specifically targets equal risk contribution.',
+      solution: 'Risk parity specifically targets equal risk contribution, which typically requires unequal dollar weights given differing asset-class volatilities.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing risk parity with an equal-dollar-weighted portfolio.',
+      tags: ['risk-budgeting']
+    },
+    {
+      id: 'wm_b071', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 3, targetTime: 90,
+      prompt: 'A client is surprised their "60/40" portfolio fell sharply during an equity downturn, saying they thought "only 60% was even at risk." What is the most accurate explanation?',
+      answerType: 'mc', options: [
+        'The client\'s portfolio must have been mislabeled',
+        'The 60/40 figure describes CAPITAL allocation, not RISK allocation — equities\' higher volatility means they likely drove a much larger share (often 80%+) of the portfolio\'s actual risk and downturn experience',
+        'Bonds must have also fallen by an identical amount',
+        'This experience proves the 60/40 label was completely inaccurate and meaningless'
+      ], correctAnswer: 'The 60/40 figure describes CAPITAL allocation, not RISK allocation — equities\' higher volatility means they likely drove a much larger share (often 80%+) of the portfolio\'s actual risk and downturn experience',
+      hint: 'Distinguish capital allocation from risk allocation.',
+      approach: 'This is the classic gap between capital and risk allocation.',
+      solution: 'This is the classic gap between capital allocation and risk allocation — the label describes dollars, not the portfolio\'s actual risk experience.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a capital-weighted label accurately reflects a portfolio\'s actual risk distribution.',
+      tags: ['risk-budgeting', 'client-communication']
+    },
+
+    /* ---------------------- PE metrics: J-curve, DPI, TVPI ---------------------- */
+    {
+      id: 'wm_b072', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 2, targetTime: 60,
+      prompt: 'A client has paid in $1.5m to a PE fund and has received $600,000 of distributions so far. What is the DPI?',
+      answerType: 'numeric', correctAnswer: 0.4, tolerance: 0.02,
+      hint: 'DPI = cash distributed / cash paid in.',
+      approach: 'Divide cumulative distributions by cumulative paid-in capital.',
+      solution: 'DPI = 600,000/1,500,000 = 0.4x.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing paid-in capital by distributions instead of the other way around.',
+      tags: ['dpi']
+    },
+    {
+      id: 'wm_b073', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 2, targetTime: 60,
+      prompt: 'Using the same fund (paid in $1.5m, distributed $600,000), the remaining fund stake is currently estimated at $1.2m. What is the TVPI?',
+      answerType: 'numeric', correctAnswer: 1.2, tolerance: 0.02,
+      hint: 'TVPI = (cash distributed + current value of remaining holdings) / cash paid in.',
+      approach: 'Add distributions and remaining value, then divide by paid-in capital.',
+      solution: 'TVPI = (600,000 + 1,200,000)/1,500,000 = 1.2x.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to include the remaining (unrealized) fund value in the numerator, effectively just recomputing DPI.',
+      tags: ['tvpi']
+    },
+    {
+      id: 'wm_b074', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 3, targetTime: 90,
+      prompt: 'A client 2 years into a 10-year PE fund sees a TVPI of 0.85x and asks if the fund is performing badly. What is the most appropriate response?',
+      answerType: 'mc', options: ['Immediately confirm the fund is performing badly and recommend redeeming', 'Explain this is a normal, expected feature of the early J-curve (fees charged before realized gains), and a more meaningful assessment would compare this fund to others of a similar vintage and stage, not judge it in isolation this early', 'Refuse to discuss the fund\'s performance at all', 'Explain that TVPI is irrelevant and only DPI should ever be considered'], correctAnswer: 'Explain this is a normal, expected feature of the early J-curve (fees charged before realized gains), and a more meaningful assessment would compare this fund to others of a similar vintage and stage, not judge it in isolation this early',
+      hint: 'Think about what stage of the fund\'s life this represents.',
+      approach: 'Early-stage TVPI below 1.0x is a textbook J-curve pattern.',
+      solution: 'Early-stage TVPI below 1.0x is a textbook J-curve pattern; meaningful evaluation requires comparing against similar-vintage funds, not judging in isolation this early.',
+      recognitionTechnique: 'Other', commonTrap: 'Interpreting an early-stage negative or sub-1.0x return as definitive evidence of poor fund performance.',
+      tags: ['j-curve', 'client-communication']
+    },
+
+    /* ---------------------- Hedge fund strategies & real assets ---------------------- */
+    {
+      id: 'wm_b075', topic: 'Alternative Investments (Client View)', subtopic: 'Hedge fund strategies', difficulty: 2, targetTime: 60,
+      prompt: 'A fund buys the stock of a company being acquired in a stock-for-stock deal and simultaneously shorts the acquirer\'s stock, aiming to capture the spread as the deal closes. What type of strategy is this?',
+      answerType: 'mc', options: ['Global macro', 'Event-driven (merger arbitrage)', 'Long/short equity', 'Relative value / quantitative'], correctAnswer: 'Event-driven (merger arbitrage)',
+      hint: 'This strategy profits from a specific pending corporate event.',
+      approach: 'Merger arbitrage is a classic event-driven strategy.',
+      solution: 'This is a classic event-driven strategy, specifically merger arbitrage, profiting from the spread around a pending merger.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing merger arbitrage with general long/short equity stock-picking.',
+      tags: ['hedge-fund-strategies']
+    },
+    {
+      id: 'wm_b076', topic: 'Alternative Investments (Client View)', subtopic: 'Hedge fund strategies', difficulty: 3, targetTime: 90,
+      prompt: 'A client wants an alternative allocation specifically to reduce overall portfolio volatility with low correlation to stocks and bonds. Which category of strategy is generally better matched?',
+      answerType: 'mc', options: ['Global macro, since it is always the highest-returning strategy', 'Market-neutral / relative value strategies, which are more explicitly designed for lower correlation to traditional markets', 'Any hedge fund strategy works equally well for this specific goal', 'Long/short equity is always the best match for this specific goal'], correctAnswer: 'Market-neutral / relative value strategies, which are more explicitly designed for lower correlation to traditional markets',
+      hint: 'Match the strategy type to the client\'s stated goal of low correlation.',
+      approach: 'Market-neutral/relative-value strategies are more explicitly designed around low correlation.',
+      solution: 'Market-neutral/relative-value strategies are generally more explicitly designed around low correlation to traditional markets, directly matching this stated client goal.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating all hedge fund strategies as interchangeable for diversification purposes.',
+      tags: ['hedge-fund-strategies', 'suitability']
+    },
+    {
+      id: 'wm_b077', topic: 'Alternative Investments (Client View)', subtopic: 'Real assets', difficulty: 3, targetTime: 90,
+      prompt: 'What is a key nuance to raise with a client considering futures-based commodity exposure as an inflation hedge?',
+      answerType: 'mc', options: ['Futures-based commodity funds are always identical to holding the physical commodity', 'Futures-based exposure can carry an ongoing "roll yield" cost or benefit as contracts are rolled over, which can meaningfully affect long-run returns distinct from the physical commodity\'s price alone', 'Commodities can never be used as an inflation hedge under any structure', 'Roll yield only affects real estate investments, never commodities'], correctAnswer: 'Futures-based exposure can carry an ongoing "roll yield" cost or benefit as contracts are rolled over, which can meaningfully affect long-run returns distinct from the physical commodity\'s price alone',
+      hint: 'Think about what happens as futures contracts approach expiration and must be replaced.',
+      approach: 'Roll yield is a distinct return driver for futures-based commodity exposure.',
+      solution: 'Roll yield is a real, distinct return driver for futures-based commodity exposure that a client should understand before assuming it behaves identically to physical ownership.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming futures-based commodity exposure perfectly tracks the spot price of the physical commodity.',
+      tags: ['real-assets', 'commodities']
+    },
+
+    /* ---------------------- KYC ---------------------- */
+    {
+      id: 'wm_b078', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 2, targetTime: 60,
+      prompt: 'What is "KYC" (Know Your Customer)?',
+      answerType: 'mc', options: ['An optional marketing questionnaire with no legal significance', 'A binding regulatory obligation requiring firms to gather and document specific client information before making investment recommendations', 'A one-time background check only relevant to anti-fraud purposes', 'A voluntary best practice with no regulatory basis'], correctAnswer: 'A binding regulatory obligation requiring firms to gather and document specific client information before making investment recommendations',
+      hint: 'Think about whether KYC is optional or mandated.',
+      approach: 'KYC is a binding, regulatory requirement underlying every suitable recommendation.',
+      solution: 'KYC is a binding, regulatory (not optional) requirement underlying every suitable recommendation.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating KYC as an optional or purely internal best practice rather than a regulatory obligation.',
+      tags: ['kyc']
+    },
+    {
+      id: 'wm_b079', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 2, targetTime: 60,
+      prompt: 'Why must KYC information be periodically UPDATED rather than collected only once at account opening?',
+      answerType: 'mc', options: ['Regulations require updates purely as a formality with no real purpose', 'Major life events (divorce, inheritance, job change, retirement) can materially change what is actually suitable for a client, so outdated information no longer reflects their true situation', 'KYC information never actually needs to be accurate', 'Updating KYC is optional and rarely done in practice'], correctAnswer: 'Major life events (divorce, inheritance, job change, retirement) can materially change what is actually suitable for a client, so outdated information no longer reflects their true situation',
+      hint: 'Think about how a client\'s circumstances can change over time.',
+      approach: 'Suitability must be assessed against current, not outdated, information.',
+      solution: 'A client\'s true circumstances can change substantially over time, and suitability must be assessed against CURRENT, not outdated, information.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating KYC as a one-time account-opening formality.',
+      tags: ['kyc']
+    },
+    {
+      id: 'wm_b080', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 3, targetTime: 90,
+      prompt: 'A recommendation made using stale, years-old KYC information happens to work out well for the client. Does this resolve the compliance concern?',
+      answerType: 'mc', options: ['Yes, a favorable outcome always resolves any KYC concern', 'No — regulators generally evaluate whether an adequate, documented KYC process was followed at the time of the recommendation, independent of how the investment later performed', 'This scenario can never actually occur in practice', 'Only the client\'s opinion of the outcome matters for compliance purposes'], correctAnswer: 'No — regulators generally evaluate whether an adequate, documented KYC process was followed at the time of the recommendation, independent of how the investment later performed',
+      hint: 'Think about whether compliance is about process or about outcome.',
+      approach: 'KYC compliance centers on the documented process, not the eventual outcome.',
+      solution: 'KYC compliance centers on the documented PROCESS at the time of the recommendation, not on whether the outcome happened to be favorable afterward.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a good outcome retroactively excuses an inadequate KYC process.',
+      tags: ['kyc']
+    },
+
+    /* ---------------------- Estate planning ---------------------- */
+    {
+      id: 'wm_b081', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s will leaves everything to their children, but their life insurance policy still names an ex-spouse as beneficiary. Who legally receives the life insurance proceeds?',
+      answerType: 'mc', options: ['The children, since the will is more recent', 'The ex-spouse, since the beneficiary designation overrides the will for that specific asset', 'The proceeds are split evenly between the children and the ex-spouse automatically', 'The proceeds go to probate court to decide'], correctAnswer: 'The ex-spouse, since the beneficiary designation overrides the will for that specific asset',
+      hint: 'Beneficiary designations control independently of the will.',
+      approach: 'A beneficiary designation overrides the will for that specific asset.',
+      solution: 'The beneficiary designation controls for that asset regardless of what the will states, even if the will is more recently updated.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a more recently updated will automatically overrides an outdated beneficiary designation.',
+      tags: ['estate-planning']
+    },
+    {
+      id: 'wm_b082', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 2, targetTime: 60,
+      prompt: 'Why might a wealth manager recommend a trust rather than a simple direct bequest in a will for a young or financially inexperienced heir?',
+      answerType: 'mc', options: ['Trusts are always identical to a simple will bequest with no meaningful difference', 'A trust can specify staggered distributions over time rather than an immediate lump sum, giving the heir time to mature financially', 'Trusts always distribute assets faster than a will', 'This distinction has no relevance to estate planning'], correctAnswer: 'A trust can specify staggered distributions over time rather than an immediate lump sum, giving the heir time to mature financially',
+      hint: 'Think about the control a trust offers over distribution timing.',
+      approach: 'A trust\'s ability to control distribution timing is a key advantage over a lump-sum bequest.',
+      solution: 'A trust\'s ability to control the TIMING and structure of distributions is a key advantage over a simple lump-sum will bequest for a young or inexperienced heir.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a trust and a direct will bequest achieve identical outcomes.',
+      tags: ['estate-planning', 'trusts']
+    },
+    {
+      id: 'wm_b083', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 3, targetTime: 90,
+      prompt: 'A wealth manager discovers a client\'s retirement account still names a dissolved business partnership as beneficiary, contradicting the client\'s clearly updated will. What is the most appropriate next step?',
+      answerType: 'mc', options: ['Do nothing, since the will\'s more recent instructions will automatically control', 'Immediately flag this to the client and coordinate updating the beneficiary designation itself, since the will has no power to override it', 'Wait until the client\'s next scheduled estate planning review, which could be years away', 'Assume the outdated designation is not a real legal concern'], correctAnswer: 'Immediately flag this to the client and coordinate updating the beneficiary designation itself, since the will has no power to override it',
+      hint: 'The will cannot fix an outdated beneficiary designation on its own.',
+      approach: 'Beneficiary designations must be corrected directly, not assumed fixed by the will.',
+      solution: 'Given that beneficiary designations override the will and this discrepancy directly contradicts the client\'s current intentions, prompt action to correct the designation itself is warranted, not a wait-and-see approach.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming an updated will automatically resolves an outdated beneficiary designation.',
+      tags: ['estate-planning']
+    },
+
+    /* ---------------------- Concentrated stock positions ---------------------- */
+    {
+      id: 'wm_b084', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 2, targetTime: 60,
+      prompt: 'Why does a concentrated stock position represent genuinely UNCOMPENSATED risk for a client?',
+      answerType: 'mc', options: ['Concentrated positions always earn extra expected return to compensate for the risk', 'The company-specific (unsystematic) risk in a concentrated position can be diversified away for free, so bearing it provides no additional expected reward', 'Concentration risk does not actually exist as a real phenomenon', 'Only bonds can ever be considered "concentrated" positions'], correctAnswer: 'The company-specific (unsystematic) risk in a concentrated position can be diversified away for free, so bearing it provides no additional expected reward',
+      hint: 'Recall the systematic vs. unsystematic risk distinction.',
+      approach: 'Unsystematic risk is diversifiable and therefore not compensated with extra expected return.',
+      solution: 'Since unsystematic risk is diversifiable, a client holding a concentrated position bears real risk without any extra expected compensation for it.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a concentrated position must be earning extra return simply because it carries extra risk.',
+      tags: ['concentrated-positions']
+    },
+    {
+      id: 'wm_b085', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 2, targetTime: 60,
+      prompt: 'How does a "collar" (buying a put, selling a call) help manage a concentrated position?',
+      answerType: 'mc', options: ['It requires immediately selling the entire position', 'It protects against downside price moves while the client retains ownership (avoiding an immediate taxable sale), at the cost of the option premium and/or capped upside', 'It eliminates all concentration risk with no tradeoffs of any kind', 'It has no relationship to managing concentration risk'], correctAnswer: 'It protects against downside price moves while the client retains ownership (avoiding an immediate taxable sale), at the cost of the option premium and/or capped upside',
+      hint: 'A collar combines a protective put with a covered call.',
+      approach: 'A collar provides downside protection while deferring the tax event, in exchange for a cost.',
+      solution: 'A collar provides downside protection while the client keeps the shares (and defers the tax event), in exchange for premium cost and/or an upside cap.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a collar eliminates concentration risk entirely with no tradeoffs.',
+      tags: ['concentrated-positions', 'hedging']
+    },
+    {
+      id: 'wm_b086', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 3, targetTime: 90,
+      prompt: 'A client with a large concentrated position has strong philanthropic intent and faces a significant tax bill if they sell outright. How might donating appreciated shares serve both goals at once?',
+      answerType: 'mc', options: [
+        'Charitable giving has no effect on portfolio concentration',
+        'It reduces the concentrated position AND avoids capital gains tax on the donated shares (while generating a charitable deduction) — serving both diversification and philanthropic goals simultaneously',
+        'Donated shares are always taxed at a higher rate than a sale',
+        'It only ever serves the charitable goal, never the concentration-reduction goal'
+      ], correctAnswer: 'It reduces the concentrated position AND avoids capital gains tax on the donated shares (while generating a charitable deduction) — serving both diversification and philanthropic goals simultaneously',
+      hint: 'Think about what happens to the embedded gain when shares are donated rather than sold.',
+      approach: 'Donating appreciated shares directly removes concentration exposure and avoids capital gains tax on those shares.',
+      solution: 'Donating appreciated shares directly removes concentration exposure and avoids capital gains tax on those specific shares, while also fulfilling philanthropic intent.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming charitable giving and concentration reduction are unrelated, separate goals that cannot be addressed together.',
+      tags: ['concentrated-positions', 'charitable-giving']
     }
   ];
 
