@@ -362,5 +362,225 @@
     }
   });
 
+  /* ============================ GOODWILL & WORKING CAPITAL ============================ */
+
+  add({
+    id: 'ib_goodwill_calc', topic: 'M&A Mechanics', subtopic: 'Purchase accounting', difficulty: 3, targetTime: 90,
+    build(r) {
+      const price = r.pick([400, 500, 600, 750, 900]);
+      const identAssets = r.pick([350, 420, 500, 600]);
+      const liabilities = r.pick([40, 60, 80, 100]);
+      const netIdent = identAssets - liabilities;
+      const goodwill = round(price - netIdent, 1);
+      return {
+        prompt: `An acquirer pays $${price}m for a target. A fair-value appraisal finds the target's identifiable assets are worth $${identAssets}m and its liabilities are $${liabilities}m. What goodwill is created, in $ millions?`,
+        answerType: 'numeric', correctAnswer: goodwill, tolerance: 0.5,
+        hint: 'First net the identifiable assets against liabilities, then compare to the purchase price.',
+        approach: 'Goodwill = Purchase Price − (Fair Value of Identifiable Assets − Liabilities Assumed).',
+        solution: `Net identifiable assets = ${identAssets} − ${liabilities} = $${netIdent}m. Goodwill = ${price} − ${netIdent} = $${goodwill}m.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Subtracting the purchase price from the identifiable assets alone, forgetting to first net out the assumed liabilities.',
+        tags: ['goodwill', 'purchase-accounting']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_nwc_impact', topic: 'Accounting Flows', subtopic: 'Working capital flow-through', difficulty: 3, targetTime: 90,
+    build(r) {
+      const dAR = r.pick([4, 8, 12, 16]), dInv = r.pick([2, 5, 9, 14]), dAP = r.pick([3, 7, 11, 15]);
+      const arDir = r.pick([1, -1]), invDir = r.pick([1, -1]), apDir = r.pick([1, -1]);
+      const dNWC = arDir * dAR + invDir * dInv - apDir * dAP;
+      const fcfImpact = -dNWC;
+      const arWord = arDir === 1 ? 'increased' : 'decreased';
+      const invWord = invDir === 1 ? 'increased' : 'decreased';
+      const apWord = apDir === 1 ? 'increased' : 'decreased';
+      return {
+        prompt: `This year, accounts receivable ${arWord} by $${dAR}m, inventory ${invWord} by $${dInv}m, and accounts payable ${apWord} by $${dAP}m. Assuming no other changes, what is the resulting impact on FREE CASH FLOW, in $ millions (negative if FCF falls)?`,
+        answerType: 'numeric', correctAnswer: round(fcfImpact, 1), tolerance: 0.1,
+        hint: 'A rise in an operating asset (AR, inventory) ties up cash; a rise in an operating liability (AP) frees up cash. Falls work the opposite way.',
+        approach: 'ΔNWC = Δ(receivables) + Δ(inventory) − Δ(payables), each signed by whether it rose or fell. FCF impact = −ΔNWC.',
+        solution: `ΔNWC = ${arDir === 1 ? '+' : '−'}${dAR} ${invDir === 1 ? '+' : '−'} ${dInv} ${apDir === 1 ? '−' : '+'} ${dAP} = ${round(dNWC, 1)}. FCF impact = −ΔNWC = ${round(fcfImpact, 1)}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the "rising = use of cash" rule to a FALLING balance without flipping the sign, or mixing up the direction for accounts payable versus the two asset lines.',
+        tags: ['working-capital', 'fcf']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_irr_decision', topic: 'DCF Valuation', subtopic: 'Investment decision criteria', difficulty: 3, targetTime: 90,
+    build(r) {
+      const irr = r.pick([6, 8, 10, 12, 15, 18, 20]);
+      let hurdle = r.pick([8, 9, 10, 11, 12, 14]);
+      while (hurdle === irr) hurdle = r.pick([8, 9, 10, 11, 12, 14]);
+      const decision = irr > hurdle ? 'Invest' : 'Reject';
+      return {
+        prompt: `A project has an IRR of ${irr}%. The company's hurdle rate (WACC) is ${hurdle}%. Based on the standard IRR decision rule, should the company invest in this project?`,
+        answerType: 'mc', options: ['Invest', 'Reject', 'Impossible to decide without the initial investment amount', 'Impossible to decide without the exact cash flow schedule'], correctAnswer: decision,
+        hint: 'Compare IRR directly to the hurdle rate — no other information is needed for this decision rule.',
+        approach: 'Standard rule: IRR > hurdle rate ⇒ invest (positive NPV at that hurdle rate); IRR < hurdle rate ⇒ reject.',
+        solution: `IRR (${irr}%) is ${irr > hurdle ? 'ABOVE' : 'BELOW'} the hurdle rate (${hurdle}%), so the project is expected to ${irr > hurdle ? 'create' : 'destroy'} value relative to the cost of capital. Decision: ${decision}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Trying to bring in the initial investment size or exact cash flow schedule — once IRR and the hurdle rate are both known, the decision rule needs nothing else.',
+        tags: ['irr', 'decision-rule']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_treasury_stock', topic: 'M&A Mechanics', subtopic: 'Share count mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const options = r.pick([2, 3, 4, 5, 6]);
+      const strike = r.pick([20, 25, 30, 35, 40]);
+      const priceOffset = r.pick([5, 8, 10, 12, -5, -8]);
+      const price = strike + priceOffset;
+      if (price <= strike) {
+        return {
+          prompt: `${options} million options are outstanding with a $${strike} strike price. The current share price is $${price}. Using the treasury stock method, how many net new shares (in millions) do these options add to the fully diluted share count?`,
+          answerType: 'numeric', correctAnswer: 0, tolerance: 0.01,
+          hint: 'Compare the strike price to the market price before doing any arithmetic.',
+          approach: 'Out-of-the-money options (strike ≥ market price) are excluded entirely from the treasury stock method — they add 0 shares.',
+          solution: `Since the $${strike} strike price is at or above the $${price} market price, these options are out-of-the-money — a rational holder would not exercise them, so they add 0 net new shares.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Running the exercise/repurchase mechanics anyway without first checking whether the options are even in-the-money.',
+          tags: ['treasury-stock-method']
+        };
+      }
+      const proceeds = round(options * strike, 2);
+      const sharesRepurchased = round(proceeds / price, 3);
+      const netNewShares = round(options - sharesRepurchased, 2);
+      return {
+        prompt: `${options} million options are outstanding with a $${strike} strike price. The current share price is $${price}. Using the treasury stock method, how many net new shares (in millions, to 2 decimals) do these options add to the fully diluted share count?`,
+        answerType: 'numeric', correctAnswer: netNewShares, tolerance: 0.03,
+        hint: 'Step 1: exercise proceeds = options × strike. Step 2: shares that proceeds could hypothetically buy back at the market price. Step 3: net new shares = options exercised − shares repurchased.',
+        approach: 'TSM: proceeds = shares × strike; hypothetical buyback = proceeds ÷ market price; net new shares = options − buyback shares.',
+        solution: `Exercise proceeds = ${options}m × $${strike} = $${proceeds}m. Hypothetical buyback = ${proceeds} ÷ ${price} = ${sharesRepurchased}m shares. Net new shares = ${options} − ${sharesRepurchased} = ${netNewShares}m.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Adding all the option shares to the share count directly instead of netting out the hypothetical buyback funded by the exercise proceeds.',
+        tags: ['treasury-stock-method']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_beta_relever', topic: 'Equity & Capital Markets', subtopic: 'Beta and cost of equity', difficulty: 4, targetTime: 120,
+    build(r) {
+      const betaL = r.pick([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]);
+      const deRatio = r.pick([0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0]);
+      const tax = r.pick([0.20, 0.25, 0.30]);
+      const mode = r.pick(['unlever', 'relever']);
+      if (mode === 'unlever') {
+        const denom = round(1 + (1 - tax) * deRatio, 4);
+        const betaU = round(betaL / denom, 3);
+        return {
+          prompt: `A company has a levered (observed) beta of ${betaL}, a debt-to-equity ratio of ${deRatio}, and faces a ${round(tax * 100, 0)}% tax rate. Using the Hamada equation, what is its UNLEVERED beta (to 3 decimals)?`,
+          answerType: 'numeric', correctAnswer: betaU, tolerance: 0.01,
+          hint: 'Unlever: βu = βl / [1 + (1−t)(D/E)]. Compute the bracket term first.',
+          approach: 'βu = βl / [1 + (1−t) × (D/E)].',
+          solution: `Bracket = 1 + (1−${round(tax * 100, 0)}%)×${deRatio} = 1 + ${round((1 - tax) * deRatio, 4)} = ${denom}. βu = ${betaL} / ${denom} = ${betaU}.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Multiplying by the bracket term instead of dividing by it when UNLEVERING (multiplying is for relevering, which goes the other direction).',
+          tags: ['beta', 'hamada']
+        };
+      }
+      const factor = round(1 + (1 - tax) * deRatio, 4);
+      const betaRelevered = round(betaL * factor, 3);
+      return {
+        prompt: `A peer group's average UNLEVERED beta is ${betaL}. The target company itself has a debt-to-equity ratio of ${deRatio} and faces a ${round(tax * 100, 0)}% tax rate. Using the Hamada equation, what is the target's RELEVERED beta (to 3 decimals)?`,
+        answerType: 'numeric', correctAnswer: betaRelevered, tolerance: 0.01,
+        hint: 'Relever: βl = βu × [1 + (1−t)(D/E)], using the TARGET\'s own D/E.',
+        approach: 'βl = βu × [1 + (1−t) × (D/E)].',
+        solution: `Bracket = 1 + (1−${round(tax * 100, 0)}%)×${deRatio} = 1 + ${round((1 - tax) * deRatio, 4)} = ${factor}. βl = ${betaL} × ${factor} = ${betaRelevered}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Using a peer\'s D/E instead of the target\'s own D/E when relevering, or dividing instead of multiplying (dividing is for unlevering, which goes the other direction).',
+        tags: ['beta', 'hamada']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_duration_price', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 3, targetTime: 90,
+    build(r) {
+      const duration = r.pick([3, 4, 5, 6, 7, 8, 9, 10]);
+      const yieldChangeBp = r.pick([25, 50, 75, 100, 150]);
+      const direction = r.pick([1, -1]);
+      const price = r.pick([900, 950, 1000, 1050, 1100]);
+      const yieldChangePct = yieldChangeBp / 100;
+      const pctChange = round(-duration * direction * yieldChangePct, 3);
+      const newPrice = round(price * (1 + pctChange / 100), 2);
+      const dirWord = direction === 1 ? 'rise' : 'fall';
+      return {
+        prompt: `A bond has a duration of ${duration} and is currently priced at $${price}. If yields ${dirWord} by ${yieldChangeBp} basis points, what is the approximate new price, in dollars (to 2 decimals)?`,
+        answerType: 'numeric', correctAnswer: newPrice, tolerance: 1,
+        hint: '%ΔPrice ≈ −Duration × Δyield. A yield rise means Δyield is positive; a yield fall means it is negative.',
+        approach: 'Compute the approximate percentage price change from duration, then apply it to the current price.',
+        solution: `Δyield = ${direction === 1 ? '+' : '−'}${yieldChangeBp}bp = ${direction === 1 ? '+' : '−'}${yieldChangePct}%. %ΔPrice ≈ −${duration} × (${direction === 1 ? '+' : '−'}${yieldChangePct}%) = ${pctChange}%. New price ≈ ${price} × (1 ${pctChange >= 0 ? '+' : '−'} ${Math.abs(pctChange)}%) = $${newPrice}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Getting the sign backwards — a RISE in yields should DECREASE the price (negative %ΔPrice), and a FALL in yields should INCREASE it.',
+        tags: ['duration', 'price-sensitivity']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_ytm_classification', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const faceValue = 1000;
+      const couponRate = r.pick([3, 4, 5, 6, 7, 8]);
+      const priceType = r.pick(['discount', 'premium', 'par']);
+      let price;
+      if (priceType === 'discount') price = faceValue - r.pick([40, 60, 80, 100]);
+      else if (priceType === 'premium') price = faceValue + r.pick([40, 60, 80, 100]);
+      else price = faceValue;
+      const coupon = round(faceValue * couponRate / 100, 2);
+      const currentYield = round((coupon / price) * 100, 3);
+      let answer;
+      if (priceType === 'par') answer = 'Coupon rate = Current yield = YTM';
+      else if (priceType === 'discount') answer = 'YTM > Current yield > Coupon rate';
+      else answer = 'Coupon rate > Current yield > YTM';
+      return {
+        prompt: `A bond has a $${faceValue} face value and a ${couponRate}% coupon rate. It currently trades at $${price}. What is the correct ordering of coupon rate, current yield, and YTM for this bond?`,
+        answerType: 'mc', options: ['Coupon rate = Current yield = YTM', 'YTM > Current yield > Coupon rate', 'Coupon rate > Current yield > YTM'], correctAnswer: answer,
+        hint: `Compare the bond's price ($${price}) to its face value ($${faceValue}) first — is it trading at a discount, at par, or at a premium?`,
+        approach: 'A bond at par has all three equal. A discount bond has YTM as the highest (capital gain to maturity added on). A premium bond has YTM as the lowest (capital loss to maturity subtracted off).',
+        solution: `The bond trades at $${price} versus a $${faceValue} face value, so it is trading at a ${priceType === 'par' ? 'exactly par' : priceType}. Current yield = ${coupon}/${price} ≈ ${currentYield}%. ${priceType === 'par' ? `Since price equals face value, coupon rate = current yield = YTM.` : priceType === 'discount' ? `Since the bond is below face value, holding to maturity captures a capital gain on top of the coupons, so YTM > Current yield > Coupon rate.` : `Since the bond is above face value, holding to maturity gives up a capital loss, so Coupon rate > Current yield > YTM.`}`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming current yield alone (income over price) is a complete measure of return, without accounting for the capital gain or loss embedded in a discount or premium price relative to face value.',
+        tags: ['ytm', 'current-yield', 'coupon-rate']
+      };
+    }
+  });
+
+  add({
+    id: 'ib_option_itm', topic: 'Currencies & Derivatives', subtopic: 'Options mechanics', difficulty: 3, targetTime: 90,
+    build(r) {
+      const optType = r.pick(['call', 'put']);
+      const strike = r.pick([40, 50, 60, 70, 80, 90, 100]);
+      const offset = r.pick([-15, -10, -5, 5, 10, 15]);
+      const underlying = strike + offset;
+      const mode = r.pick(['intrinsic', 'classify']);
+      const intrinsic = optType === 'call' ? Math.max(underlying - strike, 0) : Math.max(strike - underlying, 0);
+      if (mode === 'intrinsic') {
+        return {
+          prompt: `A ${optType} option has a strike price of $${strike}. The underlying is currently trading at $${underlying}. What is this option's intrinsic value, in dollars?`,
+          answerType: 'numeric', correctAnswer: intrinsic, tolerance: 0.5,
+          hint: optType === 'call' ? 'Call intrinsic value = max(underlying − strike, 0).' : 'Put intrinsic value = max(strike − underlying, 0).',
+          approach: optType === 'call' ? 'Intrinsic value = max(underlying price − strike price, 0).' : 'Intrinsic value = max(strike price − underlying price, 0).',
+          solution: optType === 'call'
+            ? `Intrinsic value = max(${underlying} − ${strike}, 0) = $${intrinsic}.`
+            : `Intrinsic value = max(${strike} − ${underlying}, 0) = $${intrinsic}.`,
+          recognitionTechnique: 'Direct calculation', commonTrap: 'Using the wrong direction of subtraction for a put versus a call, or forgetting intrinsic value is never negative (floored at zero).',
+          tags: ['options', 'intrinsic-value']
+        };
+      }
+      let classification;
+      if (optType === 'call') classification = underlying > strike ? 'In-the-money (ITM)' : 'Out-of-the-money (OTM)';
+      else classification = underlying < strike ? 'In-the-money (ITM)' : 'Out-of-the-money (OTM)';
+      return {
+        prompt: `A ${optType} option has a strike price of $${strike}. The underlying is currently trading at $${underlying}. Is this option in-the-money or out-of-the-money?`,
+        answerType: 'mc', options: ['In-the-money (ITM)', 'Out-of-the-money (OTM)'], correctAnswer: classification,
+        hint: optType === 'call' ? 'A call is ITM when the underlying price exceeds the strike.' : 'A put is ITM when the underlying price is below the strike.',
+        approach: optType === 'call' ? 'Call: ITM if underlying > strike.' : 'Put: ITM if underlying < strike.',
+        solution: optType === 'call'
+          ? `The underlying ($${underlying}) is ${underlying > strike ? 'above' : 'at or below'} the strike ($${strike}), so this call is ${classification}.`
+          : `The underlying ($${underlying}) is ${underlying < strike ? 'below' : 'at or above'} the strike ($${strike}), so this put is ${classification}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the call\'s ITM rule (price above strike) to a put, which uses the opposite direction.',
+        tags: ['options', 'moneyness']
+      };
+    }
+  });
+
   global.QTL_GEN_IB = G;
 })(window);

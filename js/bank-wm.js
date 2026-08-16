@@ -364,6 +364,600 @@
       solution: 'Commercial real estate is a physical, tangible asset, placing it in the "real assets" category, distinct from traditional financial instruments like stocks and bonds.',
       recognitionTechnique: 'Other', commonTrap: 'Confusing real estate investment trusts (publicly traded, liquid) with direct real estate ownership (illiquid, a genuine real asset) — both broadly relate to real estate but have very different liquidity profiles.',
       tags: ['real-assets']
+    },
+
+    /* ---------------------- Duration ---------------------- */
+    {
+      id: 'wm_b036', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond fund has a duration of 6. Rates rise by 0.75% (75bp). Approximately how much does the fund\'s value change?',
+      answerType: 'numeric', correctAnswer: -4.5, tolerance: 0.3,
+      hint: '%ΔValue ≈ −Duration × Δyield.',
+      approach: 'Multiply duration by the yield change (with the correct sign) to approximate the % value change.',
+      solution: '%ΔValue ≈ −6 × 0.75% = −4.5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting the negative sign — a rate rise should produce a value decline.',
+      tags: ['duration']
+    },
+    {
+      id: 'wm_b037', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 2, targetTime: 60,
+      prompt: 'A client with a 2-year time horizon for a specific goal is choosing bond duration. Which is generally more appropriate?',
+      answerType: 'mc', options: ['A long-duration bond fund, for the higher stated yield', 'A short-duration bond fund, to limit the risk of a rate-driven price dip right when the funds are needed', 'Duration is irrelevant to a 2-year time horizon', 'An all-equity allocation instead of any bonds'], correctAnswer: 'A short-duration bond fund, to limit the risk of a rate-driven price dip right when the funds are needed',
+      hint: 'Think about how much time the client has to ride out a rate move.',
+      approach: 'Match bond duration to the client\'s time horizon to reduce the risk of being forced to sell at a depressed price.',
+      solution: 'A short time horizon means the client cannot easily wait out a rate-driven price swing, making the lower sensitivity of a short-duration bond fund the more appropriate match.',
+      recognitionTechnique: 'Other', commonTrap: 'Chasing the higher yield of longer-duration bonds without considering the client\'s actual time horizon.',
+      tags: ['duration', 'suitability']
+    },
+    {
+      id: 'wm_b038', topic: 'Fixed Income', subtopic: 'Duration', difficulty: 3, targetTime: 90,
+      prompt: 'A client is upset that their "safe" bond fund lost value in a year when rates rose sharply, even though no underlying issuer had any credit trouble. What should a wealth manager explain?',
+      answerType: 'mc', options: [
+        'The fund must be poorly managed or fraudulent',
+        'This is a normal, mechanical consequence of interest-rate risk (duration), separate from credit risk, and the value can recover as rates stabilize or bonds mature at face value',
+        'Bonds should never be described as relatively lower-risk under any circumstances',
+        'This loss is permanent and has nothing to do with interest rates'
+      ], correctAnswer: 'This is a normal, mechanical consequence of interest-rate risk (duration), separate from credit risk, and the value can recover as rates stabilize or bonds mature at face value',
+      hint: 'Distinguish interest-rate risk from credit risk.',
+      approach: 'Explain the price decline as a normal duration-driven effect, not a sign of deteriorating credit quality.',
+      solution: 'The loss reflects interest-rate risk (duration), not credit risk — a normal, expected mechanical consequence of holding bonds with meaningful duration during a rising-rate environment, not a sign of financial distress at the underlying issuers.',
+      recognitionTechnique: 'Other', commonTrap: 'Conflating interest-rate risk with credit/default risk when communicating with a client.',
+      tags: ['duration', 'client-communication']
+    },
+
+    /* ---------------------- Yield mechanics ---------------------- */
+    {
+      id: 'wm_b039', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond pays a $35 annual coupon and trades at $700. What is its current yield?',
+      answerType: 'numeric', correctAnswer: 5, tolerance: 0.1,
+      hint: 'Current yield = annual coupon / current market price.',
+      approach: 'Divide the annual coupon by the current market price.',
+      solution: 'Current yield = 35/700 = 5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing by face value instead of the current market price.',
+      tags: ['current-yield']
+    },
+    {
+      id: 'wm_b040', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 3, targetTime: 90,
+      prompt: 'A wealth manager quotes a client only the current yield on a premium bond as "your expected return." What is missing from this explanation?',
+      answerType: 'mc', options: [
+        'Nothing — current yield is always a complete and accurate figure to quote',
+        'Current yield ignores the capital loss the client will realize as the premium bond\'s price converges to face value by maturity; YTM should be quoted as the accurate total-return figure',
+        'Premium bonds never lose any value by maturity',
+        'YTM is only relevant for discount bonds, not premium bonds'
+      ], correctAnswer: 'Current yield ignores the capital loss the client will realize as the premium bond\'s price converges to face value by maturity; YTM should be quoted as the accurate total-return figure',
+      hint: 'Think about what a premium bond\'s price does by maturity.',
+      approach: 'Current yield alone systematically overstates a premium bond\'s true expected return.',
+      solution: 'Current yield omits the built-in capital loss a premium bond gives back by maturity; YTM is the complete, client-appropriate figure that captures the bond\'s true total expected return.',
+      recognitionTechnique: 'Other', commonTrap: 'Presenting current yield alone as a client\'s full expected return.',
+      tags: ['ytm', 'current-yield', 'client-communication']
+    },
+    {
+      id: 'wm_b041', topic: 'Fixed Income', subtopic: 'Yield mechanics', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s bond was purchased at exactly its face (par) value. What is true of its coupon rate, current yield, and YTM?',
+      answerType: 'mc', options: ['They are always different', 'They are all exactly equal', 'Only current yield and YTM match', 'Only coupon rate and current yield match'], correctAnswer: 'They are all exactly equal',
+      hint: 'At par, there is no capital gain or loss embedded.',
+      approach: 'A bond bought at par has no gap between purchase price and face value to create a gain or loss.',
+      solution: 'With price equal to face value, there is no capital gain or loss to maturity, so coupon rate, current yield, and YTM all collapse to the same figure.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming these three figures always differ, regardless of the bond\'s price relative to face value.',
+      tags: ['ytm', 'current-yield', 'coupon-rate']
+    },
+
+    /* ---------------------- Bond structures ---------------------- */
+    {
+      id: 'wm_b042', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 2, targetTime: 60,
+      prompt: 'A client needs exactly $40,000 in 8 years for a known future expense and wants to avoid reinvestment guesswork along the way. Which bond structure best matches this goal?',
+      answerType: 'mc', options: ['A callable bond', 'A zero-coupon bond', 'A convertible bond', 'A floating-rate bond'], correctAnswer: 'A zero-coupon bond',
+      hint: 'Think about which structure delivers its entire return as a single lump sum on a known date.',
+      approach: 'A zero-coupon bond delivers a single payment at maturity with no interim coupons to reinvest.',
+      solution: 'A zero-coupon bond purchased to mature at the target date delivers the full face value precisely when needed, with no interim coupons to reinvest or track — a clean match for a single, known future liability.',
+      recognitionTechnique: 'Other', commonTrap: 'Recommending a coupon-paying bond, which introduces reinvestment-rate uncertainty for the interim coupons.',
+      tags: ['zero-coupon', 'suitability']
+    },
+    {
+      id: 'wm_b043', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'A client is comparing a straight bond yielding 5.5% to a callable bond (callable after year 3) from the same issuer yielding 6.3%. Why might a wealth manager caution against assuming the callable bond is simply "the better deal"?',
+      answerType: 'mc', options: [
+        'Callable bonds always default more often',
+        'If rates fall after year 3, the issuer may call the bond away, forcing the client to reinvest at lower prevailing rates — undermining the cash-flow certainty the higher yield seemed to promise',
+        'Callable bonds pay no coupons at all',
+        'There is no reason for caution — the higher yield is simply better with no tradeoff'
+      ], correctAnswer: 'If rates fall after year 3, the issuer may call the bond away, forcing the client to reinvest at lower prevailing rates — undermining the cash-flow certainty the higher yield seemed to promise',
+      hint: 'Think about what happens to the client\'s cash flows if the bond gets called.',
+      approach: 'The call option benefits the issuer and can disrupt the client\'s expected income stream.',
+      solution: 'The extra yield compensates for the risk that the issuer calls the bond away if rates fall, forcing the client to reinvest at now-lower rates — a real risk to the cash-flow certainty the higher stated yield might suggest.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating a callable bond\'s higher yield as simply "more return for the same risk."',
+      tags: ['callable-bonds', 'suitability']
+    },
+    {
+      id: 'wm_b044', topic: 'Fixed Income', subtopic: 'Bond structures', difficulty: 3, targetTime: 90,
+      prompt: 'A client wants some equity-like upside potential but more downside protection than owning the stock directly. Which bond structure most directly addresses this goal?',
+      answerType: 'mc', options: ['A zero-coupon bond', 'A convertible bond', 'A putable bond', 'A callable bond'], correctAnswer: 'A convertible bond',
+      hint: 'Think about which structure lets the client participate in equity upside while keeping bond-like protection.',
+      approach: 'A convertible bond lets the client convert into equity if the stock performs well, while otherwise behaving like a bond.',
+      solution: 'A convertible bond combines bond-like downside protection (coupons, principal repayment if never converted) with the option to convert into equity if the stock rallies — directly matching this client\'s stated goal.',
+      recognitionTechnique: 'Other', commonTrap: 'Recommending a callable or putable bond, neither of which offers any equity upside participation.',
+      tags: ['convertible-bonds', 'suitability']
+    },
+
+    /* ---------------------- Creditor seniority ---------------------- */
+    {
+      id: 'wm_b045', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 2, targetTime: 60,
+      prompt: 'A client is comparing two bonds from the SAME issuer: a senior secured bond yielding 5%, and a subordinated bond yielding 8%. What explains the yield gap?',
+      answerType: 'mc', options: [
+        'The subordinated bond must have a typo in its yield',
+        'The subordinated bond is paid only after the senior secured bond (and other senior claims) are fully satisfied in a potential insolvency — a materially higher risk of an incomplete recovery',
+        'The two bonds must actually be from different issuers',
+        'Higher yield always means better value with no added risk'
+      ], correctAnswer: 'The subordinated bond is paid only after the senior secured bond (and other senior claims) are fully satisfied in a potential insolvency — a materially higher risk of an incomplete recovery',
+      hint: 'Think about where each bond sits in the liquidation priority order.',
+      approach: 'Seniority within the same issuer\'s capital structure can differ substantially between bonds.',
+      solution: 'The extra yield on the subordinated bond directly compensates for being paid only after senior claims are satisfied in full — a materially higher risk of an incomplete recovery, despite sharing the same issuer.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all bonds from the same issuer carry identical risk regardless of seniority.',
+      tags: ['creditor-waterfall', 'suitability']
+    },
+    {
+      id: 'wm_b046', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 2, targetTime: 60,
+      prompt: 'An issuer liquidates for $50m, with $30m of senior secured debt and $25m of subordinated debt (no other claims). What does the subordinated debt recover?',
+      answerType: 'numeric', correctAnswer: 20, tolerance: 0.5,
+      hint: 'Senior secured debt is paid in full first.',
+      approach: 'Pay senior secured in full, then apply remaining proceeds to subordinated debt.',
+      solution: 'Senior secured paid in full: $30m, leaving 50−30 = $20m for the $25m subordinated claim — a partial recovery of $20m.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Splitting proceeds proportionally instead of following the strict, sequential priority order.',
+      tags: ['creditor-waterfall']
+    },
+    {
+      id: 'wm_b047', topic: 'Fixed Income', subtopic: 'Creditor seniority', difficulty: 3, targetTime: 90,
+      prompt: 'A client, chasing yield, wants to buy only the highest-yielding bond from a well-known, financially healthy company, without checking anything else. Why should a wealth manager push back?',
+      answerType: 'mc', options: [
+        'Yield-chasing is always appropriate as long as the issuer is well-known',
+        'The high yield may simply reflect that this specific bond sits low in the issuer\'s capital structure (e.g., subordinated), meaning the client is taking on more structural risk than the issuer\'s reputation alone would suggest',
+        'Well-known issuers never offer bonds with varying seniority',
+        'Yield differences within one issuer are always due to maturity alone, never seniority'
+      ], correctAnswer: 'The high yield may simply reflect that this specific bond sits low in the issuer\'s capital structure (e.g., subordinated), meaning the client is taking on more structural risk than the issuer\'s reputation alone would suggest',
+      hint: 'Consider what a bond\'s yield can reveal about its seniority, independent of the issuer\'s overall reputation.',
+      approach: 'A complete risk assessment requires checking the specific bond\'s seniority, not just the issuer\'s name.',
+      solution: 'A yield premium from an otherwise solid issuer often reflects that the specific bond sits low in the capital structure (e.g., subordinated), not that the issuer itself is unusually risky — the client may be taking on more structural risk than realized.',
+      recognitionTechnique: 'Other', commonTrap: 'Relying on an issuer\'s general reputation instead of checking a specific bond\'s seniority.',
+      tags: ['creditor-waterfall', 'suitability']
+    },
+
+    /* ---------------------- Inflation & TIPS ---------------------- */
+    {
+      id: 'wm_b048', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s target real return is 3%, and expected inflation is 2.5%. Using the Fisher approximation, what nominal return do they need?',
+      answerType: 'numeric', correctAnswer: 5.5, tolerance: 0.2,
+      hint: 'Nominal rate ≈ real rate + expected inflation.',
+      approach: 'Add the target real return and expected inflation.',
+      solution: 'Nominal rate ≈ 3% + 2.5% = 5.5%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Confusing the nominal and real return targets when discussing goals with a client.',
+      tags: ['fisher-equation']
+    },
+    {
+      id: 'wm_b049', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 2, targetTime: 60,
+      prompt: 'A client holds a TIPS bond with an original $8,000 principal and a 1.5% coupon rate. After one year, cumulative inflation is 3%. What is that year\'s coupon payment?',
+      answerType: 'numeric', correctAnswer: 123.6, tolerance: 2,
+      hint: 'First adjust the principal upward by cumulative inflation, then apply the coupon rate to the adjusted principal.',
+      approach: 'Adjusted principal = original × (1+inflation). Coupon = coupon rate × adjusted principal.',
+      solution: 'Adjusted principal = 8000×1.03 = $8240. Coupon = 1.5%×8240 = $123.60.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Applying the coupon rate to the original, un-adjusted principal instead of the inflation-adjusted principal.',
+      tags: ['tips']
+    },
+    {
+      id: 'wm_b050', topic: 'Fixed Income', subtopic: 'Inflation & TIPS', difficulty: 3, targetTime: 90,
+      prompt: 'A retired client, well into a 30-year retirement, is entirely invested in conventional nominal bonds and is confident their fixed coupon income is fully "safe" since the dollar amounts never change. What should a wealth manager flag?',
+      answerType: 'mc', options: [
+        'Nothing — nominal safety and real safety are the same thing',
+        'Over a long retirement, even moderate inflation compounds substantially, eroding the real purchasing power of fixed nominal payments even though the dollar figures never change — a case for allocating some fixed income to TIPS',
+        'Nominal bonds automatically convert into TIPS after enough years',
+        'This client should hold no bonds at all'
+      ], correctAnswer: 'Over a long retirement, even moderate inflation compounds substantially, eroding the real purchasing power of fixed nominal payments even though the dollar figures never change — a case for allocating some fixed income to TIPS',
+      hint: 'Distinguish nominal safety from real (purchasing-power) safety over a long horizon.',
+      approach: 'Inflation compounds meaningfully over decades, eroding real purchasing power even when nominal payments are reliable.',
+      solution: 'A long retirement gives inflation more time to compound and erode real purchasing power even while nominal payments remain perfectly reliable — a real risk to the client\'s long-run standard of living, which allocating part of the fixed-income sleeve to TIPS directly addresses.',
+      recognitionTechnique: 'Other', commonTrap: 'Reassuring a client that fixed nominal payments are fully safe without distinguishing nominal safety from real (inflation-adjusted) safety.',
+      tags: ['inflation', 'tips', 'client-communication']
+    },
+
+    /* ---------------------- Buyer types (business owner clients) ---------------------- */
+    {
+      id: 'wm_b051', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 2, targetTime: 60,
+      prompt: 'Why might a direct competitor (strategic, horizontal buyer) be willing to pay MORE for a client\'s business than a financial buyer?',
+      answerType: 'mc', options: ['Competitors are always required by law to overpay', 'The competitor can capture operational cost synergies (combined facilities, eliminated overhead) by merging operations, value a financial buyer typically cannot access', 'Financial buyers never have enough capital to make competitive offers', 'There is no typical pattern — offers are always random'], correctAnswer: 'The competitor can capture operational cost synergies (combined facilities, eliminated overhead) by merging operations, value a financial buyer typically cannot access',
+      hint: 'Think about what a competitor can do with the business that a financial buyer cannot.',
+      approach: 'Operational synergies from combining with a rival are a real, extractable source of extra value.',
+      solution: 'A competitor can extract real cost synergies by combining operations, a source of value a purely financial buyer generally cannot access, which is often reflected in a higher price.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all buyer types value a business identically.',
+      tags: ['buyer-types']
+    },
+    {
+      id: 'wm_b052', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 3, targetTime: 90,
+      prompt: 'A client receives a lower offer from a buyer that would preserve the company\'s brand and existing employees, versus a higher offer from a competitor that would likely eliminate both. How should a wealth manager frame this decision?',
+      answerType: 'mc', options: ['Always recommend the highest price regardless of any other factor', 'Help the client explicitly weigh how much the higher price is worth relative to their own priorities around brand and employee continuity — a decision only the client can ultimately make', 'Refuse to discuss any offer below the highest one received', 'Assume the client only cares about price and ignore their stated concerns'], correctAnswer: 'Help the client explicitly weigh how much the higher price is worth relative to their own priorities around brand and employee continuity — a decision only the client can ultimately make',
+      hint: 'This is a values-based tradeoff, not a purely financial calculation.',
+      approach: 'Help the client frame the tradeoff clearly rather than deciding it for them.',
+      solution: 'This is fundamentally a values-based tradeoff for the client; the wealth manager\'s role is to help frame the tradeoff clearly (price versus non-price priorities), not to decide it unilaterally.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the highest headline price is automatically the best outcome for every client.',
+      tags: ['buyer-types', 'suitability']
+    },
+    {
+      id: 'wm_b053', topic: 'Business Owner & Liquidity Events', subtopic: 'Buyer types', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s key supplier proposes acquiring the client\'s business. What is a likely motivation for this vertical acquirer?',
+      answerType: 'mc', options: ['Eliminating a direct competitor', 'Securing supply and capturing margin currently paid between the two companies', 'Diversifying into a completely unrelated industry', 'There is no typical strategic motivation for this type of buyer'], correctAnswer: 'Securing supply and capturing margin currently paid between the two companies',
+      hint: 'Think about the supply-chain relationship between the two companies.',
+      approach: 'A vertical acquirer is motivated by securing supply and capturing margin along the existing relationship.',
+      solution: 'A vertical (supply-chain) acquirer is typically motivated by securing supply and capturing margin along the existing supplier-customer relationship.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming only competitors have a strategic motivation to acquire a business.',
+      tags: ['buyer-types']
+    },
+
+    /* ---------------------- Takeover defenses (shareholder view) ---------------------- */
+    {
+      id: 'wm_b054', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 2, targetTime: 60,
+      prompt: 'From an ordinary shareholder\'s perspective, what is the main practical effect of a poison pill on a hostile takeover attempt?',
+      answerType: 'mc', options: ['It immediately cancels the shareholder\'s existing shares', 'It generally does not directly harm existing shareholders, and can force the hostile acquirer to negotiate directly with the board rather than accumulate control unilaterally', 'It automatically doubles the shareholder\'s tax liability', 'It guarantees the takeover will never happen under any circumstances'], correctAnswer: 'It generally does not directly harm existing shareholders, and can force the hostile acquirer to negotiate directly with the board rather than accumulate control unilaterally',
+      hint: 'Think about whether a poison pill directly harms an ordinary shareholder\'s existing rights.',
+      approach: 'A poison pill deters unilateral accumulation of control without directly harming ordinary shareholders.',
+      solution: 'A poison pill\'s main function is deterring unilateral accumulation of control, generally without directly harming existing shareholders\' rights, and can lead to a better-negotiated outcome.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a poison pill directly harms the shareholder\'s existing position.',
+      tags: ['takeover-defenses']
+    },
+    {
+      id: 'wm_b055', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 3, targetTime: 90,
+      prompt: 'A board resists a takeover bid for over a year with no competing offer ever emerging and no articulated value rationale. What should this pattern suggest to a wealth manager evaluating the client\'s position?',
+      answerType: 'mc', options: ['This is always a sign of excellent governance', 'This is a potential governance red flag, since it may indicate entrenchment rather than genuine shareholder value protection', 'This pattern has no relevance to the client\'s position', 'This always means the original bid was too low'], correctAnswer: 'This is a potential governance red flag, since it may indicate entrenchment rather than genuine shareholder value protection',
+      hint: 'Consider whether the defense is producing any measurable benefit for shareholders.',
+      approach: 'Prolonged resistance with no competing bid or rationale is a recognizable entrenchment pattern.',
+      solution: 'Prolonged resistance with no competing bid and no articulated value rationale is a recognizable pattern worth flagging as a possible governance concern for the client.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all takeover resistance is automatically in shareholders\' best interest.',
+      tags: ['takeover-defenses', 'governance']
+    },
+    {
+      id: 'wm_b056', topic: 'Business Owner & Liquidity Events', subtopic: 'Takeover defenses (shareholder view)', difficulty: 2, targetTime: 60,
+      prompt: 'How can a "white knight" defense directly benefit a client holding stock in the target company?',
+      answerType: 'mc', options: ['It never benefits shareholders in any way', 'If it triggers competitive bidding, it can push the ultimate sale price higher than the original hostile bid, directly benefiting shareholders', 'It automatically cancels the deal entirely', 'It only benefits the target company\'s management, never shareholders'], correctAnswer: 'If it triggers competitive bidding, it can push the ultimate sale price higher than the original hostile bid, directly benefiting shareholders',
+      hint: 'Think about what happens when two acquirers compete for the same target.',
+      approach: 'Competitive bidding from a white knight search can raise the final price.',
+      solution: 'Competitive bidding driven by a white knight search can produce a measurably higher final price, a direct benefit to shareholders like the client.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a white knight defense only ever serves management\'s interests.',
+      tags: ['takeover-defenses']
+    },
+
+    /* ---------------------- Cash vs stock consideration (client planning) ---------------------- */
+    {
+      id: 'wm_b057', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why does receiving STOCK consideration create a concentration risk for a client selling their business?',
+      answerType: 'mc', options: ['Stock consideration never creates any concentration risk', 'The client ends up holding a large, often outsized position in a single stock (the acquirer\'s shares), directly conflicting with diversification unless deliberately reduced over time', 'Stock consideration is always split evenly across many different companies automatically', 'Concentration risk only applies to cash consideration, never stock'], correctAnswer: 'The client ends up holding a large, often outsized position in a single stock (the acquirer\'s shares), directly conflicting with diversification unless deliberately reduced over time',
+      hint: 'Think about what the client now holds after receiving stock consideration.',
+      approach: 'Stock consideration creates a new, potentially concentrated single-stock position.',
+      solution: 'A large single-stock position, even if tax-deferred, represents exactly the kind of concentration risk diversification is meant to avoid, unless actively managed down over time.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a stock-for-stock deal automatically achieves diversification.',
+      tags: ['stock-vs-cash', 'concentration-risk']
+    },
+    {
+      id: 'wm_b058', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why should a wealth manager plan for a client\'s cash-consideration tax bill BEFORE the deal closes, rather than after?',
+      answerType: 'mc', options: ['There is no benefit to planning ahead versus reacting afterward', 'Proactive planning avoids the client committing or spending funds that will actually be needed for a large, known upcoming tax liability', 'Tax bills from a business sale are always negligible and require no planning', 'Planning ahead is illegal under most tax regimes'], correctAnswer: 'Proactive planning avoids the client committing or spending funds that will actually be needed for a large, known upcoming tax liability',
+      hint: 'Think about what could go wrong if the tax bill is only addressed after cash has already arrived.',
+      approach: 'A large, foreseeable tax liability should be reserved for in advance.',
+      solution: 'A large, foreseeable tax liability should be reserved for in advance, not discovered as a surprise after cash has already been deployed elsewhere.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming tax planning can be deferred until after a large cash windfall has already been received and spent.',
+      tags: ['stock-vs-cash', 'tax-planning']
+    },
+    {
+      id: 'wm_b059', topic: 'Business Owner & Liquidity Events', subtopic: 'Cash vs stock (client planning)', difficulty: 3, targetTime: 90,
+      prompt: 'A client receives stock consideration subject to a 12-month lock-up period. What should a wealth manager do regarding diversification planning?',
+      answerType: 'mc', options: ['Wait until the lock-up expires before doing any planning at all', 'Build a concrete diversification plan in advance (pace of future sales, tax coordination, any available interim risk-management options) so execution can begin as soon as the lock-up permits', 'Advise the client that nothing can be done about concentration risk until the lock-up ends, with no further planning needed', 'Recommend the client immediately violate the lock-up restriction'], correctAnswer: 'Build a concrete diversification plan in advance (pace of future sales, tax coordination, any available interim risk-management options) so execution can begin as soon as the lock-up permits',
+      hint: 'Proactive planning during a restriction period still adds value.',
+      approach: 'Planning ahead ensures the client is ready to act immediately once restrictions lift.',
+      solution: 'Proactive planning during the lock-up period ensures the client is ready to act immediately once restrictions lift, rather than starting the planning process late.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming nothing productive can be planned until a trading restriction formally expires.',
+      tags: ['stock-vs-cash', 'concentration-risk']
+    },
+
+    /* ---------------------- Control premium (business owner clients) ---------------------- */
+    {
+      id: 'wm_b060', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 2, targetTime: 60,
+      prompt: 'If similar public companies trade at 7× EBITDA, should a client selling their ENTIRE private business expect to receive exactly 7×?',
+      answerType: 'mc', options: ['Yes, this benchmark should be used exactly as-is with no adjustment', 'Not necessarily — since the client is transferring full control, a control premium above this minority-stake benchmark would reasonably be expected', 'The public benchmark is always completely irrelevant to a private sale', 'A private sale should always be valued at a discount to the public benchmark'], correctAnswer: 'Not necessarily — since the client is transferring full control, a control premium above this minority-stake benchmark would reasonably be expected',
+      hint: 'Think about what public trading multiples actually reflect versus a full-company sale.',
+      approach: 'Public multiples reflect minority-stake pricing; a full sale transfers control and reasonably commands a premium.',
+      solution: 'The public multiple reflects passive minority-stake pricing; a full-company sale transferring control reasonably commands a premium above it.',
+      recognitionTechnique: 'Other', commonTrap: 'Anchoring a client\'s expectations directly on an unadjusted public trading multiple.',
+      tags: ['control-premium', 'suitability']
+    },
+    {
+      id: 'wm_b061', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 3, targetTime: 90,
+      prompt: 'Why should a wealth manager caution a client against assuming an unlimited control premium simply because "control is valuable"?',
+      answerType: 'mc', options: ['Control premiums are never actually valuable in practice', 'The actual size of the premium a specific buyer will pay is bounded by how much real extra value that particular buyer can capture, not an unlimited amount', 'Every buyer always pays the exact same premium regardless of circumstances', 'Only public companies are ever subject to a control premium'], correctAnswer: 'The actual size of the premium a specific buyer will pay is bounded by how much real extra value that particular buyer can capture, not an unlimited amount',
+      hint: 'Think about what actually determines how large a premium a specific buyer will pay.',
+      approach: 'A realistic premium estimate must be grounded in the specific buyer\'s ability to extract extra value.',
+      solution: 'A realistic premium estimate is bounded by the specific buyer\'s actual ability to capture extra value (synergies, strategic fit), not treated as boundless.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming "control has value" implies an unlimited premium in every case.',
+      tags: ['control-premium', 'suitability']
+    },
+    {
+      id: 'wm_b062', topic: 'Business Owner & Liquidity Events', subtopic: 'Control premium (client expectations)', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s undisturbed comparison benchmark implies $40/share, but the actual full-company acquisition offer is $52/share. What is the control premium?',
+      answerType: 'numeric', correctAnswer: 30, tolerance: 1,
+      hint: 'Control premium = (offer / benchmark − 1) × 100.',
+      approach: 'Divide the offer by the benchmark, subtract 1, convert to a percentage.',
+      solution: 'Control premium = (52/40 − 1) × 100 = 30%.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Computing a simple dollar difference instead of a percentage premium.',
+      tags: ['control-premium']
+    },
+
+    /* ---------------------- Earnouts & NWC adjustments (client planning) ---------------------- */
+    {
+      id: 'wm_b063', topic: 'Business Owner & Liquidity Events', subtopic: 'Earnouts (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'Why should a wealth manager help a client plan near-term finances around the UPFRONT portion of a deal, rather than the full headline value including an earnout?',
+      answerType: 'mc', options: ['Earnouts are always guaranteed to be paid in full', 'The earnout is contingent on future performance targets being met, so it is not guaranteed — planning around it as if certain risks overcommitting the client\'s finances', 'Upfront payments are always smaller than earnouts and therefore irrelevant', 'There is no meaningful difference between upfront and earnout proceeds for planning purposes'], correctAnswer: 'The earnout is contingent on future performance targets being met, so it is not guaranteed — planning around it as if certain risks overcommitting the client\'s finances',
+      hint: 'Think about what happens if the earnout targets are ultimately missed.',
+      approach: 'Near-term financial commitments should be built around certain proceeds only.',
+      solution: 'An earnout\'s contingent nature means it should be treated as a potential bonus, not counted on for firm financial commitments, to avoid overcommitting the client\'s finances.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the full headline deal value, including a contingent earnout, as guaranteed.',
+      tags: ['earnouts', 'financial-planning']
+    },
+    {
+      id: 'wm_b064', topic: 'Business Owner & Liquidity Events', subtopic: 'Earnouts (client planning)', difficulty: 3, targetTime: 90,
+      prompt: 'A client is offered a deal requiring 3 more years of active operational involvement to help achieve an earnout, but had hoped to retire within 1 year. What should a wealth manager help the client evaluate?',
+      answerType: 'mc', options: ['Only the financial size of the potential earnout, ignoring the client\'s retirement timeline entirely', 'The explicit tradeoff between the additional (contingent) earnout proceeds and the real cost of delaying retirement, modeling the client\'s financial plan under both the "earnout achieved" and "earnout missed" scenarios', 'Automatically recommending the client reject any deal involving an earnout', 'Automatically recommending the client accept any deal with a larger total headline value'], correctAnswer: 'The explicit tradeoff between the additional (contingent) earnout proceeds and the real cost of delaying retirement, modeling the client\'s financial plan under both the "earnout achieved" and "earnout missed" scenarios',
+      hint: 'This decision involves both financial modeling and the client\'s own life priorities.',
+      approach: 'Surface both the financial and non-financial tradeoffs explicitly, under multiple scenarios.',
+      solution: 'This decision involves both financial modeling under multiple scenarios and the client\'s own non-financial priorities (retirement timing), both of which the wealth manager should help surface explicitly.',
+      recognitionTechnique: 'Other', commonTrap: 'Reducing this decision to a pure financial calculation, ignoring the client\'s life-timeline priorities.',
+      tags: ['earnouts', 'financial-planning']
+    },
+    {
+      id: 'wm_b065', topic: 'Business Owner & Liquidity Events', subtopic: 'NWC adjustments (client planning)', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s deal assumes $5m of target NWC at closing; actual NWC delivered comes in at $5.3m. How should a wealth manager explain this to the client?',
+      answerType: 'mc', options: [
+        'This indicates a serious problem with the deal that requires renegotiation',
+        'This is a normal, expected mechanical true-up: the client delivered slightly more working capital than assumed, resulting in an additional $300,000 at closing',
+        'This means the deal must be canceled',
+        'This has no effect on the client\'s proceeds whatsoever'
+      ], correctAnswer: 'This is a normal, expected mechanical true-up: the client delivered slightly more working capital than assumed, resulting in an additional $300,000 at closing',
+      hint: 'NWC adjustments are a routine part of most deals.',
+      approach: 'Explain the NWC adjustment as a normal, expected mechanical true-up.',
+      solution: 'This is a normal, expected mechanical true-up of the client\'s closing proceeds, not a sign of any problem or a renegotiation.',
+      recognitionTechnique: 'Other', commonTrap: 'Alarming the client by treating a routine NWC true-up as a sign of deal trouble.',
+      tags: ['nwc-adjustment', 'client-communication']
+    },
+
+    /* ---------------------- Mean-variance optimization / efficient frontier ---------------------- */
+    {
+      id: 'wm_b066', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 2, targetTime: 60,
+      prompt: 'Why can combining two assets that are NOT perfectly correlated produce a portfolio with LOWER risk than a simple weighted average of their individual risks?',
+      answerType: 'mc', options: ['This is not actually possible under any circumstances', 'Because their individual price swings partially offset rather than reinforce each other, since they do not move in perfect lockstep', 'Because diversification always eliminates all risk entirely', 'Because combining assets always increases expected return with no change to risk'], correctAnswer: 'Because their individual price swings partially offset rather than reinforce each other, since they do not move in perfect lockstep',
+      hint: 'Think about what imperfect correlation means for combined price movements.',
+      approach: 'Imperfect correlation allows gains in one asset to offset losses in another.',
+      solution: 'Imperfect correlation means gains in one asset can offset losses in another, producing a combined risk level below the simple weighted average of the parts.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming diversification benefits require assets to be negatively correlated, when merely imperfect (less than perfect) correlation is enough to help.',
+      tags: ['mean-variance', 'efficient-frontier']
+    },
+    {
+      id: 'wm_b067', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 2, targetTime: 60,
+      prompt: 'Portfolio A has 12% volatility and 7% expected return. Portfolio B has the same 7% expected return but only 9% volatility. Which portfolio is more likely to sit on the efficient frontier?',
+      answerType: 'mc', options: ['Portfolio A', 'Portfolio B, since it achieves the same return with less risk', 'They are equally likely to be on the frontier', 'Neither can ever be on the efficient frontier'], correctAnswer: 'Portfolio B, since it achieves the same return with less risk',
+      hint: 'For the same return, less risk is always preferable.',
+      approach: 'A portfolio dominated by another offering the same return at lower risk is sub-optimal.',
+      solution: 'For the same expected return, the lower-risk portfolio (B) is more efficient — A is sub-optimal since B achieves the identical return with less risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming higher volatility is automatically compensated by proportionally higher return.',
+      tags: ['efficient-frontier']
+    },
+    {
+      id: 'wm_b068', topic: 'Asset Allocation', subtopic: 'Mean-variance optimization', difficulty: 3, targetTime: 90,
+      prompt: 'A mean-variance optimization recommends putting 65% of a portfolio into a single obscure asset class. What is the most likely explanation, and appropriate response?',
+      answerType: 'mc', options: [
+        'This must be the objectively correct allocation and should be implemented exactly as calculated',
+        'This is likely a symptom of input estimation error (especially in that asset\'s expected return); the output should be treated as one input among several, with practical constraints applied rather than implemented directly',
+        'Mean-variance optimization should never be used again after this result',
+        'This result proves the asset class is definitely undervalued by the broader market'
+      ], correctAnswer: 'This is likely a symptom of input estimation error (especially in that asset\'s expected return); the output should be treated as one input among several, with practical constraints applied rather than implemented directly',
+      hint: 'Think about the optimizer\'s known sensitivity to small input errors.',
+      approach: 'Extreme, concentrated outputs are a well-known symptom of input sensitivity.',
+      solution: 'Extreme, concentrated outputs are a well-known symptom of the optimizer\'s sensitivity to input error, calling for practical constraints rather than blind implementation.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating an optimizer\'s raw output as a final, ready-to-implement recommendation.',
+      tags: ['mean-variance']
+    },
+
+    /* ---------------------- Risk budgeting ---------------------- */
+    {
+      id: 'wm_b069', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 2, targetTime: 60,
+      prompt: 'Why can a 60% equity / 40% bond portfolio have its TOTAL RISK overwhelmingly dominated by the equity sleeve, despite equities being only 60% of the capital?',
+      answerType: 'mc', options: ['This is impossible — risk always matches capital weights exactly', 'Equities are typically far more volatile than bonds, so they contribute a disproportionately larger share of total portfolio risk per dollar invested than their capital weight alone would suggest', 'Bonds always have zero risk in every portfolio', 'The 60/40 split only applies to returns, never to risk'], correctAnswer: 'Equities are typically far more volatile than bonds, so they contribute a disproportionately larger share of total portfolio risk per dollar invested than their capital weight alone would suggest',
+      hint: 'Think about volatility differences between the two asset classes.',
+      approach: 'Higher volatility means a disproportionately larger risk contribution per dollar.',
+      solution: 'Higher volatility means a disproportionately larger risk contribution per dollar, which is exactly the gap between capital allocation and risk allocation.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a portfolio\'s capital split accurately describes its risk split.',
+      tags: ['risk-budgeting']
+    },
+    {
+      id: 'wm_b070', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 2, targetTime: 60,
+      prompt: 'A "risk parity" approach aims to:',
+      answerType: 'mc', options: ['Allocate equal DOLLAR amounts to every asset class, regardless of volatility', 'Allocate dollar amounts so that each asset class contributes roughly EQUAL risk to the total portfolio', 'Only ever hold a single asset class', 'Maximize total portfolio volatility'], correctAnswer: 'Allocate dollar amounts so that each asset class contributes roughly EQUAL risk to the total portfolio',
+      hint: 'Risk parity targets risk contribution, not dollar weights.',
+      approach: 'Risk parity specifically targets equal risk contribution.',
+      solution: 'Risk parity specifically targets equal risk contribution, which typically requires unequal dollar weights given differing asset-class volatilities.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing risk parity with an equal-dollar-weighted portfolio.',
+      tags: ['risk-budgeting']
+    },
+    {
+      id: 'wm_b071', topic: 'Asset Allocation', subtopic: 'Risk budgeting', difficulty: 3, targetTime: 90,
+      prompt: 'A client is surprised their "60/40" portfolio fell sharply during an equity downturn, saying they thought "only 60% was even at risk." What is the most accurate explanation?',
+      answerType: 'mc', options: [
+        'The client\'s portfolio must have been mislabeled',
+        'The 60/40 figure describes CAPITAL allocation, not RISK allocation — equities\' higher volatility means they likely drove a much larger share (often 80%+) of the portfolio\'s actual risk and downturn experience',
+        'Bonds must have also fallen by an identical amount',
+        'This experience proves the 60/40 label was completely inaccurate and meaningless'
+      ], correctAnswer: 'The 60/40 figure describes CAPITAL allocation, not RISK allocation — equities\' higher volatility means they likely drove a much larger share (often 80%+) of the portfolio\'s actual risk and downturn experience',
+      hint: 'Distinguish capital allocation from risk allocation.',
+      approach: 'This is the classic gap between capital and risk allocation.',
+      solution: 'This is the classic gap between capital allocation and risk allocation — the label describes dollars, not the portfolio\'s actual risk experience.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a capital-weighted label accurately reflects a portfolio\'s actual risk distribution.',
+      tags: ['risk-budgeting', 'client-communication']
+    },
+
+    /* ---------------------- PE metrics: J-curve, DPI, TVPI ---------------------- */
+    {
+      id: 'wm_b072', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 2, targetTime: 60,
+      prompt: 'A client has paid in $1.5m to a PE fund and has received $600,000 of distributions so far. What is the DPI?',
+      answerType: 'numeric', correctAnswer: 0.4, tolerance: 0.02,
+      hint: 'DPI = cash distributed / cash paid in.',
+      approach: 'Divide cumulative distributions by cumulative paid-in capital.',
+      solution: 'DPI = 600,000/1,500,000 = 0.4x.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Dividing paid-in capital by distributions instead of the other way around.',
+      tags: ['dpi']
+    },
+    {
+      id: 'wm_b073', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 2, targetTime: 60,
+      prompt: 'Using the same fund (paid in $1.5m, distributed $600,000), the remaining fund stake is currently estimated at $1.2m. What is the TVPI?',
+      answerType: 'numeric', correctAnswer: 1.2, tolerance: 0.02,
+      hint: 'TVPI = (cash distributed + current value of remaining holdings) / cash paid in.',
+      approach: 'Add distributions and remaining value, then divide by paid-in capital.',
+      solution: 'TVPI = (600,000 + 1,200,000)/1,500,000 = 1.2x.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to include the remaining (unrealized) fund value in the numerator, effectively just recomputing DPI.',
+      tags: ['tvpi']
+    },
+    {
+      id: 'wm_b074', topic: 'Alternative Investments (Client View)', subtopic: 'PE performance metrics', difficulty: 3, targetTime: 90,
+      prompt: 'A client 2 years into a 10-year PE fund sees a TVPI of 0.85x and asks if the fund is performing badly. What is the most appropriate response?',
+      answerType: 'mc', options: ['Immediately confirm the fund is performing badly and recommend redeeming', 'Explain this is a normal, expected feature of the early J-curve (fees charged before realized gains), and a more meaningful assessment would compare this fund to others of a similar vintage and stage, not judge it in isolation this early', 'Refuse to discuss the fund\'s performance at all', 'Explain that TVPI is irrelevant and only DPI should ever be considered'], correctAnswer: 'Explain this is a normal, expected feature of the early J-curve (fees charged before realized gains), and a more meaningful assessment would compare this fund to others of a similar vintage and stage, not judge it in isolation this early',
+      hint: 'Think about what stage of the fund\'s life this represents.',
+      approach: 'Early-stage TVPI below 1.0x is a textbook J-curve pattern.',
+      solution: 'Early-stage TVPI below 1.0x is a textbook J-curve pattern; meaningful evaluation requires comparing against similar-vintage funds, not judging in isolation this early.',
+      recognitionTechnique: 'Other', commonTrap: 'Interpreting an early-stage negative or sub-1.0x return as definitive evidence of poor fund performance.',
+      tags: ['j-curve', 'client-communication']
+    },
+
+    /* ---------------------- Hedge fund strategies & real assets ---------------------- */
+    {
+      id: 'wm_b075', topic: 'Alternative Investments (Client View)', subtopic: 'Hedge fund strategies', difficulty: 2, targetTime: 60,
+      prompt: 'A fund buys the stock of a company being acquired in a stock-for-stock deal and simultaneously shorts the acquirer\'s stock, aiming to capture the spread as the deal closes. What type of strategy is this?',
+      answerType: 'mc', options: ['Global macro', 'Event-driven (merger arbitrage)', 'Long/short equity', 'Relative value / quantitative'], correctAnswer: 'Event-driven (merger arbitrage)',
+      hint: 'This strategy profits from a specific pending corporate event.',
+      approach: 'Merger arbitrage is a classic event-driven strategy.',
+      solution: 'This is a classic event-driven strategy, specifically merger arbitrage, profiting from the spread around a pending merger.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing merger arbitrage with general long/short equity stock-picking.',
+      tags: ['hedge-fund-strategies']
+    },
+    {
+      id: 'wm_b076', topic: 'Alternative Investments (Client View)', subtopic: 'Hedge fund strategies', difficulty: 3, targetTime: 90,
+      prompt: 'A client wants an alternative allocation specifically to reduce overall portfolio volatility with low correlation to stocks and bonds. Which category of strategy is generally better matched?',
+      answerType: 'mc', options: ['Global macro, since it is always the highest-returning strategy', 'Market-neutral / relative value strategies, which are more explicitly designed for lower correlation to traditional markets', 'Any hedge fund strategy works equally well for this specific goal', 'Long/short equity is always the best match for this specific goal'], correctAnswer: 'Market-neutral / relative value strategies, which are more explicitly designed for lower correlation to traditional markets',
+      hint: 'Match the strategy type to the client\'s stated goal of low correlation.',
+      approach: 'Market-neutral/relative-value strategies are more explicitly designed around low correlation.',
+      solution: 'Market-neutral/relative-value strategies are generally more explicitly designed around low correlation to traditional markets, directly matching this stated client goal.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating all hedge fund strategies as interchangeable for diversification purposes.',
+      tags: ['hedge-fund-strategies', 'suitability']
+    },
+    {
+      id: 'wm_b077', topic: 'Alternative Investments (Client View)', subtopic: 'Real assets', difficulty: 3, targetTime: 90,
+      prompt: 'What is a key nuance to raise with a client considering futures-based commodity exposure as an inflation hedge?',
+      answerType: 'mc', options: ['Futures-based commodity funds are always identical to holding the physical commodity', 'Futures-based exposure can carry an ongoing "roll yield" cost or benefit as contracts are rolled over, which can meaningfully affect long-run returns distinct from the physical commodity\'s price alone', 'Commodities can never be used as an inflation hedge under any structure', 'Roll yield only affects real estate investments, never commodities'], correctAnswer: 'Futures-based exposure can carry an ongoing "roll yield" cost or benefit as contracts are rolled over, which can meaningfully affect long-run returns distinct from the physical commodity\'s price alone',
+      hint: 'Think about what happens as futures contracts approach expiration and must be replaced.',
+      approach: 'Roll yield is a distinct return driver for futures-based commodity exposure.',
+      solution: 'Roll yield is a real, distinct return driver for futures-based commodity exposure that a client should understand before assuming it behaves identically to physical ownership.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming futures-based commodity exposure perfectly tracks the spot price of the physical commodity.',
+      tags: ['real-assets', 'commodities']
+    },
+
+    /* ---------------------- KYC ---------------------- */
+    {
+      id: 'wm_b078', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 2, targetTime: 60,
+      prompt: 'What is "KYC" (Know Your Customer)?',
+      answerType: 'mc', options: ['An optional marketing questionnaire with no legal significance', 'A binding regulatory obligation requiring firms to gather and document specific client information before making investment recommendations', 'A one-time background check only relevant to anti-fraud purposes', 'A voluntary best practice with no regulatory basis'], correctAnswer: 'A binding regulatory obligation requiring firms to gather and document specific client information before making investment recommendations',
+      hint: 'Think about whether KYC is optional or mandated.',
+      approach: 'KYC is a binding, regulatory requirement underlying every suitable recommendation.',
+      solution: 'KYC is a binding, regulatory (not optional) requirement underlying every suitable recommendation.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating KYC as an optional or purely internal best practice rather than a regulatory obligation.',
+      tags: ['kyc']
+    },
+    {
+      id: 'wm_b079', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 2, targetTime: 60,
+      prompt: 'Why must KYC information be periodically UPDATED rather than collected only once at account opening?',
+      answerType: 'mc', options: ['Regulations require updates purely as a formality with no real purpose', 'Major life events (divorce, inheritance, job change, retirement) can materially change what is actually suitable for a client, so outdated information no longer reflects their true situation', 'KYC information never actually needs to be accurate', 'Updating KYC is optional and rarely done in practice'], correctAnswer: 'Major life events (divorce, inheritance, job change, retirement) can materially change what is actually suitable for a client, so outdated information no longer reflects their true situation',
+      hint: 'Think about how a client\'s circumstances can change over time.',
+      approach: 'Suitability must be assessed against current, not outdated, information.',
+      solution: 'A client\'s true circumstances can change substantially over time, and suitability must be assessed against CURRENT, not outdated, information.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating KYC as a one-time account-opening formality.',
+      tags: ['kyc']
+    },
+    {
+      id: 'wm_b080', topic: 'Suitability & Risk Profiling', subtopic: 'KYC', difficulty: 3, targetTime: 90,
+      prompt: 'A recommendation made using stale, years-old KYC information happens to work out well for the client. Does this resolve the compliance concern?',
+      answerType: 'mc', options: ['Yes, a favorable outcome always resolves any KYC concern', 'No — regulators generally evaluate whether an adequate, documented KYC process was followed at the time of the recommendation, independent of how the investment later performed', 'This scenario can never actually occur in practice', 'Only the client\'s opinion of the outcome matters for compliance purposes'], correctAnswer: 'No — regulators generally evaluate whether an adequate, documented KYC process was followed at the time of the recommendation, independent of how the investment later performed',
+      hint: 'Think about whether compliance is about process or about outcome.',
+      approach: 'KYC compliance centers on the documented process, not the eventual outcome.',
+      solution: 'KYC compliance centers on the documented PROCESS at the time of the recommendation, not on whether the outcome happened to be favorable afterward.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a good outcome retroactively excuses an inadequate KYC process.',
+      tags: ['kyc']
+    },
+
+    /* ---------------------- Estate planning ---------------------- */
+    {
+      id: 'wm_b081', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 2, targetTime: 60,
+      prompt: 'A client\'s will leaves everything to their children, but their life insurance policy still names an ex-spouse as beneficiary. Who legally receives the life insurance proceeds?',
+      answerType: 'mc', options: ['The children, since the will is more recent', 'The ex-spouse, since the beneficiary designation overrides the will for that specific asset', 'The proceeds are split evenly between the children and the ex-spouse automatically', 'The proceeds go to probate court to decide'], correctAnswer: 'The ex-spouse, since the beneficiary designation overrides the will for that specific asset',
+      hint: 'Beneficiary designations control independently of the will.',
+      approach: 'A beneficiary designation overrides the will for that specific asset.',
+      solution: 'The beneficiary designation controls for that asset regardless of what the will states, even if the will is more recently updated.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a more recently updated will automatically overrides an outdated beneficiary designation.',
+      tags: ['estate-planning']
+    },
+    {
+      id: 'wm_b082', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 2, targetTime: 60,
+      prompt: 'Why might a wealth manager recommend a trust rather than a simple direct bequest in a will for a young or financially inexperienced heir?',
+      answerType: 'mc', options: ['Trusts are always identical to a simple will bequest with no meaningful difference', 'A trust can specify staggered distributions over time rather than an immediate lump sum, giving the heir time to mature financially', 'Trusts always distribute assets faster than a will', 'This distinction has no relevance to estate planning'], correctAnswer: 'A trust can specify staggered distributions over time rather than an immediate lump sum, giving the heir time to mature financially',
+      hint: 'Think about the control a trust offers over distribution timing.',
+      approach: 'A trust\'s ability to control distribution timing is a key advantage over a lump-sum bequest.',
+      solution: 'A trust\'s ability to control the TIMING and structure of distributions is a key advantage over a simple lump-sum will bequest for a young or inexperienced heir.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a trust and a direct will bequest achieve identical outcomes.',
+      tags: ['estate-planning', 'trusts']
+    },
+    {
+      id: 'wm_b083', topic: 'Wealth Planning', subtopic: 'Estate planning', difficulty: 3, targetTime: 90,
+      prompt: 'A wealth manager discovers a client\'s retirement account still names a dissolved business partnership as beneficiary, contradicting the client\'s clearly updated will. What is the most appropriate next step?',
+      answerType: 'mc', options: ['Do nothing, since the will\'s more recent instructions will automatically control', 'Immediately flag this to the client and coordinate updating the beneficiary designation itself, since the will has no power to override it', 'Wait until the client\'s next scheduled estate planning review, which could be years away', 'Assume the outdated designation is not a real legal concern'], correctAnswer: 'Immediately flag this to the client and coordinate updating the beneficiary designation itself, since the will has no power to override it',
+      hint: 'The will cannot fix an outdated beneficiary designation on its own.',
+      approach: 'Beneficiary designations must be corrected directly, not assumed fixed by the will.',
+      solution: 'Given that beneficiary designations override the will and this discrepancy directly contradicts the client\'s current intentions, prompt action to correct the designation itself is warranted, not a wait-and-see approach.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming an updated will automatically resolves an outdated beneficiary designation.',
+      tags: ['estate-planning']
+    },
+
+    /* ---------------------- Concentrated stock positions ---------------------- */
+    {
+      id: 'wm_b084', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 2, targetTime: 60,
+      prompt: 'Why does a concentrated stock position represent genuinely UNCOMPENSATED risk for a client?',
+      answerType: 'mc', options: ['Concentrated positions always earn extra expected return to compensate for the risk', 'The company-specific (unsystematic) risk in a concentrated position can be diversified away for free, so bearing it provides no additional expected reward', 'Concentration risk does not actually exist as a real phenomenon', 'Only bonds can ever be considered "concentrated" positions'], correctAnswer: 'The company-specific (unsystematic) risk in a concentrated position can be diversified away for free, so bearing it provides no additional expected reward',
+      hint: 'Recall the systematic vs. unsystematic risk distinction.',
+      approach: 'Unsystematic risk is diversifiable and therefore not compensated with extra expected return.',
+      solution: 'Since unsystematic risk is diversifiable, a client holding a concentrated position bears real risk without any extra expected compensation for it.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a concentrated position must be earning extra return simply because it carries extra risk.',
+      tags: ['concentrated-positions']
+    },
+    {
+      id: 'wm_b085', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 2, targetTime: 60,
+      prompt: 'How does a "collar" (buying a put, selling a call) help manage a concentrated position?',
+      answerType: 'mc', options: ['It requires immediately selling the entire position', 'It protects against downside price moves while the client retains ownership (avoiding an immediate taxable sale), at the cost of the option premium and/or capped upside', 'It eliminates all concentration risk with no tradeoffs of any kind', 'It has no relationship to managing concentration risk'], correctAnswer: 'It protects against downside price moves while the client retains ownership (avoiding an immediate taxable sale), at the cost of the option premium and/or capped upside',
+      hint: 'A collar combines a protective put with a covered call.',
+      approach: 'A collar provides downside protection while deferring the tax event, in exchange for a cost.',
+      solution: 'A collar provides downside protection while the client keeps the shares (and defers the tax event), in exchange for premium cost and/or an upside cap.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a collar eliminates concentration risk entirely with no tradeoffs.',
+      tags: ['concentrated-positions', 'hedging']
+    },
+    {
+      id: 'wm_b086', topic: 'Wealth Planning', subtopic: 'Concentrated positions', difficulty: 3, targetTime: 90,
+      prompt: 'A client with a large concentrated position has strong philanthropic intent and faces a significant tax bill if they sell outright. How might donating appreciated shares serve both goals at once?',
+      answerType: 'mc', options: [
+        'Charitable giving has no effect on portfolio concentration',
+        'It reduces the concentrated position AND avoids capital gains tax on the donated shares (while generating a charitable deduction) — serving both diversification and philanthropic goals simultaneously',
+        'Donated shares are always taxed at a higher rate than a sale',
+        'It only ever serves the charitable goal, never the concentration-reduction goal'
+      ], correctAnswer: 'It reduces the concentrated position AND avoids capital gains tax on the donated shares (while generating a charitable deduction) — serving both diversification and philanthropic goals simultaneously',
+      hint: 'Think about what happens to the embedded gain when shares are donated rather than sold.',
+      approach: 'Donating appreciated shares directly removes concentration exposure and avoids capital gains tax on those shares.',
+      solution: 'Donating appreciated shares directly removes concentration exposure and avoids capital gains tax on those specific shares, while also fulfilling philanthropic intent.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming charitable giving and concentration reduction are unrelated, separate goals that cannot be addressed together.',
+      tags: ['concentrated-positions', 'charitable-giving']
     }
   ];
 
