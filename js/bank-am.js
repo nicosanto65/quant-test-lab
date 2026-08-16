@@ -794,6 +794,166 @@
       solution: 'The yen\'s dual role — both a safe haven AND the classic carry-trade funding currency — can produce reinforcing, additive appreciation pressure during a shock.',
       recognitionTechnique: 'Other', commonTrap: 'Treating all safe-haven currencies as appreciating by the same degree during any given crisis.',
       tags: ['carry-trade', 'risk-off']
+    },
+
+    /* ---------------------- PE: COMMITMENT, VINTAGE, J-CURVE ---------------------- */
+    {
+      id: 'am_c075', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE: vintage & drawdowns', difficulty: 2, targetTime: 60,
+      prompt: 'What is the key difference between an LP\'s "commitment" and an actual "capital call" (drawdown)?',
+      answerType: 'mc', options: ['They are the same thing under different names, with 100% always called', 'The commitment is the total amount promised over the fund\'s life; the capital call is the GP\'s actual incremental request for a portion of that commitment as investments are identified, typically totaling only 60-70% of the full commitment over the fund\'s life', 'A capital call always exceeds the original commitment', 'Capital calls are made entirely upfront, all at once'], correctAnswer: 'The commitment is the total amount promised over the fund\'s life; the capital call is the GP\'s actual incremental request for a portion of that commitment as investments are identified, typically totaling only 60-70% of the full commitment over the fund\'s life',
+      hint: 'The commitment is a ceiling; calls are incremental.',
+      approach: 'Only a portion of the commitment is typically ever actually called.',
+      solution: 'The commitment is a ceiling promised over time; actual calls are incremental, partial, and unpredictable in timing.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the full commitment is drawn down immediately.',
+      tags: ['pe-commitment']
+    },
+    {
+      id: 'am_c076', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE: vintage & drawdowns', difficulty: 3, targetTime: 90,
+      prompt: 'Two funds from the same GP and strategy have different vintage years, and one significantly underperforms the other. What is the most likely explanation, absent other information?',
+      answerType: 'mc', options: ['The underperforming fund\'s GP must have become meaningfully less skilled', 'Entry-timing risk tied to each fund\'s specific vintage year (buying at high valuations before a downturn versus buying at depressed valuations during a trough) can explain the gap, independent of any change in GP skill', 'Vintage year has no bearing on fund performance whatsoever', 'The two funds must have used completely different investment strategies'], correctAnswer: 'Entry-timing risk tied to each fund\'s specific vintage year (buying at high valuations before a downturn versus buying at depressed valuations during a trough) can explain the gap, independent of any change in GP skill',
+      hint: 'Think about what vintage year captures.',
+      approach: 'Vintage-year entry timing is a documented, GP-skill-independent driver of performance gaps.',
+      solution: 'Vintage-year entry timing is a well-documented, GP-skill-independent driver of performance differences across a manager\'s own fund series.',
+      recognitionTechnique: 'Other', commonTrap: 'Attributing a performance gap purely to a change in GP skill without considering vintage-year effects.',
+      tags: ['vintage-year']
+    },
+    {
+      id: 'am_c077', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE: vintage & drawdowns', difficulty: 3, targetTime: 90,
+      prompt: 'An LP evaluating a 2-year-old fund with negative interim performance wants to determine if this specific GP is actually underperforming. What is the correct benchmark to use?',
+      answerType: 'mc', options: ['An absolute return target with no reference to other funds', 'Other funds of the SAME vintage year pursuing similar strategies, which controls for the shared entry-timing and early-fee-drag effects every fund of that vintage faces', 'A fund from a completely different vintage year, since more data points are always better regardless of comparability', 'The performance of the public stock market over the same period, with no vintage-year adjustment'], correctAnswer: 'Other funds of the SAME vintage year pursuing similar strategies, which controls for the shared entry-timing and early-fee-drag effects every fund of that vintage faces',
+      hint: 'Control for the shared J-curve and entry-timing effects.',
+      approach: 'Same-vintage peer comparison isolates genuine GP skill.',
+      solution: 'Same-vintage peer comparison isolates genuine GP-specific skill from the shared, unavoidable entry-timing effects every fund of that vintage experiences.',
+      recognitionTechnique: 'Other', commonTrap: 'Judging a young fund against an absolute hurdle or a mismatched vintage.',
+      tags: ['j-curve', 'due-diligence']
+    },
+
+    /* ---------------------- PE METRICS FOR PORTFOLIO MONITORING ---------------------- */
+    {
+      id: 'am_c078', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE monitoring metrics', difficulty: 2, targetTime: 60,
+      prompt: 'An LP has paid in $8m and received $5m in distributions, with a current estimated remaining value of $6m. What is the TVPI?',
+      answerType: 'numeric', correctAnswer: 1.375, tolerance: 0.02,
+      hint: 'TVPI = (distributed + remaining value) / paid-in.',
+      approach: 'Add distributed and remaining value, divide by paid-in capital.',
+      solution: 'TVPI = (5+6)/8 = 1.375x.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Forgetting to include the remaining, unrealized value.',
+      tags: ['tvpi']
+    },
+    {
+      id: 'am_c079', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE monitoring metrics', difficulty: 3, targetTime: 90,
+      prompt: 'A fund returns 2x capital in 1 year (high IRR, lower multiple) versus another fund returning 3x capital over 8 years (lower IRR, higher multiple). What does this illustrate?',
+      answerType: 'mc', options: ['IRR and multiple always rank investments identically', 'IRR rewards SPEED of return, while multiple rewards the TOTAL MAGNITUDE of return regardless of time — the two metrics can rank the same investments in opposite order', 'Multiple is always the more important metric in every situation', 'IRR is always the more important metric in every situation'], correctAnswer: 'IRR rewards SPEED of return, while multiple rewards the TOTAL MAGNITUDE of return regardless of time — the two metrics can rank the same investments in opposite order',
+      hint: 'Time-sensitivity is the key difference.',
+      approach: 'IRR and multiple weigh time and magnitude differently.',
+      solution: 'This is the core IRR-versus-multiple tension: the two metrics weigh time and magnitude differently, and can disagree on which investment is "better."',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming one of the two metrics is universally superior.',
+      tags: ['irr-vs-multiple']
+    },
+    {
+      id: 'am_c080', topic: 'Alternatives (LP/Allocator View)', subtopic: 'PE monitoring metrics', difficulty: 3, targetTime: 90,
+      prompt: 'Why can a PE secondary stake trade at a DISCOUNT to its reported NAV even for a genuinely well-performing fund?',
+      answerType: 'mc', options: ['A discount always means the fund is secretly performing poorly', 'Secondary buyers demand compensation for taking on remaining illiquidity and uncertainty, and during stressed markets specifically, urgent sellers and a shrinking pool of buyers create a supply/demand imbalance that drives the discount, independent of the fund\'s actual quality', 'Secondary market discounts are illegal and never actually occur', 'NAV is always a perfectly certain, guaranteed final value'], correctAnswer: 'Secondary buyers demand compensation for taking on remaining illiquidity and uncertainty, and during stressed markets specifically, urgent sellers and a shrinking pool of buyers create a supply/demand imbalance that drives the discount, independent of the fund\'s actual quality',
+      hint: 'Think about supply/demand dynamics, not just fund quality.',
+      approach: 'Discounts can reflect the liquidity environment as much as fund quality.',
+      solution: 'Discounts can reflect the broader liquidity/demand environment and residual uncertainty, not necessarily doubt about the specific fund\'s quality.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a secondary discount is always a signal of poor fund quality.',
+      tags: ['secondaries']
+    },
+
+    /* ---------------------- HEDGE FUND STRATEGIES ---------------------- */
+    {
+      id: 'am_c081', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF strategy universe', difficulty: 2, targetTime: 60,
+      prompt: 'What is the main distinct risk of a CTA / systematic trend-following strategy?',
+      answerType: 'mc', options: ['Deal break', 'Short squeeze', '"Whipsaws" — choppy, directionless/sideways markets where trend signals repeatedly trigger and then reverse, generating a string of small losses', 'Interest rate risk'], correctAnswer: '"Whipsaws" — choppy, directionless/sideways markets where trend signals repeatedly trigger and then reverse, generating a string of small losses',
+      hint: 'Think about what happens to a trend-follower in a non-trending market.',
+      approach: 'Trend-following struggles specifically in choppy, sideways markets.',
+      solution: 'Trend-following specifically struggles in non-trending, choppy markets, generating repeated false-start losses — its defining distinct risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing CTA risk with other strategies\' distinct risks (deal break, short squeeze).',
+      tags: ['cta', 'trend-following']
+    },
+    {
+      id: 'am_c082', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF strategy universe', difficulty: 2, targetTime: 60,
+      prompt: 'What is the main distinct risk of merger arbitrage (a type of event-driven strategy)?',
+      answerType: 'mc', options: ['Whipsaws in sideways markets', '"Deal break" — the announced deal failing to close (regulatory rejection, financing issues, renegotiation), causing the target\'s stock to fall back toward its pre-announcement price', 'Correlation breakdown across many unrelated positions', 'Currency risk from foreign holdings'], correctAnswer: '"Deal break" — the announced deal failing to close (regulatory rejection, financing issues, renegotiation), causing the target\'s stock to fall back toward its pre-announcement price',
+      hint: 'The trade is priced assuming the deal closes.',
+      approach: 'A failed deal directly threatens the position\'s core thesis.',
+      solution: 'Since the spread is priced assuming a high probability of deal completion, a failed deal directly threatens the position\'s core thesis.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing merger arbitrage risk with a different strategy\'s distinct risk.',
+      tags: ['event-driven', 'merger-arbitrage']
+    },
+    {
+      id: 'am_c083', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF strategy universe', difficulty: 3, targetTime: 90,
+      prompt: 'A relative value/FI arbitrage fund shows years of low, steady volatility, then suffers catastrophic losses during a systemic crisis. Why is this consistent with (not contradictory to) the strategy\'s known risk profile?',
+      answerType: 'mc', options: ['This outcome is actually inconsistent and indicates fraud', 'The strategy relies on historically-reliable pricing relationships that can break down simultaneously across many leveraged positions during a genuine systemic crisis — years of low volatility do not contradict this low-probability, high-severity tail risk; they are entirely consistent with it', 'Relative value strategies never actually use any leverage', 'Systemic crises have no effect on relative value strategies specifically'], correctAnswer: 'The strategy relies on historically-reliable pricing relationships that can break down simultaneously across many leveraged positions during a genuine systemic crisis — years of low volatility do not contradict this low-probability, high-severity tail risk; they are entirely consistent with it',
+      hint: 'This is the classic LTCM pattern.',
+      approach: 'Low observed volatility can mask a real, leverage-amplified tail risk.',
+      solution: 'Low observed historical volatility can mask a real, leverage-amplified tail risk that simply has not yet materialized within the observed sample — exactly the LTCM pattern.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating low historical volatility as proof of genuinely low risk.',
+      tags: ['relative-value', 'ltcm']
+    },
+
+    /* ---------------------- HEDGE FUND ECONOMICS ---------------------- */
+    {
+      id: 'am_c084', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF economics', difficulty: 2, targetTime: 60,
+      prompt: 'A fund\'s value peaks at $80m, falls to $65m, then recovers to $78m the following year (still below the original $80m peak). Does the manager earn a performance fee for that recovery year?',
+      answerType: 'mc', options: ['Yes, since the fund posted a strong positive return that year', 'No, since the fund remains below its previous $80m high-water mark', 'Yes, but only on half of the recovery', 'This scenario is impossible under a high-water mark provision'], correctAnswer: 'No, since the fund remains below its previous $80m high-water mark',
+      hint: 'The fund must exceed its prior peak first.',
+      approach: 'Performance fees require exceeding the high-water mark.',
+      solution: 'The fund must first exceed its prior $80m peak before any new performance fee is owed, regardless of a strong recovery-year return.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any positive-return year automatically triggers a performance fee.',
+      tags: ['high-water-mark']
+    },
+    {
+      id: 'am_c085', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF economics', difficulty: 3, targetTime: 90,
+      prompt: 'A hedge fund shows a gross return 1.5 percentage points above a low-cost index fund, before fees. Why might the hedge fund investor still end up WORSE off than the index investor, after fees?',
+      answerType: 'mc', options: ['This outcome is impossible if the gross return is higher', 'The combined drag of the 2% management fee and a share of the 20% performance fee can exceed the 1.5-point gross outperformance, leaving the investor worse off after fees despite the higher gross return', 'Fees are always negligible and never actually affect net investor outcomes', 'Index funds always charge higher fees than hedge funds'], correctAnswer: 'The combined drag of the 2% management fee and a share of the 20% performance fee can exceed the 1.5-point gross outperformance, leaving the investor worse off after fees despite the higher gross return',
+      hint: 'Compare the fee drag to the gross outperformance.',
+      approach: 'The combined "2 and 20" drag can exceed a modest gross outperformance.',
+      solution: 'The substantial combined fee drag of "2 and 20" can exceed a modest gross outperformance, flipping the after-fee comparison in the index fund\'s favor.',
+      recognitionTechnique: 'Other', commonTrap: 'Comparing gross returns without netting out fees.',
+      tags: ['2-and-20', 'fee-drag']
+    },
+    {
+      id: 'am_c086', topic: 'Alternatives (LP/Allocator View)', subtopic: 'HF economics', difficulty: 2, targetTime: 60,
+      prompt: 'Why do many hedge fund strategies require a lock-up period on investor capital?',
+      answerType: 'mc', options: ['Lock-ups exist purely to inconvenience investors with no strategic purpose', 'Many strategies genuinely require patient, stable capital to execute properly — investors demanding capital back on short notice could force the fund to sell positions at exactly the wrong time', 'Lock-ups are a legal requirement for every type of investment fund', 'Lock-ups only exist for funds that never actually lose money'], correctAnswer: 'Many strategies genuinely require patient, stable capital to execute properly — investors demanding capital back on short notice could force the fund to sell positions at exactly the wrong time',
+      hint: 'Think about what the underlying strategy actually needs.',
+      approach: 'The strategy\'s own liquidity needs drive lock-up requirements.',
+      solution: 'The underlying strategy\'s own liquidity needs (not arbitrary restriction) are the genuine reason lock-ups exist.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming lock-ups are arbitrary rather than tied to strategy execution needs.',
+      tags: ['lock-ups']
+    },
+
+    /* ---------------------- GOLD VS SILVER ---------------------- */
+    {
+      id: 'am_c087', topic: 'Alternatives (LP/Allocator View)', subtopic: 'Gold vs silver', difficulty: 2, targetTime: 60,
+      prompt: 'Roughly what share of silver demand comes from INDUSTRIAL uses?',
+      answerType: 'mc', options: ['Essentially none — silver has no industrial demand', 'Roughly 50-60%', 'Exactly 100%', 'Roughly 5%'], correctAnswer: 'Roughly 50-60%',
+      hint: 'Silver has a much larger industrial component than gold.',
+      approach: 'Silver\'s substantial industrial demand drives its higher cyclicality.',
+      solution: 'Silver\'s substantial (roughly 50-60%) industrial demand component is the key structural difference driving its higher cyclicality versus gold.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming silver\'s demand profile mirrors gold\'s purely monetary character.',
+      tags: ['silver']
+    },
+    {
+      id: 'am_c088', topic: 'Alternatives (LP/Allocator View)', subtopic: 'Gold vs silver', difficulty: 3, targetTime: 90,
+      prompt: 'Why does silver tend to UNDERPERFORM gold by a wide margin during an economic downturn?',
+      answerType: 'mc', options: ['Silver always outperforms gold in every environment', 'Silver\'s substantial industrial demand component weakens during a downturn (on top of any monetary-driven softness shared with gold), amplifying its decline relative to gold\'s more purely monetary character', 'Silver has no relationship to the economic cycle whatsoever', 'Gold and silver always move by identical amounts in every scenario'], correctAnswer: 'Silver\'s substantial industrial demand component weakens during a downturn (on top of any monetary-driven softness shared with gold), amplifying its decline relative to gold\'s more purely monetary character',
+      hint: 'Think about what happens to industrial demand in a downturn.',
+      approach: 'The industrial component amplifies silver\'s downside during weakness.',
+      solution: 'The industrial demand component is specifically what amplifies silver\'s downside during economic weakness, beyond what gold experiences.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming gold and silver behave identically during a downturn.',
+      tags: ['silver', 'cyclicality']
+    },
+    {
+      id: 'am_c089', topic: 'Alternatives (LP/Allocator View)', subtopic: 'Gold vs silver', difficulty: 3, targetTime: 90,
+      prompt: 'Why might silver actually work AGAINST a portfolio objective of pure, defensive crisis-insurance, even though it shares some monetary characteristics with gold?',
+      answerType: 'mc', options: ['Silver is always a perfect substitute for gold in every use case', 'In a crisis accompanied by economic weakness, silver\'s industrial-demand-driven weakness could partially or fully offset any safe-haven-driven strength, making it a less reliable choice specifically for a defensive objective compared to gold\'s more purely monetary character', 'Silver has no monetary characteristics at all and should never be considered a precious metal', 'This scenario could never actually occur in any real market environment'], correctAnswer: 'In a crisis accompanied by economic weakness, silver\'s industrial-demand-driven weakness could partially or fully offset any safe-haven-driven strength, making it a less reliable choice specifically for a defensive objective compared to gold\'s more purely monetary character',
+      hint: 'Consider what happens when a crisis coincides with an economic slowdown.',
+      approach: 'The conflict between industrial-cyclical exposure and monetary character can undermine silver\'s defensive reliability.',
+      solution: 'The conflict between silver\'s industrial-cyclical exposure and its monetary/safe-haven characteristics can undermine its reliability for a purely defensive purpose, unlike gold.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating gold and silver as interchangeable for a purely defensive portfolio objective.',
+      tags: ['silver', 'gold', 'portfolio-role']
     }
   ];
 
