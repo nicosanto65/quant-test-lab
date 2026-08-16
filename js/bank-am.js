@@ -410,6 +410,166 @@
       solution: 'The risk-premium versus behavioral-bias debate is the central, still-unresolved question in the academic factor investing literature.',
       recognitionTechnique: 'Other', commonTrap: 'Assuming this debate has been definitively settled in one direction.',
       tags: ['investment-philosophy', 'factor-investing']
+    },
+
+    /* ---------------------- MARKET THESIS / READING THE MARKET ---------------------- */
+    {
+      id: 'am_c039', topic: 'Equities & Market Knowledge', subtopic: 'Reading the market', difficulty: 2, targetTime: 60,
+      prompt: 'What is the key difference between "forward P/E" and "trailing P/E"?',
+      answerType: 'mc', options: ['They are the same measure with different names', 'Forward P/E uses estimated NEXT-12-month earnings; trailing P/E uses actual PAST-12-month reported earnings', 'Forward P/E only applies to individual stocks, never to the whole index', 'Trailing P/E is always higher than forward P/E'], correctAnswer: 'Forward P/E uses estimated NEXT-12-month earnings; trailing P/E uses actual PAST-12-month reported earnings',
+      hint: 'One looks forward, one looks backward.',
+      approach: 'Forward is estimate-based; trailing is based on already-reported figures.',
+      solution: 'Forward P/E is estimate-based and forward-looking; trailing P/E is based on real, already-reported numbers but is backward-looking.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the two measures as interchangeable.',
+      tags: ['forward-pe']
+    },
+    {
+      id: 'am_c040', topic: 'Equities & Market Knowledge', subtopic: 'Reading the market', difficulty: 2, targetTime: 60,
+      prompt: 'In the 60-second market thesis structure, what should follow after stating the asset\'s current level versus its historical benchmark?',
+      answerType: 'mc', options: ['Nothing further is needed', 'An expected direction (rise/fall/flat), supported by multiple concrete drivers, and a stated risk to the thesis', 'Only a single one-word prediction with no supporting reasoning', 'A list of unrelated historical facts about the asset'], correctAnswer: 'An expected direction (rise/fall/flat), supported by multiple concrete drivers, and a stated risk to the thesis',
+      hint: 'A level alone is not a thesis.',
+      approach: 'The structure requires direction, drivers, and a risk.',
+      solution: 'The structure specifically requires a direction, multiple drivers, and an explicit risk — a level alone is not a thesis.',
+      recognitionTechnique: 'Other', commonTrap: 'Stopping at the level/benchmark comparison without building out the rest of the thesis.',
+      tags: ['market-thesis']
+    },
+    {
+      id: 'am_c041', topic: 'Equities & Market Knowledge', subtopic: 'Reading the market', difficulty: 3, targetTime: 90,
+      prompt: 'A candidate is asked about oil and responds primarily with reasoning about Fed policy and the 10-year yield, with no mention of supply, demand, or geopolitical factors. What is the issue with this answer?',
+      answerType: 'mc', options: ['There is no issue — all commodities are driven entirely by interest rates', 'Oil\'s price is primarily driven by supply/demand fundamentals and geopolitical risk, not by interest-rate-driven valuation logic the way equities are — the drivers cited should fit the SPECIFIC asset being discussed', 'Interest rates are always the single most important driver for every asset class', 'This is a strong answer and needs no improvement'], correctAnswer: 'Oil\'s price is primarily driven by supply/demand fundamentals and geopolitical risk, not by interest-rate-driven valuation logic the way equities are — the drivers cited should fit the SPECIFIC asset being discussed',
+      hint: 'Think about whether the drivers cited actually fit the asset being discussed.',
+      approach: 'A credible thesis adapts its drivers to the specific asset.',
+      solution: 'A credible thesis adapts its drivers to the asset in question — oil\'s drivers are fundamentally different from an equity index\'s valuation-based drivers.',
+      recognitionTechnique: 'Other', commonTrap: 'Applying the same driver template regardless of which asset is actually being discussed.',
+      tags: ['market-thesis']
+    },
+
+    /* ---------------------- SECTOR ROTATION ---------------------- */
+    {
+      id: 'am_c042', topic: 'Equities & Market Knowledge', subtopic: 'Sector rotation', difficulty: 2, targetTime: 60,
+      prompt: 'Under high inflation, why do energy and materials companies tend to benefit?',
+      answerType: 'mc', options: ['They are exempt from all forms of taxation during inflation', 'Their revenues (selling commodities) scale directly with the general price level, giving them natural pricing power', 'Inflation always causes energy demand to rise, regardless of price', 'This is a myth — energy companies are never affected by inflation'], correctAnswer: 'Their revenues (selling commodities) scale directly with the general price level, giving them natural pricing power',
+      hint: 'Think about what they sell and how its price moves with inflation.',
+      approach: 'Selling a commodity whose price rises with inflation is a direct hedge.',
+      solution: 'Selling a commodity whose price itself rises with inflation gives these sectors a direct, structural hedge against rising prices.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the benefit is unrelated to the commodity nature of their revenue.',
+      tags: ['sector-rotation', 'inflation']
+    },
+    {
+      id: 'am_c043', topic: 'Equities & Market Knowledge', subtopic: 'Sector rotation', difficulty: 3, targetTime: 90,
+      prompt: 'Why do growth technology stocks tend to underperform disproportionately when interest rates rise, compared to a stable, moderate-growth company?',
+      answerType: 'mc', options: ['Growth tech stocks are legally required to fall when rates rise', 'Growth tech valuations rely heavily on cash flows far in the future, and higher discount rates reduce the present value of distant cash flows disproportionately more than near-term ones', 'Rising rates have no effect on any equity valuations', 'Growth tech companies always have the most debt of any sector'], correctAnswer: 'Growth tech valuations rely heavily on cash flows far in the future, and higher discount rates reduce the present value of distant cash flows disproportionately more than near-term ones',
+      hint: 'Think about where most of a growth stock\'s value comes from.',
+      approach: 'Discount-rate sensitivity of far-future cash flows explains the disproportionate impact.',
+      solution: 'The disproportionate impact comes from the discount-rate sensitivity of far-future cash flows, which dominate a growth company\'s valuation.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming all sectors are equally sensitive to rate changes.',
+      tags: ['sector-rotation', 'rates']
+    },
+    {
+      id: 'am_c044', topic: 'Equities & Market Knowledge', subtopic: 'Sector rotation', difficulty: 3, targetTime: 90,
+      prompt: 'A US multinational with substantial foreign revenue is hurt by a strong dollar through two DISTINCT mechanisms. What are they?',
+      answerType: 'mc', options: ['Only one mechanism actually exists — this is a trick question', '"Translation" (foreign revenue converts back to fewer dollars, a pure accounting/currency effect) and "competitiveness" (the company\'s products become relatively more expensive for foreign buyers, potentially reducing actual unit sales, a real demand effect)', 'Higher taxes and higher interest rates', 'Reduced access to capital markets and higher labor costs'], correctAnswer: '"Translation" (foreign revenue converts back to fewer dollars, a pure accounting/currency effect) and "competitiveness" (the company\'s products become relatively more expensive for foreign buyers, potentially reducing actual unit sales, a real demand effect)',
+      hint: 'One mechanism is an accounting effect, the other a real demand effect.',
+      approach: 'Translation is a currency-conversion effect; competitiveness is a demand-side effect.',
+      solution: 'Translation is a currency-conversion accounting effect; competitiveness is a genuine, separate demand-side effect — both can hurt the same company simultaneously through different channels.',
+      recognitionTechnique: 'Other', commonTrap: 'Identifying only one of the two distinct mechanisms.',
+      tags: ['sector-rotation', 'fx']
+    },
+
+    /* ---------------------- MARKET VALUATION ---------------------- */
+    {
+      id: 'am_c045', topic: 'Equities & Market Knowledge', subtopic: 'Market valuation', difficulty: 2, targetTime: 60,
+      prompt: 'What does CAPE (Shiller P/E) specifically correct for, compared to a standard one-year P/E?',
+      answerType: 'mc', options: ['Nothing — CAPE and standard P/E are identical', 'It smooths out cyclical swings by using a 10-year average of inflation-adjusted earnings instead of a single year\'s figure', 'It only applies to individual stocks, never a whole market index', 'It corrects for currency exchange rate differences'], correctAnswer: 'It smooths out cyclical swings by using a 10-year average of inflation-adjusted earnings instead of a single year\'s figure',
+      hint: 'CAPE averages earnings over a longer period.',
+      approach: 'CAPE uses a 10-year inflation-adjusted earnings average to normalize across the cycle.',
+      solution: 'CAPE\'s defining feature is averaging earnings over a full decade (inflation-adjusted) to avoid distortion from any single unusually strong or weak year.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing CAPE with a standard trailing or forward P/E.',
+      tags: ['cape', 'valuation']
+    },
+    {
+      id: 'am_c046', topic: 'Equities & Market Knowledge', subtopic: 'Market valuation', difficulty: 3, targetTime: 90,
+      prompt: 'Why is EV/EBITDA generally more useful than P/E for comparing companies with meaningfully different debt levels?',
+      answerType: 'mc', options: ['EV/EBITDA is never actually used in real valuation work', 'EV/EBITDA sits above interest expense in the income statement and enterprise value already incorporates debt directly, making it capital-structure-neutral, unlike P/E which is affected by differing interest expense', 'P/E is always a superior comparison tool in every situation', 'EBITDA and net income are the exact same figure'], correctAnswer: 'EV/EBITDA sits above interest expense in the income statement and enterprise value already incorporates debt directly, making it capital-structure-neutral, unlike P/E which is affected by differing interest expense',
+      hint: 'Think about what sits above vs below interest expense.',
+      approach: 'Excluding interest expense isolates operating performance from financing differences.',
+      solution: 'By excluding interest expense (and taxes), EV/EBITDA isolates operating performance from financing-structure differences that distort P/E comparisons.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming P/E is always the superior comparison regardless of capital structure differences.',
+      tags: ['ev-ebitda', 'valuation']
+    },
+    {
+      id: 'am_c047', topic: 'Equities & Market Knowledge', subtopic: 'Market valuation', difficulty: 3, targetTime: 90,
+      prompt: 'What is the core limitation of the Buffett Indicator (market cap / GDP) as a valuation signal today?',
+      answerType: 'mc', options: ['It has no limitations and is a perfectly reliable signal', 'Today\'s large public companies earn a much greater share of revenue from GLOBAL markets than in the past, so comparing that global-revenue-driven market cap purely against DOMESTIC GDP can overstate apparent overvaluation relative to history', 'The Buffett Indicator only applies to bond markets, not equities', 'GDP data is never available for any country'], correctAnswer: 'Today\'s large public companies earn a much greater share of revenue from GLOBAL markets than in the past, so comparing that global-revenue-driven market cap purely against DOMESTIC GDP can overstate apparent overvaluation relative to history',
+      hint: 'Think about where large companies\' revenue actually comes from today.',
+      approach: 'The mismatch between global revenue and domestic GDP is the key limitation.',
+      solution: 'The mismatch between an increasingly global revenue base and a purely domestic GDP denominator is the indicator\'s key modern limitation.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating the Buffett Indicator as a flawless, context-independent signal.',
+      tags: ['buffett-indicator', 'valuation']
+    },
+
+    /* ---------------------- SECTOR BETA ---------------------- */
+    {
+      id: 'am_c048', topic: 'Equities & Market Knowledge', subtopic: 'Sector beta', difficulty: 2, targetTime: 60,
+      prompt: 'Why do energy and financials sectors typically have HIGHER betas than utilities or consumer staples?',
+      answerType: 'mc', options: ['Higher-beta sectors are always smaller companies', 'Their revenues, earnings, or losses are far more sensitive to the broader economic and credit cycle (commodity prices, loan performance) than sectors with stable, necessity-driven demand', 'Beta has no relationship to a sector\'s underlying business characteristics', 'Energy and financials are legally required to have high beta'], correctAnswer: 'Their revenues, earnings, or losses are far more sensitive to the broader economic and credit cycle (commodity prices, loan performance) than sectors with stable, necessity-driven demand',
+      hint: 'Think about how sensitive each sector\'s core business is to the economic cycle.',
+      approach: 'Direct cyclical sensitivity drives higher typical betas.',
+      solution: 'Direct sensitivity to swings in the economic/credit cycle is the fundamental driver of these sectors\' typically higher betas.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming beta is unrelated to a sector\'s underlying business drivers.',
+      tags: ['sector-beta']
+    },
+    {
+      id: 'am_c049', topic: 'Equities & Market Knowledge', subtopic: 'Sector beta', difficulty: 3, targetTime: 90,
+      prompt: 'Why can beta alone provide a misleadingly comfortable picture of diversification during a genuine, severe market-wide crisis?',
+      answerType: 'mc', options: ['Beta always remains perfectly accurate in every market environment', 'Correlations between normally-independent sectors can spike sharply toward 1 during a true systemic crisis, as broad forced selling and fear override sector-specific fundamentals — meaning normal-times beta and correlation data understate real risk exactly when protection matters most', 'Beta only applies to bonds, never to equity sectors', 'This phenomenon has never actually been observed in any real market crisis'], correctAnswer: 'Correlations between normally-independent sectors can spike sharply toward 1 during a true systemic crisis, as broad forced selling and fear override sector-specific fundamentals — meaning normal-times beta and correlation data understate real risk exactly when protection matters most',
+      hint: 'Think about what happens to normal-times diversification during a genuine crisis.',
+      approach: 'Correlation breakdown during systemic stress is a real, documented limitation.',
+      solution: 'The collapse of normal-times correlations during genuine systemic stress is a well-documented, real limitation of relying on beta/correlation-based diversification alone.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming normal-times beta and correlation data hold up unchanged during a genuine crisis.',
+      tags: ['sector-beta', 'correlation']
+    },
+    {
+      id: 'am_c050', topic: 'Equities & Market Knowledge', subtopic: 'Sector beta', difficulty: 2, targetTime: 60,
+      prompt: 'A PM overweights cyclical sectors (energy, financials, technology) relative to the broader market. What is this decision doing to the portfolio\'s systematic risk exposure?',
+      answerType: 'mc', options: ['Decreasing it', 'Increasing it, since these sectors carry above-market betas', 'Systematic risk exposure is unaffected by sector weighting', 'This only affects idiosyncratic risk, not systematic risk'], correctAnswer: 'Increasing it, since these sectors carry above-market betas',
+      hint: 'Think about the typical betas of the sectors being overweighted.',
+      approach: 'Overweighting above-market-beta sectors increases systematic risk exposure.',
+      solution: 'Overweighting above-market-beta sectors directly increases the portfolio\'s overall sensitivity to broad market moves — its systematic risk.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming sector weighting decisions only affect idiosyncratic, not systematic, risk.',
+      tags: ['sector-beta', 'sector-rotation']
+    },
+
+    /* ---------------------- AM STOCK PITCH STRUCTURE ---------------------- */
+    {
+      id: 'am_c051', topic: 'Equities & Market Knowledge', subtopic: 'Stock pitch structure', difficulty: 2, targetTime: 60,
+      prompt: 'What does "the edge" refer to in an AM stock pitch?',
+      answerType: 'mc', options: ['The company\'s stock ticker symbol', 'A clear, specific explanation of why the market is currently WRONG about or has not fully priced in something about the company', 'The size of the position being recommended', 'The company\'s current market capitalization'], correctAnswer: 'A clear, specific explanation of why the market is currently WRONG about or has not fully priced in something about the company',
+      hint: 'The edge is a point of disagreement with the market\'s current view.',
+      approach: 'The edge specifically identifies what the market is missing or getting wrong.',
+      solution: 'The edge is specifically the point of disagreement with the market\'s current view — not a generic positive statement about the company.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing "the edge" with a generic positive statement about company quality.',
+      tags: ['stock-pitch']
+    },
+    {
+      id: 'am_c052', topic: 'Equities & Market Knowledge', subtopic: 'Stock pitch structure', difficulty: 3, targetTime: 90,
+      prompt: 'Why does a long/short (or outright short) pitch generally require a harder analytical bar than a long-only pitch?',
+      answerType: 'mc', options: ['Short pitches are always easier to construct than long pitches', 'The long-only pitch only needs relative outperformance versus a benchmark; a short pitch requires conviction about absolute (or specifically relative-to-a-pair) DIRECTIONAL decline, a more binary requirement', 'There is no meaningful difference in the bar required between the two', 'Long/short pitches never require any price target'], correctAnswer: 'The long-only pitch only needs relative outperformance versus a benchmark; a short pitch requires conviction about absolute (or specifically relative-to-a-pair) DIRECTIONAL decline, a more binary requirement',
+      hint: 'Think about what each pitch type actually needs to be true.',
+      approach: 'A directional call about absolute decline is inherently harder than a relative-outperformance call.',
+      solution: 'A directional call about absolute decline is inherently harder to be right about than a comparative, relative-outperformance call.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming long-only and short pitches require the same level of directional conviction.',
+      tags: ['stock-pitch', 'long-short']
+    },
+    {
+      id: 'am_c053', topic: 'Equities & Market Knowledge', subtopic: 'Stock pitch structure', difficulty: 2, targetTime: 60,
+      prompt: 'Which of these is NOT one of the standard systematic screening filters for generating an AM stock pitch candidate?',
+      answerType: 'mc', options: ['High insider ownership', 'Low analyst coverage', 'Guaranteed future earnings growth with no uncertainty', 'Valuation versus peers'], correctAnswer: 'Guaranteed future earnings growth with no uncertainty',
+      hint: 'No real screening filter can guarantee a future outcome.',
+      approach: 'Screening filters surface candidates for further research, not guaranteed outcomes.',
+      solution: 'No screening filter can guarantee future results with certainty — the real filters (insider ownership, analyst coverage, earnings surprise potential, relative valuation) surface candidates for further research, not guaranteed outcomes.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming a screening process can identify guaranteed outcomes rather than promising candidates.',
+      tags: ['stock-pitch', 'screening']
     }
   ];
 
