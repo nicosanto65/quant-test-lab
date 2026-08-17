@@ -1279,5 +1279,43 @@
     }
   });
 
+  /* ==================== Y. ADVANCED COUNTING: CATALAN / BALLOT ============= */
+
+  add({
+    id: 'c_catalan', topic: 'Combinatorics', subtopic: 'Catalan structures', difficulty: 4, targetTime: 150,
+    build(r) {
+      const n = r.pick([3, 4, 5, 6]);
+      const catalan = nCr(2 * n, n) / (n + 1);
+      return {
+        prompt: `How many sequences of ${n} opening and ${n} closing brackets are correctly matched (at every prefix of the sequence, the number of closing brackets seen so far never exceeds the number of opening brackets)?`,
+        answerType: 'numeric', correctAnswer: catalan, tolerance: 0,
+        hint: 'Total unrestricted arrangements minus the "bad" ones, via a reflection argument, gives a clean closed form: the Catalan number.',
+        approach: `Catalan number C_n = C(2n,n)/(n+1), counting exactly the sequences that never let closing brackets get ahead of opening ones.`,
+        solution: `C_${n} = C(${2 * n},${n})/(${n}+1) = ${nCr(2 * n, n)}/${n + 1} = ${catalan}.`,
+        recognitionTechnique: 'Counting', commonTrap: `Answering the unrestricted count C(${2 * n},${n}) = ${nCr(2 * n, n)} directly, forgetting the "never more closing than opening" prefix condition that the ÷(n+1) correction accounts for.`,
+        tags: ['catalan', 'lattice paths']
+      };
+    }
+  });
+
+  add({
+    id: 'c_ballot', topic: 'Combinatorics', subtopic: 'Ballot problems', difficulty: 5, targetTime: 210,
+    build(r) {
+      const a = r.pick([5, 6, 7, 8, 9]);
+      const bOptions = [1, 2, 3, 4].filter((b) => b < a);
+      const b = r.pick(bOptions);
+      const p = round(100 * (a - b) / (a + b), 1);
+      return {
+        prompt: `Candidate A receives ${a} votes and candidate B receives ${b} votes. Votes are counted in a uniformly random order. What is the probability that A is strictly ahead of B throughout the ENTIRE count (never tied, never behind, from the very first vote counted)? Answer as a percentage to one decimal place.`,
+        answerType: 'numeric', correctAnswer: p, tolerance: 0.6,
+        hint: 'This has a one-line closed form — no need to enumerate vote orderings by hand.',
+        approach: "Bertrand's ballot theorem: P(A strictly ahead throughout) = (a−b)/(a+b), given A wins with a > b total votes.",
+        solution: `(${a} − ${b})/(${a} + ${b}) = ${a - b}/${a + b} = ${p}%.`,
+        recognitionTechnique: 'Counting', commonTrap: 'Confusing "strictly ahead throughout the ENTIRE count" with merely "ahead at the very end" (which has probability 1 here, since A wins outright) — the ballot theorem answers the much stronger, harder condition.',
+        tags: ['ballot', 'reflection principle']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);
