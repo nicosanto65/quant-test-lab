@@ -852,6 +852,26 @@
       approach: 'Direct counting over the 12×12=144 ordered pairs, checking gcd(x,y)=1 for each.',
       solution: 'Counting all ordered pairs (x,y) with x,y ∈ {1,...,12} and gcd(x,y)=1 gives exactly 91 coprime pairs out of 144 total. P = 91/144 ≈ 0.6319.',
       commonTrap: 'Using the asymptotic large-N constant 6/π² ≈ 0.6079 as if it applied exactly here — that limit is only approached as N→∞, and is noticeably off for a small, finite N=12.', tags: ['number theory', 'gcd', 'coprime']
+    },
+
+    /* ------------------- RANDOM PERMUTATIONS: CYCLES ----------------------- */
+    {
+      id: 'h084', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
+      prompt: 'A uniformly random permutation of 6 elements (labelled 1 through 6) is drawn. What is the expected length of the cycle that contains element 1?',
+      answerType: 'numeric', correctAnswer: 3.5, tolerance: 0.02, acceptFraction: [7, 2],
+      hint: 'By symmetry, every other element is equally likely to end up sharing a cycle with element 1.', recognitionTechnique: 'Symmetry',
+      approach: 'By symmetry among the other n−1 elements, the expected length of the cycle containing a fixed element is (n+1)/2.',
+      solution: 'E[cycle length containing element 1] = (n+1)/2 = (6+1)/2 = 3.5.',
+      commonTrap: 'Confusing this with the expected NUMBER of cycles in the whole permutation (a harmonic-number sum, H_6 ≈ 2.45) — a different, unrelated quantity from the length of one specific cycle.', tags: ['permutations', 'cycles', 'symmetry']
+    },
+    {
+      id: 'h085', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
+      prompt: 'A uniformly random permutation of 6 elements is drawn. What is the probability that the permutation consists of a SINGLE cycle of length 6 (i.e. it is one big cycle, with no shorter cycles at all)?',
+      answerType: 'numeric', correctAnswer: 0.1667, tolerance: 0.002, acceptFraction: [1, 6],
+      hint: 'Count how many of the 6! permutations are a single 6-cycle, using the standard cycle-counting formula (n−1)!.', recognitionTechnique: 'Counting',
+      approach: 'The number of permutations of n elements forming a single n-cycle is (n−1)!, out of n! total permutations, giving probability (n−1)!/n! = 1/n.',
+      solution: 'Single 6-cycles number (6−1)! = 5! = 120, out of 6! = 720 total permutations. P = 120/720 = 1/6 ≈ 0.1667.',
+      commonTrap: 'Assuming a "random" permutation is unlikely to be a single cycle without checking the actual count — 1/n is often larger than intuition suggests (here, roughly 1 in 6, not some vanishingly small chance).', tags: ['permutations', 'cycles', 'counting']
     }
   ];
 

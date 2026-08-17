@@ -1109,5 +1109,82 @@
     }
   });
 
+  /* =================== V. RANDOM PERMUTATIONS: CYCLES ====================== */
+
+  // Generate every permutation of [0..n-1] exactly once — used to compute
+  // exact expectations for small n by full enumeration, rather than trusting
+  // a hand-derived formula (H_n for cycle count, (n+1)/2 for cycle length).
+  function allPermutations(n) {
+    const arr = Array.from({ length: n }, (_, i) => i);
+    const out = [];
+    const used = Array(n).fill(false);
+    const cur = [];
+    function rec() {
+      if (cur.length === n) { out.push(cur.slice()); return; }
+      for (let i = 0; i < n; i++) {
+        if (used[i]) continue;
+        used[i] = true; cur.push(arr[i]);
+        rec();
+        cur.pop(); used[i] = false;
+      }
+    }
+    rec();
+    return out;
+  }
+  function countCycles(perm) {
+    const n = perm.length, visited = Array(n).fill(false);
+    let cycles = 0;
+    for (let i = 0; i < n; i++) {
+      if (visited[i]) continue;
+      cycles++;
+      let j = i;
+      while (!visited[j]) { visited[j] = true; j = perm[j]; }
+    }
+    return cycles;
+  }
+  function cycleLengthOf(perm, elem) {
+    let j = elem, len = 0;
+    do { len++; j = perm[j]; } while (j !== elem);
+    return len;
+  }
+
+  add({
+    id: 'perm_num_cycles', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 5, 6, 7]);
+      const perms = allPermutations(n);
+      const avg = perms.reduce((s, p) => s + countCycles(p), 0) / perms.length;
+      const ans = round(avg, 4);
+      return {
+        prompt: `A uniformly random permutation of ${n} elements is drawn. What is the expected number of cycles in its cycle decomposition? Answer to four decimals.`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.01,
+        hint: 'Build the permutation one element at a time: at each step, there is a fixed probability the next placement closes off a cycle.',
+        approach: 'Sequential construction + linearity of expectation: when placing the k-th element into the permutation, it closes a cycle with probability 1/(n−k+1), so summing over k gives the harmonic number H_n = 1 + 1/2 + ... + 1/n.',
+        solution: `E[number of cycles] = H_${n} = 1 + 1/2 + ... + 1/${n} = ${ans}.`,
+        recognitionTechnique: 'Indicator variables', commonTrap: 'Confusing the EXPECTED NUMBER OF CYCLES (a harmonic-number sum, growing like ln n) with the expected LENGTH of any one particular cycle (which instead grows linearly in n).',
+        tags: ['permutations', 'cycles', 'linearity']
+      };
+    }
+  });
+
+  add({
+    id: 'perm_cycle_length', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 5, 6, 7]);
+      const perms = allPermutations(n);
+      const avg = perms.reduce((s, p) => s + cycleLengthOf(p, 0), 0) / perms.length;
+      const ans = round(avg, 4);
+      return {
+        prompt: `A uniformly random permutation of ${n} elements (labelled 1 through ${n}) is drawn. What is the expected length of the cycle that contains element 1? Answer to four decimals.`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.01,
+        hint: 'For each other specific element, ask: what is the probability it lands in the SAME cycle as element 1?',
+        approach: 'Indicator variables: the cycle length containing element 1 equals 1 plus the number of other elements sharing its cycle; by symmetry, each of the other n−1 elements independently has the same probability of being in that cycle.',
+        solution: `By symmetry (each pair of elements is equally likely to share a cycle), E[cycle length containing element 1] = (${n}+1)/2 = ${ans}.`,
+        recognitionTechnique: 'Symmetry', commonTrap: 'Confusing this with the expected NUMBER of cycles (a harmonic-number sum) — the expected length of one specific cycle instead grows linearly, at exactly half of n+1.',
+        tags: ['permutations', 'cycles', 'symmetry']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);
