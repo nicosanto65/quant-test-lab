@@ -1055,5 +1055,59 @@
     }
   });
 
+  /* ========================= U. NUMBER THEORY BASICS ======================= */
+
+  add({
+    id: 'nt_dice_mod', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 150,
+    build(r) {
+      const n = r.pick([3, 4, 5]);
+      const s = r.pick([4, 6, 8]);
+      const m = r.pick([3, 4, 5]);
+      const target = r.int(0, m - 1);
+      let dp = Array(m).fill(0);
+      dp[0] = 1;
+      for (let k = 0; k < n; k++) {
+        const next = Array(m).fill(0);
+        for (let rem = 0; rem < m; rem++) {
+          if (!dp[rem]) continue;
+          for (let face = 1; face <= s; face++) next[(rem + face) % m] += dp[rem];
+        }
+        dp = next;
+      }
+      const total = Math.pow(s, n);
+      const count = dp[target];
+      const ans = round(count / total, 4);
+      return {
+        prompt: `You roll ${n} fair ${s}-sided dice. What is the probability that the sum of all ${n} rolls is congruent to ${target} modulo ${m} (i.e. leaves remainder ${target} when divided by ${m})?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.005,
+        hint: 'Track only the RUNNING REMAINDER (mod m) after each die, not the running total itself — there are only m possible remainders to keep count of.',
+        approach: 'Dynamic programming over remainders: after each die, update the count of ways to reach each possible remainder mod m, adding each face value and reducing mod m.',
+        solution: `Building up remainder counts die by die (a table of only ${m} running totals, one per residue mod ${m}), after all ${n} dice there are ${count} outcomes (out of ${total} total equally likely outcomes) with sum ≡ ${target} (mod ${m}). P = ${count}/${total} = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Trying to enumerate every possible SUM value directly instead of tracking only the remainder mod m, which collapses the state space from a wide range of sums down to just m buckets.',
+        tags: ['number theory', 'modular arithmetic', 'dice']
+      };
+    }
+  });
+
+  add({
+    id: 'nt_coprime', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 120,
+    build(r) {
+      const N = r.pick([10, 12, 15, 20]);
+      let coprimeCount = 0;
+      for (let x = 1; x <= N; x++) for (let y = 1; y <= N; y++) if (U.gcd(x, y) === 1) coprimeCount++;
+      const total = N * N;
+      const ans = round(coprimeCount / total, 4);
+      return {
+        prompt: `Two integers X and Y are each chosen independently and uniformly at random from {1, 2, ..., ${N}}. What is the probability that X and Y are coprime (gcd(X, Y) = 1)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.004,
+        hint: 'There is no shortcut formula for a small, finite N — count the coprime pairs directly.',
+        approach: `Direct counting: check gcd(x,y) for all ${N}×${N} ordered pairs and count how many have gcd exactly 1.`,
+        solution: `Out of ${total} equally likely ordered pairs (X,Y) with X,Y ∈ {1,...,${N}}, exactly ${coprimeCount} have gcd(X,Y) = 1. P = ${coprimeCount}/${total} = ${ans}.`,
+        recognitionTechnique: 'Counting', commonTrap: `Using the asymptotic constant 6/π² ≈ 0.6079 (the limiting coprime-pair density as N→∞), which is only an approximation and is measurably inaccurate for a small, finite N like ${N}.`,
+        tags: ['number theory', 'gcd', 'coprime']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);

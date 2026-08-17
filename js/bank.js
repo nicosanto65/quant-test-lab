@@ -823,6 +823,35 @@
       approach: 'Geometric probability with a curved boundary: the area under y=x² for x from 0 to 1 is ∫₀¹x²dx.',
       solution: '∫₀¹ x² dx = [x³/3]₀¹ = 1/3 ≈ 0.3333. Since the square has area 1, this integral directly gives P(Y < X²).',
       commonTrap: 'Treating the curved boundary y=x² as if it were a straight line (which would incorrectly give an area of 1/2, the same as a linear boundary through similar endpoints).', tags: ['geometry', 'random point', 'integration']
+    },
+
+    /* ---------------------------- NUMBER THEORY ---------------------------- */
+    {
+      id: 'h081', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 150,
+      prompt: 'Three fair six-sided dice are rolled. What is the probability that the sum of all three is divisible by 3?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.001, acceptFraction: [1, 3],
+      hint: 'Look at each die\'s value modulo 3 — how many of the 6 faces give each possible remainder?', recognitionTechnique: 'Other',
+      approach: 'Symmetry via modular arithmetic: each die\'s face values {1,...,6} contain exactly two faces giving each residue mod 3 (residue 0: {3,6}; residue 1: {1,4}; residue 2: {2,5}), so each die\'s remainder mod 3 is itself perfectly uniform over {0,1,2}, and the sum of independent uniform-mod-3 remainders is also uniform mod 3.',
+      solution: 'Each die is equally likely to land on remainder 0, 1, or 2 (mod 3), since exactly two of its six faces give each remainder. Because this holds independently for all three dice, the sum\'s remainder mod 3 is also exactly uniform over {0,1,2} — so P(sum divisible by 3) = 1/3 ≈ 0.3333, regardless of how many dice are rolled (as long as each die individually has this uniform-residue property).',
+      commonTrap: 'Assuming you need to enumerate all 216 outcomes by brute force — recognizing that each die is already uniform mod 3 gives the answer immediately, with no counting required at all.', tags: ['number theory', 'modular arithmetic', 'dice']
+    },
+    {
+      id: 'h082', topic: 'Probability', subtopic: 'Number theory', difficulty: 2, targetTime: 100,
+      prompt: 'Two fair six-sided dice are rolled. What is the probability that their sum is divisible by 4?',
+      answerType: 'numeric', correctAnswer: 0.25, tolerance: 0.001, acceptFraction: [1, 4],
+      hint: 'List the sums from 2 to 12 that are multiples of 4, then count the ways to make each.', recognitionTechnique: 'Counting',
+      approach: 'Direct counting: identify which sums (4, 8, 12) are divisible by 4, and count the number of (die 1, die 2) combinations giving each.',
+      solution: 'Sum=4: 3 ways (1+3,2+2,3+1). Sum=8: 5 ways (2+6,3+5,4+4,5+3,6+2). Sum=12: 1 way (6+6). Total = 3+5+1 = 9 out of 36 equally likely outcomes. P = 9/36 = 1/4 = 0.25.',
+      commonTrap: 'Assuming the sum\'s remainder mod 4 is uniform (as it happens to be for mod 3 with a single die) — this does NOT generally hold for every modulus, so it must be checked directly by counting rather than assumed by symmetry.', tags: ['number theory', 'modular arithmetic', 'dice']
+    },
+    {
+      id: 'h083', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 120,
+      prompt: 'Two integers X and Y are each chosen independently and uniformly at random from {1, 2, ..., 12}. What is the probability that X and Y are coprime (gcd(X,Y)=1)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.6319, tolerance: 0.002, acceptFraction: [91, 144],
+      hint: 'For a small, specific N like 12, count the coprime pairs directly rather than using the large-N asymptotic constant 6/π².', recognitionTechnique: 'Counting',
+      approach: 'Direct counting over the 12×12=144 ordered pairs, checking gcd(x,y)=1 for each.',
+      solution: 'Counting all ordered pairs (x,y) with x,y ∈ {1,...,12} and gcd(x,y)=1 gives exactly 91 coprime pairs out of 144 total. P = 91/144 ≈ 0.6319.',
+      commonTrap: 'Using the asymptotic large-N constant 6/π² ≈ 0.6079 as if it applied exactly here — that limit is only approached as N→∞, and is noticeably off for a small, finite N=12.', tags: ['number theory', 'gcd', 'coprime']
     }
   ];
 
