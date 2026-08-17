@@ -1017,5 +1017,43 @@
     }
   });
 
+  /* ==================== T. GEOMETRY / COLLISION PROBABILITY ================ */
+
+  add({
+    id: 'geo_meeting_window', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+    build(r) {
+      const T = r.pick([30, 45, 60, 90]);
+      const w = r.pick([5, 10, 15, 20]);
+      const notMeet = round(Math.pow(T - w, 2) / (T * T), 6);
+      const ans = round(1 - notMeet, 4);
+      return {
+        prompt: `Two colleagues each arrive at a coffee shop at a uniformly random time between 0 and ${T} minutes past the hour, independently. Each waits ${w} minutes for the other before leaving. What is the probability they meet?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.005,
+        hint: 'Map the two arrival times to a point in a T×T square. They meet exactly when the point falls within a diagonal band of the square.',
+        approach: 'Geometric probability on the square: the "do not meet" region is two congruent right triangles, each with legs (T−w).',
+        solution: `They meet iff |X−Y| ≤ ${w}. The complement (they miss each other) is two triangles each with legs (${T}−${w})=${T - w}, total area (${T - w})²=${Math.pow(T - w, 2)}, out of the full ${T}×${T}=${T * T} square. P(miss) = ${T - w}²/${T}² = ${notMeet}. P(meet) = 1 − ${notMeet} = ${ans}.`,
+        recognitionTechnique: 'Complement', commonTrap: 'Forgetting to square the (T−w) term, or computing only one of the two symmetric "miss" triangles instead of both.',
+        tags: ['geometry', 'meeting problem']
+      };
+    }
+  });
+
+  add({
+    id: 'geo_point_corner', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 2, targetTime: 100,
+    build(r) {
+      const radius = r.pick([0.3, 0.4, 0.5, 0.6, 0.7]);
+      const ans = round(Math.PI * radius * radius / 4, 4);
+      return {
+        prompt: `A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is the probability that the point lies within a distance of ${radius} from the corner (0,0)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.004,
+        hint: 'The set of points within distance r of the corner, intersected with the square, is exactly one quarter of a full circle.',
+        approach: 'Geometric probability: the favourable region is a quarter-circle of radius r (since the square only contains the quadrant x,y ≥ 0), and the square has area 1.',
+        solution: `A full circle of radius ${radius} has area π·${radius}² = ${round(Math.PI * radius * radius, 4)}. Only the quarter lying inside the square (x,y ≥ 0) counts, giving π·${radius}²/4 = ${ans}. Since the square has area 1, this is also the probability.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Using the full circle\'s area instead of just the quarter that actually lies inside the square.',
+        tags: ['geometry', 'random point']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);

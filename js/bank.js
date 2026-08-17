@@ -785,6 +785,44 @@
       approach: 'Structural property of a 3-cycle: every die is beaten by exactly one other specific die, so a player who always reacts second (choosing after seeing the opponent\'s die) can always select that predator.',
       solution: 'Because the cycle has exactly three dice with each beaten by exactly one other, reacting to the opponent\'s choice always lets you pick the one die that beats theirs — the opponent cannot escape this by switching dice, since whichever die they pick, exactly one of the other two beats it with probability 5/9.',
       commonTrap: 'Assuming the disadvantaged player can "counter-adjust" the way one might in a game with more strategic depth — a 3-cycle\'s structure specifically guarantees the second-mover always has a beating die available, with no escape via switching.', tags: ['dice', 'non-transitive', 'strategy']
+    },
+
+    /* ------------------- GEOMETRY / COLLISION PROBABILITY ------------------ */
+    {
+      id: 'h077', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 2, targetTime: 90,
+      prompt: 'A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is P(X + Y < 1)?',
+      answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.002, acceptFraction: [1, 2],
+      hint: 'Sketch the line X+Y=1 across the unit square — which side has less area, and by how much?', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability: the region X+Y<1 within the unit square is a right triangle; divide its area by the square\'s area (1).',
+      solution: 'The line X+Y=1 cuts the unit square exactly along its diagonal, splitting it into two equal-area right triangles. The region X+Y<1 is one of them, with area 1/2 = 0.5. Since the square has area 1, P(X+Y<1) = 0.5.',
+      commonTrap: 'Overcomplicating a simple linear boundary with integration when the region is visibly just half the square by symmetry.', tags: ['geometry', 'random point']
+    },
+    {
+      id: 'h078', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 4, targetTime: 180,
+      prompt: 'Alice arrives at a cafe at a uniformly random time between 0 and 60 minutes past the hour and waits 10 minutes for Bob. Bob arrives at a uniformly random time between 0 and 60 minutes past the hour and waits 20 minutes for Alice, independently of Alice\'s arrival time. What is the probability they meet? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.4306, tolerance: 0.004,
+      hint: 'The waiting times are no longer equal, so the two "miss" regions in the arrival-time square are DIFFERENT-sized triangles — handle them separately.', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability with asymmetric waits: they meet iff X−Y ≤ 10 AND Y−X ≤ 20, so the two "miss" triangles (one per direction) have different leg lengths, (60−10) and (60−20).',
+      solution: 'The two disjoint "miss" regions have areas (60−10)²/2 = 1250 and (60−20)²/2 = 800, totalling 2050, out of the full 60×60=3600 square. P(miss) = 2050/3600 = 0.5694. P(meet) = 1 − 0.5694 = 0.4306.',
+      commonTrap: 'Reusing the SYMMETRIC formula 1−((T−w)/T)² with a single w, which only applies when both people wait the same amount of time.', tags: ['geometry', 'meeting problem']
+    },
+    {
+      id: 'h079', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+      prompt: 'Two independent points X and Y are each drawn uniformly from [0, 1]. What is E[|X − Y|]?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.002, acceptFraction: [1, 3],
+      hint: '|X−Y| equals the range (max minus min) of the two points — use the known expected max and expected min for n=2 uniform points.', recognitionTechnique: 'Order statistics',
+      approach: 'E[|X−Y|] = E[max(X,Y)] − E[min(X,Y)], using the standard order-statistic results E[max] = n/(n+1) and E[min] = 1/(n+1) for n=2 uniform [0,1] points.',
+      solution: 'For n=2 uniform points, E[max] = 2/3 and E[min] = 1/3, so E[|X−Y|] = E[max]−E[min] = 2/3 − 1/3 = 1/3 ≈ 0.3333.',
+      commonTrap: 'Assuming E[|X−Y|] = |E[X]−E[Y]| = 0 by linearity — absolute value does not commute with expectation, and the two independent points are not literally equal just because their means are.', tags: ['geometry', 'order statistics', 'uniform']
+    },
+    {
+      id: 'h080', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+      prompt: 'A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is P(Y < X²)?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.002, acceptFraction: [1, 3],
+      hint: 'The favourable region is bounded by a curve, not a straight line — integrate the curve\'s height across the square.', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability with a curved boundary: the area under y=x² for x from 0 to 1 is ∫₀¹x²dx.',
+      solution: '∫₀¹ x² dx = [x³/3]₀¹ = 1/3 ≈ 0.3333. Since the square has area 1, this integral directly gives P(Y < X²).',
+      commonTrap: 'Treating the curved boundary y=x² as if it were a straight line (which would incorrectly give an area of 1/2, the same as a linear boundary through similar endpoints).', tags: ['geometry', 'random point', 'integration']
     }
   ];
 
