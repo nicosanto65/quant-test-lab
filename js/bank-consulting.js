@@ -993,6 +993,104 @@
     }
   );
 
+  /* ------------------------------ MINI-CASES ------------------------------ */
+  /* 6 original, fully invented client scenarios (not reproducing any published
+     casebook's specific case) — each a short situation + one MC question
+     testing framework choice, a first calculation, a key clarifying
+     question, or exhibit interpretation. No open-ended pitch content. */
+  items.push(
+    {
+      id: 'con_case001', topic: 'Mini-Cases', subtopic: 'Profitability', difficulty: 3, targetTime: 120,
+      prompt: 'Riverside Bicycles, a regional bike retailer with 12 stores, has seen operating profit fall 22% over the last 12 months while total revenue held essentially flat. Management wants to understand the cause before next month\'s board meeting. Given that revenue held steady, what is the most useful FIRST branch of a profitability tree to investigate?',
+      answerType: 'mc', options: [
+        'The Costs branch (fixed and variable), since flat revenue rules out Revenue as the source of the profit decline',
+        'The Revenue branch, since every profitability analysis should always start with revenue regardless of the facts given',
+        'The Marketing branch specifically, since advertising spend is the most commonly blamed cause',
+        'The employee morale branch, since it is a common initial hypothesis in retail'
+      ], correctAnswer: 'The Costs branch (fixed and variable), since flat revenue rules out Revenue as the source of the profit decline',
+      hint: 'Since Profit = Revenue − Costs, and Revenue is confirmed flat, where must the decline be coming from?',
+      approach: 'A profitability tree lets a stated fact (flat revenue) immediately rule out an entire branch, focusing the investigation on the remaining branch.',
+      solution: 'Because Profit = Revenue − Costs and revenue is confirmed flat, the entire profit decline must be attributable to the Costs side (fixed costs, variable costs, or both) — starting there, rather than re-investigating an already-ruled-out Revenue branch or jumping to an unstructured guess like "marketing" or "morale," is the disciplined next step.',
+      recognitionTechnique: 'Other', commonTrap: 'Defaulting to "always start with revenue" as a fixed habit, ignoring a specific fact already given in the prompt (flat revenue) that rules out that entire branch.',
+      tags: ['mini-case', 'profitability']
+    },
+    {
+      id: 'con_case002', topic: 'Mini-Cases', subtopic: 'Market Sizing', difficulty: 3, targetTime: 120,
+      prompt: 'Northgate Coffee, a specialty coffee roaster, is considering launching a nationwide subscription coffee-delivery service and has asked for a market size estimate before greenlighting the initiative. No further data has been shared yet. Before building any bottom-up or top-down chain, what is the SINGLE most useful clarifying question to ask?',
+      answerType: 'mc', options: [
+        'What is the CEO\'s preferred delivery frequency for the subscription?',
+        'Should the estimate include only the population that already drinks specialty/premium coffee, or the full general population — since this materially changes which base the entire chain is built from',
+        'What color scheme will the packaging use?',
+        'How many employees does Northgate currently have?'
+      ], correctAnswer: 'Should the estimate include only the population that already drinks specialty/premium coffee, or the full general population — since this materially changes which base the entire chain is built from',
+      hint: 'Apply the relevance test: which piece of information would actually change how the sizing chain is built?',
+      approach: 'The relevance test: a clarifying question earns its place only if the answer would change the resulting analysis.',
+      solution: 'Whether the target base is the full population or only existing specialty-coffee drinkers changes the STARTING POINT of the entire bottom-up chain — the other options (delivery frequency preference, packaging color, headcount) would not change how the market-sizing chain itself should be structured, failing the relevance test.',
+      recognitionTechnique: 'Other', commonTrap: 'Asking a question that sounds business-relevant but would not actually change the structure of the market-sizing chain that follows.',
+      tags: ['mini-case', 'market-sizing']
+    },
+    {
+      id: 'con_case003', topic: 'Mini-Cases', subtopic: 'Market Entry', difficulty: 3, targetTime: 120,
+      prompt: 'Solara Fitness, a boutique fitness-studio chain currently operating only in its home country, is considering opening its first studios in a neighboring country. The CEO wants a structured read on whether this expansion makes sense before committing capital. Which framework is most appropriate as the STARTING structure for this decision, and why?',
+      answerType: 'mc', options: [
+        'A profitability tree, since the case is fundamentally about decomposing profit into revenue and cost drivers',
+        'A Market Entry framework, combining the new market\'s structural attractiveness with Solara\'s own capability and fit to win there — since an entry decision requires assessing both the market and the client\'s ability to succeed in it, not either alone',
+        'The 4 P\'s, since this is purely a tactical go-to-market question',
+        'The BCG Growth-Share Matrix, since this is fundamentally a portfolio-allocation decision across multiple existing business units'
+      ], correctAnswer: 'A Market Entry framework, combining the new market\'s structural attractiveness with Solara\'s own capability and fit to win there — since an entry decision requires assessing both the market and the client\'s ability to succeed in it, not either alone',
+      hint: 'This is a "should we enter a new market" question, not a profitability, tactical marketing, or portfolio-allocation question.',
+      approach: 'Recognize case type from the decision actually being asked: a go/no-go decision about entering a specific new market for a specific client.',
+      solution: 'A Market Entry framework is the right starting structure because the decision genuinely depends on TWO things at once — is the new market itself attractive, and can Solara specifically win there — neither a profitability tree (no profit decline is described), the 4 P\'s (too tactical for this level of decision), nor BCG (no existing portfolio of business units is being compared) fits the actual question being asked.',
+      recognitionTechnique: 'Other', commonTrap: 'Reaching for a familiar framework (profitability tree, 4 P\'s) without first checking whether the underlying DECISION actually matches what that framework is built to answer.',
+      tags: ['mini-case', 'market-entry']
+    },
+    {
+      id: 'con_case004', topic: 'Mini-Cases', subtopic: 'Operations', difficulty: 4, targetTime: 130,
+      prompt: 'Meridian Furniture\'s custom-order backlog has grown for six straight months, even after management added overtime shifts specifically at the Assembly stage. Its four production stages run at: Cutting 120 units/week, Assembly 150 units/week (even after the added overtime), Finishing 90 units/week, and Packaging 140 units/week. Why did adding overtime at Assembly fail to reduce the backlog?',
+      answerType: 'mc', options: [
+        'Assembly was never actually the bottleneck — Finishing, at 90 units/week, is the true constraint limiting total line output regardless of Assembly\'s capacity',
+        'Overtime always fails to increase capacity at any production stage, in any business',
+        'The backlog is entirely unrelated to production capacity',
+        'Packaging must be the true bottleneck, since it has the highest capacity of the four stages'
+      ], correctAnswer: 'Assembly was never actually the bottleneck — Finishing, at 90 units/week, is the true constraint limiting total line output regardless of Assembly\'s capacity',
+      hint: 'The whole line can only move as fast as its SLOWEST stage — check which stage actually has the lowest capacity.',
+      approach: 'Bottleneck identification: total line throughput is capped by the stage with the LOWEST capacity, and increasing capacity anywhere else does not raise total output.',
+      solution: 'Finishing, at 90 units/week, is the lowest-capacity stage of the four — the true bottleneck — so adding overtime at Assembly (already at 150 units/week, well above Finishing) does nothing to raise total line throughput, which remains capped by Finishing regardless of how much Assembly capacity increases.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming the stage that received the most visible intervention (overtime at Assembly) must be the bottleneck, without checking the actual stated capacity figures for all four stages.',
+      tags: ['mini-case', 'operations', 'bottleneck']
+    },
+    {
+      id: 'con_case005', topic: 'Mini-Cases', subtopic: 'Investment', difficulty: 3, targetTime: 110,
+      prompt: 'Vantage Logistics is evaluating a $2.5 million investment in an automated sorting system expected to generate $600,000 in annual cash flow savings. The CFO wants a quick read on whether this clears the firm\'s informal "under 5 years" payback hurdle before commissioning a deeper analysis. Using a simple payback calculation, does this investment clear the 5-year hurdle?',
+      answerType: 'mc', options: [
+        'Yes — payback is $2.5m / $600k ≈ 4.17 years, under the 5-year hurdle',
+        'No — payback is roughly 6 years, over the hurdle',
+        'Payback cannot be computed without first knowing a discount rate',
+        'Payback is exactly 5 years, right at the hurdle'
+      ], correctAnswer: 'Yes — payback is $2.5m / $600k ≈ 4.17 years, under the 5-year hurdle',
+      hint: 'Simple payback period = investment / annual cash flow — no discount rate is needed for this quick read.',
+      approach: 'Simple (undiscounted) payback period = investment / annual cash flow, an appropriate quick first-pass check before a more detailed discounted analysis.',
+      solution: 'Payback = $2,500,000 / $600,000 ≈ 4.17 years, which is under the firm\'s informal 5-year hurdle — a discount rate is not required for this SIMPLE payback calculation, only for a more precise discounted payback if the firm later wants one.',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming a discount rate is always required before any payback figure can be computed, confusing simple payback (needs only investment and cash flow) with discounted payback (which does require a discount rate).',
+      tags: ['mini-case', 'investment', 'payback']
+    },
+    {
+      id: 'con_case006', topic: 'Mini-Cases', subtopic: 'Industry Attractiveness', difficulty: 4, targetTime: 130,
+      prompt: '<p>BrightPath Renewables\' board is deciding whether to expand into a new national solar-panel installation market and wants a quick structural read before committing further diligence budget. A preliminary Five Forces scan produced this exhibit:</p><table class="qtable"><thead><tr><th>Force</th><th>Reading</th></tr></thead><tbody><tr><td>Threat of new entrants</td><td>LOW barriers — minimal licensing/certification required</td></tr><tr><td>Supplier power</td><td>HIGH — only 2 major panel manufacturers supply the region</td></tr><tr><td>Buyer power</td><td>LOW — installation is a one-time, high-consideration purchase, not price-shopped like a commodity</td></tr><tr><td>Rivalry</td><td>MODERATE — a handful of regional installers, in a still-growing market</td></tr></tbody></table><p>Based on this exhibit, which combination of forces should concern BrightPath most as it considers entering?</p>',
+      answerType: 'mc', options: [
+        'Low barriers to entry AND high supplier power together — new entrants will face intense future competition (given how easy entry is) while also depending on just two concentrated suppliers who can raise input costs',
+        'Buyer power, since the exhibit shows buyers are highly price-sensitive here',
+        'Rivalry, since the exhibit shows very high rivalry today',
+        'None of the forces present any real concern based on this exhibit'
+      ], correctAnswer: 'Low barriers to entry AND high supplier power together — new entrants will face intense future competition (given how easy entry is) while also depending on just two concentrated suppliers who can raise input costs',
+      hint: 'Read the exhibit row by row and identify which readings are actually UNFAVORABLE for a new entrant, rather than assuming all four forces matter equally.',
+      approach: 'Industry attractiveness assessment via Five Forces: identify which specific forces, based on the exhibit\'s own readings, are unfavorable rather than treating all forces as equally weighted.',
+      solution: 'The exhibit explicitly shows LOW barriers to entry (inviting future competitors to follow BrightPath in) and HIGH supplier power (only 2 manufacturers, who can raise input costs) — both unfavorable signals for a new entrant, unlike buyer power (explicitly LOW, favorable) and rivalry (only MODERATE, not high as one distractor option claims).',
+      recognitionTechnique: 'Direct calculation', commonTrap: 'Misreading the exhibit\'s actual stated values (e.g. treating rivalry as "very high" when it is explicitly listed as only "moderate"), or assuming every force listed must be an equal concern rather than distinguishing favorable from unfavorable readings.',
+      tags: ['mini-case', 'industry-attractiveness', 'five-forces', 'exhibit']
+    }
+  );
+
   items.forEach((q) => { q.track = 'consulting'; });
   global.QTL_BANK.addMany(items);
 })(window);
