@@ -585,6 +585,44 @@
       approach: 'Single-constraint LP: allocate everything to the highest profit per unit of the scarce resource.',
       solution: 'Chairs: €20/hour. Tables: €18/hour. With one binding constraint, produce only chairs: 50 chairs × €40 = €2,000.',
       commonTrap: 'Choosing tables because their absolute profit per unit is higher.', tags: ['optimisation', 'mckinsey']
+    },
+
+    /* ------------------------ MARKOV / STATE PROBLEMS --------------------- */
+    {
+      id: 'h061', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 4, targetTime: 180,
+      prompt: 'A token sits on state 0 of {0, 1, 2}. State 0 is a reflecting barrier (from 0 it always moves to 1). From state 1 it moves to state 0 or to state 2, each with probability 1/2. State 2 is absorbing. What is the expected number of steps, starting from state 0, to reach state 2?',
+      answerType: 'numeric', correctAnswer: 4, tolerance: 0.01,
+      hint: 'Write the two first-step equations for h_0 and h_1, using h_2 = 0.', recognitionTechnique: 'Recursion',
+      approach: 'First-step analysis: h_0 = 1 + h_1 (reflecting); h_1 = 1 + ½h_0 + ½h_2, with h_2 = 0.',
+      solution: 'h_1 = 1 + ½h_0. Substituting into h_0 = 1 + h_1 = 1 + 1 + ½h_0 = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
+      commonTrap: 'Treating state 0 as absorbing (giving h_0 = 0) instead of reflecting, which still costs one step every time the walk lands there.', tags: ['markov', 'hitting time']
+    },
+    {
+      id: 'h062', topic: 'Recursion', subtopic: 'Absorption probability', difficulty: 4, targetTime: 180,
+      prompt: 'A gambler with a biased coin (P(win) = 0.6 each round) starts with €2 and bets €1 per round, stopping at €0 or €4. What is the probability they reach €4 before going broke? Give your answer as an exact fraction or to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.6923, tolerance: 0.002, acceptFraction: [9, 13],
+      hint: 'This is asymmetric — the fair-game formula k/N (which would give 1/2) does not apply here.', recognitionTechnique: 'Recursion',
+      approach: "Asymmetric gambler's ruin: P(hit N before 0 | start k) = (1-(q/p)^k)/(1-(q/p)^N), with p=0.6, q=0.4.",
+      solution: 'q/p = 2/3. P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
+      commonTrap: 'Answering k/N = 2/4 = 0.5 by using the SYMMETRIC gambler\'s-ruin formula, which only holds when p = q = 0.5.', tags: ['markov', "gambler's ruin", 'absorption']
+    },
+    {
+      id: 'h063', topic: 'Recursion', subtopic: 'Stationary distribution', difficulty: 3, targetTime: 150,
+      prompt: 'A machine is either "Up" or "Down" each day. If Up, it stays Up the next day with probability 0.9 (Down with probability 0.1). If Down, it becomes Up the next day with probability 0.6 (stays Down with probability 0.4). In the long run, what fraction of days is the machine Up?',
+      answerType: 'numeric', correctAnswer: 0.8571, tolerance: 0.002, acceptFraction: [6, 7],
+      hint: 'Balance the flow between the two states: the rate of Up→Down transitions must equal the rate of Down→Up transitions in steady state.', recognitionTechnique: 'Recursion',
+      approach: 'Two-state stationary distribution via detailed balance: π_Up · P(Up→Down) = π_Down · P(Down→Up).',
+      solution: 'π_Up·0.1 = π_Down·0.6 ⇒ π_Up/π_Down = 6. With π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
+      commonTrap: 'Averaging the two "stay" probabilities (0.9 and 0.4) instead of solving the actual balance equations.', tags: ['markov', 'stationary distribution']
+    },
+    {
+      id: 'h064', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 3, targetTime: 150,
+      prompt: 'A FAIR coin-flip random walk starts at €3 and stops at €0 or €5 (both ends absorbing — this is the classic gambler\'s ruin setup, NOT a reflecting barrier). What is the expected number of steps until the walk stops?',
+      answerType: 'numeric', correctAnswer: 6, tolerance: 0.01,
+      hint: 'For a symmetric walk with two absorbing barriers, the expected duration has a one-line closed form: k(N−k).', recognitionTechnique: 'Recursion',
+      approach: 'Symmetric gambler\'s ruin duration formula: E[steps | start k, absorbing at 0 and N] = k(N−k).',
+      solution: 'k=3, N=5: E = 3·(5−3) = 3·2 = 6 steps.',
+      commonTrap: 'Confusing this two-sided-absorbing setup with a reflecting-barrier setup (whose expected duration follows a different formula, n² when starting at the reflecting end) — always check whether BOTH ends are absorbing or only one.', tags: ['markov', "gambler's ruin", 'hitting time']
     }
   ];
 

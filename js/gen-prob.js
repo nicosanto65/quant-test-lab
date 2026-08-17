@@ -8,6 +8,27 @@
   const add = (g) => G.push(g);
   const fr = (n, d) => { const f = F.make(n, d); return F.str(f); };
   const dec = (n, d) => round(n / d, 4);
+  // Gaussian elimination with partial pivoting — used to solve small (n<=4)
+  // linear systems exactly for Markov hitting-time / stationary-distribution
+  // generators, so every seed gets a verified, closed-system answer rather
+  // than a hand-derived formula that could be mistyped.
+  function solveLinear(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => row.slice().concat([b[i]]));
+    for (let col = 0; col < n; col++) {
+      let piv = col;
+      for (let rr = col + 1; rr < n; rr++) if (Math.abs(M[rr][col]) > Math.abs(M[piv][col])) piv = rr;
+      const tmp = M[col]; M[col] = M[piv]; M[piv] = tmp;
+      const pivVal = M[col][col];
+      for (let c = col; c <= n; c++) M[col][c] /= pivVal;
+      for (let rr = 0; rr < n; rr++) {
+        if (rr === col) continue;
+        const factor = M[rr][col];
+        for (let c = col; c <= n; c++) M[rr][c] -= factor * M[col][c];
+      }
+    }
+    return M.map((row) => row[n]);
+  }
 
   /* ============================ A. PROBABILITY ============================ */
 
@@ -862,6 +883,92 @@
         solution: `E[X_(${k})] = ${k}/(${n}+1) = ${k}/${n + 1} = ${round(k / (n + 1), 4)}.`,
         recognitionTechnique: 'Symmetry', commonTrap: 'Integrating the Beta density under time pressure when symmetry gives it instantly.',
         tags: ['order statistics', 'spacings']
+      };
+    }
+  });
+
+  /* ====================== R. MARKOV / STATE PROBLEMS ======================= */
+
+  add({
+    id: 'rw_hitting_reflect', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([3, 4, 5]);
+      const p = r.pick([0.4, 0.5, 0.6]);
+      const q = round(1 - p, 2);
+      const A = Array.from({ length: n }, () => Array(n).fill(0));
+      const b = Array(n).fill(1);
+      A[0][0] = 1; A[0][1] = -1;
+      for (let i = 1; i <= n - 1; i++) {
+        A[i][i - 1] = -q;
+        A[i][i] = 1;
+        if (i + 1 <= n - 1) A[i][i + 1] = -p;
+      }
+      const h = solveLinear(A, b);
+      const ans = round(h[0], 4);
+      return {
+        prompt: `A particle performs a random walk on states 0, 1, ..., ${n}. At states 1 through ${n - 1} it moves up (+1) with probability ${p} and down (−1) with probability ${q}. State 0 is a reflecting barrier: from state 0 the particle always moves to state 1. State ${n} is absorbing (the walk stops there). Starting at state 0, what is the expected number of steps to reach state ${n}?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.05, Math.abs(ans) * 0.01),
+        hint: 'Set up first-step equations for each state\'s expected hitting time, remembering state 0 always moves to state 1 (costing one step either way).',
+        approach: 'First-step analysis on a birth–death chain with a reflecting lower boundary: h_0 = 1+h_1; h_i = 1+p·h_(i+1)+q·h_(i-1) for interior i; h_n = 0. Solve the resulting linear system.',
+        solution: `Solving the linear system of hitting-time equations (h_${n}=0, h_0=1+h_1, and h_i=1+${p}·h_(i+1)+${q}·h_(i-1) for i=1..${n - 1}) gives h_0 = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Treating state 0 as absorbing instead of reflecting, or forgetting that being forced back to state 1 still costs one step.',
+        tags: ['markov', 'hitting time']
+      };
+    }
+  });
+
+  add({
+    id: 'rw_absorb_asym', topic: 'Recursion', subtopic: 'Absorption probability', difficulty: 4, targetTime: 180,
+    build(r) {
+      const N = r.pick([5, 8, 10]);
+      const k = r.int(1, N - 1);
+      const p = r.pick([0.4, 0.45, 0.55, 0.6]);
+      const q = round(1 - p, 2);
+      const ratio = round(q / p, 4);
+      const ans = round((1 - Math.pow(ratio, k)) / (1 - Math.pow(ratio, N)), 4);
+      return {
+        prompt: `A gambler starts with €${k} and repeatedly bets €1 on a game won with probability ${p} (lost with probability ${q}). They stop when reaching €${N} or going broke. What is the probability they reach €${N} before going broke?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.005, Math.abs(ans) * 0.01),
+        hint: 'This is an asymmetric random walk — the fair-game formula k/N no longer applies once p ≠ 0.5.',
+        approach: "Asymmetric gambler's ruin: P(reach N before 0 | start k) = (1−(q/p)^k) / (1−(q/p)^N) for p ≠ q.",
+        solution: `q/p = ${ratio}. P = (1 − ${ratio}^${k}) / (1 − ${ratio}^${N}) = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Using the fair-game formula k/N, which only holds when p = q = 0.5.',
+        tags: ['markov', "gambler's ruin", 'absorption']
+      };
+    }
+  });
+
+  add({
+    id: 'rw_stationary3', topic: 'Recursion', subtopic: 'Stationary distribution', difficulty: 4, targetTime: 180,
+    build(r) {
+      const labels = ['Sunny', 'Cloudy', 'Rainy'];
+      const P = [];
+      for (let i = 0; i < 3; i++) {
+        const a = r.pick([0.1, 0.2, 0.3]);
+        const b2 = r.pick([0.1, 0.2, 0.3]);
+        const c = round(1 - a - b2, 2);
+        P.push([a, b2, c]);
+      }
+      const A = [
+        [round(P[0][0] - 1, 4), P[1][0], P[2][0]],
+        [P[0][1], round(P[1][1] - 1, 4), P[2][1]],
+        [1, 1, 1]
+      ];
+      const bvec = [0, 0, 1];
+      const pi = solveLinear(A, bvec).map((x) => round(x, 4));
+      const state = r.int(0, 2);
+      const ans = pi[state];
+      const rows = labels.map((l, i) => `<tr><td>${l}</td><td>${P[i][0]}</td><td>${P[i][1]}</td><td>${P[i][2]}</td></tr>`).join('');
+      return {
+        prompt: `<p>A simple weather model has three states with the following daily transition probabilities:</p>
+        <table class="qtable"><thead><tr><th>From \\ To</th><th>${labels[0]}</th><th>${labels[1]}</th><th>${labels[2]}</th></tr></thead><tbody>${rows}</tbody></table>
+        <p>In the long run, what fraction of days is ${labels[state]}? Give the stationary probability, to 4 decimal places.</p>`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.005, Math.abs(ans) * 0.02),
+        hint: 'Solve π = πP together with the constraint that the three probabilities sum to 1.',
+        approach: 'Stationary distribution: solve the balance equations π = πP plus Σπ = 1 for the 3-state chain.',
+        solution: `Solving π=πP with Σπ=1 gives π(${labels[0]})=${pi[0]}, π(${labels[1]})=${pi[1]}, π(${labels[2]})=${pi[2]}. So π(${labels[state]}) = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Forgetting the normalization constraint Σπ=1 — the balance equations π=πP alone are one equation short of a unique solution.',
+        tags: ['markov', 'stationary distribution']
       };
     }
   });
