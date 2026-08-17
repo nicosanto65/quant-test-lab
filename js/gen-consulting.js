@@ -894,5 +894,33 @@
     }
   });
 
+  /* ------------------------------- INDUSTRY KNOWLEDGE ------------------------------- */
+
+  add({
+    id: 'con_industry_magnitude', topic: 'Industry Knowledge', subtopic: 'Sizing benchmarks', difficulty: 1, targetTime: 40,
+    build(r) {
+      const facts = [
+        { label: 'the current US population', correct: '≈330-340 million', options: ['≈33-34 million', '≈330-340 million', '≈3.3-3.4 billion', '≈33-34 billion'] },
+        { label: 'current world population', correct: '≈8 billion', options: ['≈800 million', '≈8 billion', '≈80 billion', '≈8 million'] },
+        { label: 'current US GDP', correct: '≈$25-29 trillion', options: ['≈$2.5-2.9 trillion', '≈$25-29 trillion', '≈$250-290 trillion', '≈$25-29 billion'] },
+        { label: 'current world GDP', correct: '≈$100-110 trillion', options: ['≈$10-11 trillion', '≈$100-110 trillion', '≈$1,000-1,100 trillion', '≈$100-110 billion'] },
+        { label: 'the number of households in the US', correct: '≈130 million', options: ['≈13 million', '≈130 million', '≈1.3 billion', '≈13 billion'] },
+        { label: "China's current population", correct: '≈1.4 billion', options: ['≈140 million', '≈1.4 billion', '≈14 billion', '≈1.4 million'] },
+        { label: "India's current population", correct: '≈1.4 billion', options: ['≈140 million', '≈1.4 billion', '≈14 billion', '≈1.4 million'] },
+        { label: "the EU's current population", correct: '≈450 million', options: ['≈45 million', '≈450 million', '≈4.5 billion', '≈45 billion'] }
+      ];
+      const f = r.pick(facts);
+      return {
+        prompt: `As a quick sizing-anchor check: what is the correct ORDER OF MAGNITUDE for ${f.label}?`,
+        answerType: 'mc', options: r.shuffle(f.options.slice()), correctAnswer: f.correct,
+        hint: 'Focus on getting the right power of ten — exact precision is not what is being tested here, only the correct general scale.',
+        approach: 'Recall the rough, order-of-magnitude benchmark for this figure, used as a starting anchor for market-sizing chains.',
+        solution: `${f.label[0].toUpperCase() + f.label.slice(1)} is ${f.correct} — this is the correct order of magnitude to use as a starting anchor in a market-sizing chain.`,
+        recognitionTechnique: 'Other', commonTrap: 'Being off by an entire order of magnitude (a factor of 10 or more) rather than by a small, acceptable margin within the correct order of magnitude.',
+        tags: ['industry-knowledge', 'sizing-facts']
+      };
+    }
+  });
+
   global.QTL_GEN_CONSULTING = G;
 })(window);

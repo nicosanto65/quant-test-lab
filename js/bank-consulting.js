@@ -794,6 +794,205 @@
     }
   );
 
+  /* ---------------------------- INDUSTRY KNOWLEDGE ---------------------------- */
+  items.push(
+    {
+      id: 'con_b058', topic: 'Industry Knowledge', subtopic: 'CPG / Retail / E-Commerce', difficulty: 2, targetTime: 75,
+      prompt: 'In the CPG (Consumer Packaged Goods) industry, who is typically the company\'s true "customer" in a B2B2C sense?',
+      answerType: 'mc', options: ['The end consumer directly', 'The retailer who stocks and resells the product', 'The government', 'Competing CPG companies'], correctAnswer: 'The retailer who stocks and resells the product',
+      hint: 'CPG companies sell to an intermediary before the product reaches the shopper.',
+      approach: 'CPG typically sells through retail intermediaries, making the retailer the direct customer, with consumers reached via separate brand marketing.',
+      solution: 'CPG companies sell to retailers, who then resell to end consumers — the retailer is the direct customer in this B2B2C structure, while consumers are reached separately through brand marketing.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming the end consumer is always the direct customer, missing the retailer intermediary step specific to CPG.',
+      tags: ['industry-knowledge', 'cpg']
+    },
+    {
+      id: 'con_b059', topic: 'Industry Knowledge', subtopic: 'CPG / Retail / E-Commerce', difficulty: 2, targetTime: 75,
+      prompt: 'What is the defining current trend putting pressure on E-Commerce businesses specifically?',
+      answerType: 'mc', options: ['A total absence of digital advertising', 'The rising cost of customer acquisition, as digital advertising grows more competitive and privacy regulation limits targeting precision', 'A shortage of physical retail store locations', 'Falling website traffic with no explanation'], correctAnswer: 'The rising cost of customer acquisition, as digital advertising grows more competitive and privacy regulation limits targeting precision',
+      hint: 'Think about what has become more expensive for e-commerce businesses to obtain.',
+      approach: 'E-commerce revenue depends on website traffic and conversion, both of which are increasingly costly to generate via digital advertising.',
+      solution: 'Rising digital customer acquisition costs, driven by advertising competition and privacy regulation limiting targeting precision, are the specific structural pressure facing e-commerce businesses.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing e-commerce\'s acquisition-cost pressure with retail\'s omnichannel pressure — the two industries face related but distinct current trends.',
+      tags: ['industry-knowledge', 'e-commerce']
+    },
+    {
+      id: 'con_b060', topic: 'Industry Knowledge', subtopic: 'CPG / Retail / E-Commerce', difficulty: 3, targetTime: 90,
+      prompt: 'What is the standard revenue formula for a physical Retail business?',
+      answerType: 'mc', options: ['Foot Traffic × Conversion Rate × Average Transaction Value', 'Website Traffic × Conversion Rate × Average Order Value', 'Volume × Price only', 'Billable Hours × Rate'], correctAnswer: 'Foot Traffic × Conversion Rate × Average Transaction Value',
+      hint: 'Physical retail depends on people physically entering the store.',
+      approach: 'Retail revenue depends on how many people enter the store, what fraction buy, and how much they spend.',
+      solution: 'Physical retail revenue = Foot Traffic × Conversion Rate × Average Transaction Value, distinct from e-commerce\'s website-traffic-based formula.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing the physical retail revenue formula (foot traffic) with the e-commerce formula (website traffic).',
+      tags: ['industry-knowledge', 'retail']
+    },
+    {
+      id: 'con_b061', topic: 'Industry Knowledge', subtopic: 'Automotive / Energy / Clean Energy', difficulty: 2, targetTime: 75,
+      prompt: 'What is the defining current trend reshaping the Automotive industry?',
+      answerType: 'mc', options: ['A total absence of competition', 'The capital-intensive, industry-wide transition from internal combustion engines (ICE) toward electric vehicles (EVs)', 'A permanent halt in vehicle production worldwide', 'A complete shift away from personal vehicle ownership'], correctAnswer: 'The capital-intensive, industry-wide transition from internal combustion engines (ICE) toward electric vehicles (EVs)',
+      hint: 'Think about what is forcing incumbent automakers to fund two manufacturing platforms at once.',
+      approach: 'The ICE-to-EV transition is the specific, currently reshaping force in Automotive.',
+      solution: 'The ICE-to-EV transition is forcing incumbents to fund overlapping manufacturing platforms simultaneously, a defining, capital-intensive current pressure.',
+      recognitionTechnique: 'Other', commonTrap: 'Describing the trend too vaguely (e.g. "increased competition") instead of naming the specific ICE-to-EV transition.',
+      tags: ['industry-knowledge', 'automotive']
+    },
+    {
+      id: 'con_b062', topic: 'Industry Knowledge', subtopic: 'Automotive / Energy / Clean Energy', difficulty: 3, targetTime: 90,
+      prompt: 'Why is a traditional Energy (oil & gas) company\'s revenue considered heavily exposed to factors largely outside any single company\'s control?',
+      answerType: 'mc', options: ['Because its revenue depends on a global commodity price set by broad supply and demand, not by the individual company', 'Because oil & gas companies never set their own production volumes', 'Because energy companies have no customers at all', 'Because commodity prices are set individually by each producer'], correctAnswer: 'Because its revenue depends on a global commodity price set by broad supply and demand, not by the individual company',
+      hint: 'Think about which half of the Volume × Price revenue formula a single producer can actually control.',
+      approach: 'Energy revenue = Volume × Commodity Price, and the price component is set globally, largely outside any one company\'s control.',
+      solution: 'The commodity PRICE component of Energy revenue is a global market price, unlike a more controllable list price in other industries, making Energy revenue heavily exposed to factors outside any single company\'s control.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming energy companies set prices the same way a CPG or retail company sets a list price.',
+      tags: ['industry-knowledge', 'energy']
+    },
+    {
+      id: 'con_b063', topic: 'Industry Knowledge', subtopic: 'Automotive / Energy / Clean Energy', difficulty: 3, targetTime: 90,
+      prompt: 'What role does a Power Purchase Agreement (PPA) typically play in the Clean Energy industry\'s revenue model?',
+      answerType: 'mc', options: ['It has no effect on revenue', 'It locks in a price for electricity sold over a long term, making revenue substantially predictable once the asset is built', 'It sets the global wholesale oil price', 'It is a vehicle financing arrangement specific to Automotive'], correctAnswer: 'It locks in a price for electricity sold over a long term, making revenue substantially predictable once the asset is built',
+      hint: 'Think about what makes clean energy behave more like an infrastructure investment than a traditional commodity business.',
+      approach: 'A PPA is a long-term contract fixing the price a developer receives for its electricity output.',
+      solution: 'A PPA locks in the electricity price for a long term (often 15+ years), making a clean energy developer\'s post-construction revenue substantially predictable, unlike traditional Energy\'s ongoing commodity-price exposure.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing clean energy\'s PPA-locked revenue model with traditional energy\'s ongoing commodity-price exposure.',
+      tags: ['industry-knowledge', 'clean-energy']
+    },
+    {
+      id: 'con_b064', topic: 'Industry Knowledge', subtopic: 'Pharma / Hospitals / Financial Services', difficulty: 2, targetTime: 75,
+      prompt: 'What happens to a specific drug\'s revenue when its patent protection expires and generic competitors enter — a phenomenon commonly called a "patent cliff"?',
+      answerType: 'mc', options: ['Revenue typically rises sharply', 'Revenue typically falls sharply as cheaper generics take share', 'Revenue stays completely flat', 'The patent is usually automatically renewed'], correctAnswer: 'Revenue typically falls sharply as cheaper generics take share',
+      hint: 'Generic competitors can legally enter and undercut price once patent protection ends.',
+      approach: 'Patent expiration removes legal exclusivity, allowing cheaper generics to rapidly take share from the branded drug.',
+      solution: 'A "patent cliff" describes the sharp, predictable revenue decline a drug experiences once patent protection ends and generic competitors legally enter the market.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming patent expiration is a minor or gradual event rather than the sharp, structural revenue cliff it typically causes.',
+      tags: ['industry-knowledge', 'pharma']
+    },
+    {
+      id: 'con_b065', topic: 'Industry Knowledge', subtopic: 'Pharma / Hospitals / Financial Services', difficulty: 2, targetTime: 75,
+      prompt: 'What is typically the LARGEST single cost category for a Hospital?', answerType: 'mc',
+      options: ['Marketing and advertising', 'Labor (physicians, nurses, and staff)', 'Raw materials/commodities', 'Retail real estate rent'], correctAnswer: 'Labor (physicians, nurses, and staff)',
+      hint: 'Hospitals sell expert medical labor and care, not a physical product.',
+      approach: 'Hospital costs are dominated by the labor required to deliver patient care.',
+      solution: 'Labor costs — physicians, nurses, and other staff — are typically the dominant cost category for hospitals, which is why staffing shortages hit hospital profitability especially hard.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming medical equipment, not labor, is a hospital\'s largest cost category.',
+      tags: ['industry-knowledge', 'hospitals']
+    },
+    {
+      id: 'con_b066', topic: 'Industry Knowledge', subtopic: 'Pharma / Hospitals / Financial Services', difficulty: 3, targetTime: 90,
+      prompt: 'What is the defining current pressure facing traditional retail/commercial banks?',
+      answerType: 'mc', options: ['A total absence of regulation', 'Intensifying competition from fintech challengers operating with a much lower fixed-cost base (no physical branch network)', 'A complete halt in all lending activity', 'The total elimination of interest rates'], correctAnswer: 'Intensifying competition from fintech challengers operating with a much lower fixed-cost base (no physical branch network)',
+      hint: 'Think about what a digital-only competitor can offer that a traditional branch-based bank struggles to match.',
+      approach: 'Fintech competitors\' lower fixed-cost structure lets them compete aggressively on rates and convenience.',
+      solution: 'Fintech challengers\' much lower fixed-cost base (no branch network) lets them offer better rates while remaining profitable, pressuring traditional banks to invest heavily in digital capabilities.',
+      recognitionTechnique: 'Other', commonTrap: 'Treating fintech competition as purely a marketing challenge rather than a structural cost-base disadvantage for traditional banks.',
+      tags: ['industry-knowledge', 'financial-services']
+    },
+    {
+      id: 'con_b067', topic: 'Industry Knowledge', subtopic: 'Technology / Media / Telecom', difficulty: 1, targetTime: 60,
+      prompt: 'What do MRR and ARR stand for in the context of a Technology/SaaS company\'s revenue?',
+      answerType: 'mc', options: ['Monthly/Annual Recurring Revenue', 'Marketing Return Rate', 'Maximum Revenue Realized', 'Minimum Return Ratio'], correctAnswer: 'Monthly/Annual Recurring Revenue',
+      hint: 'These are the standard metrics for tracking a subscription business\'s predictable revenue base.',
+      approach: 'MRR and ARR track a subscription business\'s recurring revenue base.',
+      solution: 'MRR (Monthly Recurring Revenue) and ARR (Annual Recurring Revenue) are the standard ways SaaS businesses track their predictable, recurring revenue.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing MRR/ARR with one-time or non-recurring revenue metrics.',
+      tags: ['industry-knowledge', 'technology']
+    },
+    {
+      id: 'con_b068', topic: 'Industry Knowledge', subtopic: 'Technology / Media / Telecom', difficulty: 2, targetTime: 75,
+      prompt: 'What does "cord-cutting" refer to in the Media industry?',
+      answerType: 'mc', options: ['A type of content licensing agreement between studios', 'The ongoing consumer shift away from traditional cable/linear television toward streaming services', 'A telecom-specific cost-cutting measure', 'A regulatory requirement affecting broadcast media only'], correctAnswer: 'The ongoing consumer shift away from traditional cable/linear television toward streaming services',
+      hint: 'This term describes consumers cancelling one type of subscription in favor of another.',
+      approach: '"Cord-cutting" describes the structural shift of media consumption from cable to streaming.',
+      solution: '"Cord-cutting" describes consumers canceling traditional cable subscriptions in favor of streaming, the defining current pressure reshaping legacy media companies\' revenue mix.',
+      recognitionTechnique: 'Other', commonTrap: 'Confusing "cord-cutting" with a cost-management term rather than a consumer-behavior/demand-shift term.',
+      tags: ['industry-knowledge', 'media']
+    },
+    {
+      id: 'con_b069', topic: 'Industry Knowledge', subtopic: 'Technology / Media / Telecom', difficulty: 3, targetTime: 90,
+      prompt: 'Why does operating in a "saturated" market (like Telecom in most developed countries) shift a company\'s growth strategy specifically toward upgrading existing customers rather than acquiring new ones?',
+      answerType: 'mc', options: [
+        'Saturation has no effect on growth strategy',
+        'When most potential customers already have the service, the pool of genuinely new customers to acquire is small, so growth in average revenue per user becomes the more available lever',
+        'Saturated markets always mean a company should exit the industry',
+        'New customer acquisition is always the best strategy regardless of saturation'
+      ], correctAnswer: 'When most potential customers already have the service, the pool of genuinely new customers to acquire is small, so growth in average revenue per user becomes the more available lever',
+      hint: 'Think about how many genuinely new customers remain to be won once nearly everyone already has the product.',
+      approach: 'With few new customers left to win, growth shifts toward monetizing (upgrading) the existing customer base.',
+      solution: 'With most potential customers already served, the available growth lever naturally shifts from acquisition toward upgrading existing customers to higher-priced plans (average-revenue-per-user growth).',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming acquisition-focused growth strategy applies equally regardless of how saturated the market already is.',
+      tags: ['industry-knowledge', 'telecom']
+    },
+    {
+      id: 'con_b070', topic: 'Industry Knowledge', subtopic: 'Real Estate / Travel / Professional Services', difficulty: 2, targetTime: 75,
+      prompt: 'Why is Real Estate described as highly sensitive to interest rates specifically?',
+      answerType: 'mc', options: ['Real estate has no meaningful sensitivity to interest rates', 'Real estate is typically financed with substantial debt, so rising interest rates directly raise financing costs across the industry', 'Interest rates only affect Technology companies', 'Real estate financing never involves debt'], correctAnswer: 'Real estate is typically financed with substantial debt, so rising interest rates directly raise financing costs across the industry',
+      hint: 'Think about how real estate is typically funded.',
+      approach: 'Real estate is heavily debt-financed, so interest rate changes flow directly into financing costs.',
+      solution: 'Because real estate is heavily debt-financed, rising interest rates directly raise financing costs, making the industry unusually sensitive to rate movements.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming real estate is financed primarily with equity, missing its typically heavy reliance on debt financing.',
+      tags: ['industry-knowledge', 'real-estate']
+    },
+    {
+      id: 'con_b071', topic: 'Industry Knowledge', subtopic: 'Real Estate / Travel / Professional Services', difficulty: 3, targetTime: 90,
+      prompt: 'What is typically the LARGEST cost category for a Professional Services firm (consulting, law, accounting)?',
+      answerType: 'mc', options: ['Raw materials/commodities', 'Compensation, since the firm\'s "product" is expert labor itself', 'Real estate/property ownership', 'Fuel costs'], correctAnswer: 'Compensation, since the firm\'s "product" is expert labor itself',
+      hint: 'Think about what a professional services firm is actually selling to its clients.',
+      approach: 'Professional Services sells expert labor directly, making compensation the dominant cost category.',
+      solution: 'Because Professional Services sells expert labor directly, compensation for that labor is by far the dominant cost category, unlike industries selling a physical product.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming office real estate or technology costs dominate, rather than the compensation of the expert professionals themselves.',
+      tags: ['industry-knowledge', 'professional-services']
+    },
+    {
+      id: 'con_b072', topic: 'Industry Knowledge', subtopic: 'Real Estate / Travel / Professional Services', difficulty: 3, targetTime: 90,
+      prompt: 'A commercial office REIT\'s rental income falls even though rent PER SQUARE FOOT stayed flat. What does this most directly point to?',
+      answerType: 'mc', options: ['A pricing problem, since rent per square foot must have fallen', 'A falling OCCUPANCY problem, since rental revenue = occupied square footage × rent per square foot and rent held flat', 'A currency exchange rate issue', 'An unrelated marketing problem'], correctAnswer: 'A falling OCCUPANCY problem, since rental revenue = occupied square footage × rent per square foot and rent held flat',
+      hint: 'If one half of the revenue formula stayed constant, the decline must trace to the other half.',
+      approach: 'Rental revenue = Occupied Square Footage × Rent per Square Foot — with rent flat, the decline must trace to occupancy.',
+      solution: 'Since rent per square foot held flat, the revenue decline must come from falling occupancy — consistent with the office-vacancy trend driven by remote/hybrid work, not a pricing problem.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming any real estate revenue decline must be a pricing problem, without checking whether occupancy (the other half of the formula) actually moved.',
+      tags: ['industry-knowledge', 'real-estate']
+    },
+    {
+      id: 'con_b073', topic: 'Industry Knowledge', subtopic: 'Sizing benchmarks', difficulty: 1, targetTime: 45,
+      prompt: 'What is the correct order of magnitude for the current US population?',
+      answerType: 'mc', options: ['Roughly 33 million', 'Roughly 330-340 million', 'Roughly 3.3 billion', 'Roughly 33 billion'], correctAnswer: 'Roughly 330-340 million',
+      hint: 'The US is the third most populous country, but well below the two countries with over a billion people each.',
+      approach: 'Recall the order-of-magnitude benchmark for US population as a market-sizing anchor.',
+      solution: 'The US population is roughly 330-340 million — an order of magnitude above 33 million and an order of magnitude below 3.3 billion.',
+      recognitionTechnique: 'Other', commonTrap: 'Being off by an entire order of magnitude rather than recalling the correct general scale.',
+      tags: ['industry-knowledge', 'sizing-facts']
+    },
+    {
+      id: 'con_b074', topic: 'Industry Knowledge', subtopic: 'Sizing benchmarks', difficulty: 2, targetTime: 75,
+      prompt: 'Why does what is actually being tested with these population/GDP benchmarks matter more as ORDER OF MAGNITUDE than as an exact, precise figure?',
+      answerType: 'mc', options: [
+        'Because exact figures never change over time',
+        'Because these figures drift gradually over time, so a fixed "exact" number would quickly become stale — the durable, testable skill is knowing the correct power of ten',
+        'Because order of magnitude is easier to memorize but less useful in practice',
+        'Precision does not matter at all, even to the nearest power of ten'
+      ], correctAnswer: 'Because these figures drift gradually over time, so a fixed "exact" number would quickly become stale — the durable, testable skill is knowing the correct power of ten',
+      hint: 'Think about why testing an exact point-in-time figure would be a bad long-term quiz design choice.',
+      approach: 'Order-of-magnitude recall remains valid for years, unlike a precise figure that drifts and goes stale.',
+      solution: 'Since exact figures decay over time while the correct order of magnitude remains stable for years, testing order-of-magnitude recall keeps the skill durable rather than rewarding memorization of a soon-outdated number.',
+      recognitionTechnique: 'Other', commonTrap: 'Assuming precision to the nearest exact figure is the goal, rather than recognizing that a stable, durable order-of-magnitude estimate is what actually matters for case purposes.',
+      tags: ['industry-knowledge', 'sizing-facts']
+    },
+    {
+      id: 'con_b075', topic: 'Industry Knowledge', subtopic: 'Sizing benchmarks', difficulty: 3, targetTime: 90,
+      prompt: 'A candidate\'s market-sizing estimate for a US product category comes out larger than the entire US GDP (roughly $25-29 trillion). What should this signal?',
+      answerType: 'mc', options: [
+        'Nothing — this is a completely normal, expected result',
+        'A likely compounding error somewhere in the assumption chain, since no single product category could plausibly exceed the ENTIRE economy\'s total output',
+        'That the GDP figure itself must be wrong',
+        'That the candidate should simply report the number without further checking'
+      ], correctAnswer: 'A likely compounding error somewhere in the assumption chain, since no single product category could plausibly exceed the ENTIRE economy\'s total output',
+      hint: 'Compare the scale of a single product category to the scale of the entire national economy.',
+      approach: 'GDP represents the total output of the entire economy — a sanity-check ceiling for any single product category estimate.',
+      solution: 'GDP represents the total output of the entire economy, so any single product category estimate exceeding it is a clear, usable sanity-check failure pointing to an error in the assumption chain.',
+      recognitionTechnique: 'Other', commonTrap: 'Reporting an implausibly large estimate with confidence instead of sanity-checking it against a known, larger reference point like GDP.',
+      tags: ['industry-knowledge', 'sizing-facts', 'sanity-check']
+    }
+  );
+
   items.forEach((q) => { q.track = 'consulting'; });
   global.QTL_BANK.addMany(items);
 })(window);
