@@ -1186,5 +1186,54 @@
     }
   });
 
+  /* =================== W. INFORMATION / IMPOSSIBILITY ====================== */
+
+  add({
+    id: 'info_weighings', topic: 'Information Problems', subtopic: 'Weighings', difficulty: 3, targetTime: 210,
+    build(r) {
+      // Each {N, w} pair is a well-established exact case from the classic
+      // "odd coin" weighing-puzzle family: w is the true minimum (not just
+      // the information-theoretic lower bound) because N sits at or below
+      // the known achievable capacity (3^w − 3)/2 for that many weighings.
+      const pool = [
+        { N: 3, w: 2 },
+        { N: 9, w: 3 },
+        { N: 12, w: 3 },
+        { N: 27, w: 4 },
+        { N: 39, w: 4 }
+      ];
+      const pick = r.pick(pool);
+      const outcomes = 2 * pick.N;
+      const cap3wMinus1 = Math.pow(3, pick.w - 1);
+      const cap3w = Math.pow(3, pick.w);
+      return {
+        prompt: `You have ${pick.N} visually identical balls; exactly one has a different weight (heavier or lighter, unknown which), and the rest are identical. Using a balance scale with no weights, what is the minimum number of weighings that always identifies the odd ball and whether it is heavy or light?`,
+        answerType: 'numeric', correctAnswer: pick.w, tolerance: 0,
+        hint: 'Each weighing has 3 possible outcomes. How many weighings are needed so that 3^(weighings) is at least the number of distinguishable answers?',
+        approach: `Information-theoretic lower bound (3^w ≥ number of possible answers) combined with a known explicit strategy achieving it for this specific N.`,
+        solution: `There are ${outcomes} possible answers (${pick.N} balls × heavy/light). ${pick.w - 1} weighings distinguish at most 3^${pick.w - 1} = ${cap3wMinus1} < ${outcomes}, so ${pick.w - 1} is impossible; ${pick.w} weighings give 3^${pick.w} = ${cap3w} ≥ ${outcomes}, and a known balanced-split strategy achieves it. Answer: ${pick.w}.`,
+        recognitionTechnique: 'Information / impossibility', commonTrap: 'Giving only the achievable strategy without checking the lower bound (or vice versa) — proving a true MINIMUM requires both an achievable strategy AND a proof that one fewer weighing is information-theoretically impossible.',
+        tags: ['lower bound', 'weighings']
+      };
+    }
+  });
+
+  add({
+    id: 'info_maxmin_comparisons', topic: 'Information Problems', subtopic: 'Comparisons', difficulty: 3, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 6, 8, 10, 12, 14]);
+      const ans = Math.ceil(3 * n / 2) - 2;
+      return {
+        prompt: `What is the minimum number of pairwise comparisons needed to identify both the maximum and the minimum of ${n} distinct numbers, in the worst case?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0,
+        hint: 'Compare the elements in pairs first, then find the max among the winners and the min among the losers separately.',
+        approach: 'Pair-first strategy: split into n/2 pairs (n/2 comparisons), then find the max among the n/2 pair-winners (n/2−1 comparisons) and the min among the n/2 pair-losers (n/2−1 comparisons) — this achieves the matching adversary lower bound ⌈3n/2⌉−2.',
+        solution: `Pairing costs ${n}/2 = ${n / 2} comparisons. Finding the max among the ${n / 2} winners costs ${n / 2 - 1} more; finding the min among the ${n / 2} losers costs ${n / 2 - 1} more. Total = ${n / 2} + ${n / 2 - 1} + ${n / 2 - 1} = ${ans} = ⌈3·${n}/2⌉ − 2.`,
+        recognitionTechnique: 'Information / impossibility', commonTrap: `Running two independent tournaments (one for max, one for min) over all ${n} elements separately, costing 2${n}−3 = ${2 * n - 3} comparisons — noticeably more than the optimal ${ans}, since it wastes the information already learned from each pair's own comparison.`,
+        tags: ['lower bound', 'comparisons']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);

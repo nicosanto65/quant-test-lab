@@ -872,6 +872,26 @@
       approach: 'The number of permutations of n elements forming a single n-cycle is (n−1)!, out of n! total permutations, giving probability (n−1)!/n! = 1/n.',
       solution: 'Single 6-cycles number (6−1)! = 5! = 120, out of 6! = 720 total permutations. P = 120/720 = 1/6 ≈ 0.1667.',
       commonTrap: 'Assuming a "random" permutation is unlikely to be a single cycle without checking the actual count — 1/n is often larger than intuition suggests (here, roughly 1 in 6, not some vanishingly small chance).', tags: ['permutations', 'cycles', 'counting']
+    },
+
+    /* ------------------- INFORMATION / IMPOSSIBILITY ----------------------- */
+    {
+      id: 'h086', topic: 'Information Problems', subtopic: 'Search', difficulty: 2, targetTime: 90,
+      prompt: 'Someone is thinking of a whole number from 1 to 100. You may ask only yes/no questions. What is the minimum number of questions that always guarantees identifying the exact number, in the worst case?',
+      answerType: 'numeric', correctAnswer: 7, tolerance: 0,
+      hint: 'Each yes/no question can at best cut the remaining candidates in half — how many halvings does it take to get from 100 down to 1?', recognitionTechnique: 'Information / impossibility',
+      approach: 'Information-theoretic lower bound: each yes/no answer distinguishes at most a factor of 2, so the minimum number of questions is ⌈log₂(number of candidates)⌉, achieved exactly by binary search.',
+      solution: '⌈log₂(100)⌉ = ⌈6.644⌉ = 7. Six questions could distinguish at most 2⁶=64<100 possibilities (not enough), while seven give 2⁷=128≥100, and binary search (always asking "is it above the midpoint of the remaining range?") achieves this.',
+      commonTrap: 'Guessing a round number like 10 or 100 without computing the actual log₂ bound, or forgetting that 2⁶=64 is NOT enough to cover 100 distinct possibilities.', tags: ['lower bound', 'binary search']
+    },
+    {
+      id: 'h087', topic: 'Information Problems', subtopic: 'Comparisons', difficulty: 2, targetTime: 75,
+      prompt: 'What is the minimum number of pairwise comparisons needed to find just the MAXIMUM (not the minimum) of 20 distinct numbers, in the worst case?',
+      answerType: 'numeric', correctAnswer: 19, tolerance: 0,
+      hint: 'Every number except the eventual maximum must "lose" at least one comparison to be ruled out.', recognitionTechnique: 'Information / impossibility',
+      approach: 'Each comparison eliminates at most one candidate from contention for the maximum (the loser of that comparison); with n candidates, at least n−1 eliminations (comparisons) are needed to leave exactly one standing.',
+      solution: 'To find the max, every one of the other 19 numbers must lose at least one direct or indirect comparison to be ruled out, and each single comparison can only eliminate one candidate — so at least 19 comparisons are required, and a simple sequential scan achieves exactly 19.',
+      commonTrap: 'Confusing this with the harder "find BOTH max and min" problem (which needs ⌈3n/2⌉−2 comparisons, not n−1) — finding only the maximum is strictly cheaper.', tags: ['lower bound', 'comparisons']
     }
   ];
 
