@@ -677,5 +677,55 @@
     }
   });
 
+  /* ========================= BRAINTEASERS / INVARIANTS ===================== */
+
+  add({
+    id: 'bt_domino_parity', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 3, targetTime: 120,
+    build(r) {
+      const n = r.pick([6, 8, 10]);
+      let r1 = r.int(0, n - 1), c1 = r.int(0, n - 1), r2, c2;
+      do { r2 = r.int(0, n - 1); c2 = r.int(0, n - 1); } while (r2 === r1 && c2 === c1);
+      const color1 = (r1 + c1) % 2, color2 = (r2 + c2) % 2;
+      const sameColor = color1 === color2;
+      const optYes = 'Yes — the tiling is always possible, because one square of each colour was removed, leaving equal counts of both colours';
+      const optNo = 'No — the tiling is always impossible, because two squares of the same colour were removed, leaving unequal counts of the two colours';
+      const optDepends = 'It depends on exactly which two squares were removed, not just their colour';
+      const optUnknown = 'Cannot be determined without seeing the board';
+      const correct = sameColor ? optNo : optYes;
+      return {
+        prompt: `Colour an ${n}×${n} board like a checkerboard. Two squares are removed: one at row ${r1 + 1}, column ${c1 + 1}, the other at row ${r2 + 1}, column ${c2 + 1}. Can the remaining ${n * n - 2} squares always be exactly covered by 1×2 dominoes?`,
+        answerType: 'mc', options: r.shuffle([optYes, optNo, optDepends, optUnknown]), correctAnswer: correct,
+        hint: 'Every domino covers exactly one black square and one white square — count how many of each colour remain.',
+        approach: 'Parity/colouring argument: a domino always covers one square of each colour, so removing two same-coloured squares makes the two colour-counts unequal (impossible), while removing one of each colour keeps them equal — and a classical theorem guarantees a full tiling exists whenever the counts are equal.',
+        solution: `Square 1 has colour (${r1 + 1}+${c1 + 1}) mod 2 = ${color1}; square 2 has colour (${r2 + 1}+${c2 + 1}) mod 2 = ${color2}. ${sameColor ? 'They are the SAME colour, so the two colour-counts on the remaining board are unequal — no tiling can exist.' : 'They are DIFFERENT colours, so the remaining board still has equal colour-counts, and a full domino tiling is always achievable.'}`,
+        recognitionTechnique: 'Other', commonTrap: 'Trying to reason about the specific geometry of where the squares sit, when only their COLOUR (a single invariant) actually determines the answer.',
+        tags: ['invariant', 'parity', 'coloring']
+      };
+    }
+  });
+
+  add({
+    id: 'bt_coin_parity', topic: 'Brainteasers', subtopic: 'Invariants', difficulty: 3, targetTime: 120,
+    build(r) {
+      const n = r.pick([5, 6, 7, 8, 9]);
+      const T0 = r.int(1, n);
+      const reachable = T0 % 2 === 0;
+      const optYes = 'Yes — reachable, because the number of tails is currently EVEN, and each move changes that count by 0 or ±2, preserving evenness all the way down to 0';
+      const optNo = 'No — unreachable, because the number of tails is currently ODD, and each move changes that count by 0 or ±2, so an odd count can never become 0 (which is even)';
+      const optAlways = 'Yes — reachable regardless of the starting number of tails';
+      const optNever = 'No — unreachable regardless of the starting number of tails, since a flip only swaps which coins are tails';
+      const correct = reachable ? optYes : optNo;
+      return {
+        prompt: `${n} coins are laid out, ${T0} showing tails and the rest heads. A move consists of choosing any two coins (not necessarily next to each other) and flipping both simultaneously. Is it possible to reach a state where all ${n} coins show heads, using this move repeatedly (possibly zero times)?`,
+        answerType: 'mc', options: r.shuffle([optYes, optNo, optAlways, optNever]), correctAnswer: correct,
+        hint: 'Track how the NUMBER of tails changes with each move — does it ever change by an odd amount?',
+        approach: 'Invariant identification: flipping two coins changes the tails count by exactly 0 (one H, one T), +2 (both H→T), or −2 (both T→H) — so the PARITY of the tails count never changes, no matter which two coins are chosen.',
+        solution: `The tails count starts at ${T0}, which is ${reachable ? 'EVEN' : 'ODD'}. Since every move changes the tails count by 0 or ±2, its parity is invariant. The target (all heads) has 0 tails, which is even. ${reachable ? 'Since the starting count is also even, the target is reachable.' : 'Since the starting count is odd, the target can never be reached.'}`,
+        recognitionTechnique: 'Other', commonTrap: 'Trying to search through move sequences by trial and error instead of first identifying the invariant quantity (the parity of the tails count) that determines reachability instantly.',
+        tags: ['invariant', 'parity']
+      };
+    }
+  });
+
   global.QTL_GEN_APPLIED = G;
 })(window);

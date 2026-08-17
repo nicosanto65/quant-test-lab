@@ -623,6 +623,77 @@
       approach: 'Symmetric gambler\'s ruin duration formula: E[steps | start k, absorbing at 0 and N] = k(N−k).',
       solution: 'k=3, N=5: E = 3·(5−3) = 3·2 = 6 steps.',
       commonTrap: 'Confusing this two-sided-absorbing setup with a reflecting-barrier setup (whose expected duration follows a different formula, n² when starting at the reflecting end) — always check whether BOTH ends are absorbing or only one.', tags: ['markov', "gambler's ruin", 'hitting time']
+    },
+
+    /* ------------------------ BRAINTEASERS / INVARIANTS ------------------- */
+    {
+      id: 'h065', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 3, targetTime: 120,
+      prompt: 'A standard 8×8 chessboard has its two diagonally opposite corner squares removed (both corners are the same colour on a standard board). Can the remaining 62 squares be exactly covered by 31 dominoes, each covering two adjacent squares?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if the dominoes can be rotated', 'Only on boards larger than 8×8'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Count how many squares of each colour remain after the two same-coloured corners are removed.', recognitionTechnique: 'Other',
+      approach: 'Colouring/parity invariant: every domino covers exactly one black and one white square, so the two colour-counts must stay equal for a tiling to exist.',
+      solution: 'A full 8×8 board has 32 squares of each colour. The two removed corners are the SAME colour (opposite corners always match on a standard board), leaving 32 of one colour and 30 of the other. Since every domino covers one of each colour, 31 dominoes would need to cover 31+31, not 32+30 — impossible.',
+      commonTrap: 'Trying to find an explicit tiling by trial and error instead of noticing the colour-count invariant rules it out immediately, before any tiling attempt.', tags: ['invariant', 'parity', 'coloring', 'classic']
+    },
+    {
+      id: 'h070', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 4, targetTime: 150,
+      prompt: 'On a standard 8×8 chessboard, ANY one black square and ANY one white square are removed (not necessarily corners, and not necessarily adjacent). Is the remaining 62-square board always guaranteed to be exactly tileable by 31 dominoes, no matter which black square and which white square were chosen?',
+      answerType: 'mc',
+      options: ['Yes — always tileable', 'No — it depends on exactly which two squares were removed', 'Only if the two removed squares are adjacent', 'Only if the two removed squares are far apart'],
+      correctAnswer: 'Yes — always tileable',
+      tolerance: 0,
+      hint: 'The colour-count invariant only tells you when a tiling is IMPOSSIBLE (unequal counts) — here the counts are still equal (31 and 31). A separate, stronger classical result covers this case.', recognitionTechnique: 'Other',
+      approach: "Gomory's theorem: removing any one black square and any one white square from a standard chessboard always leaves a board that can be perfectly tiled by dominoes, regardless of which two squares (of opposite colour) were removed.",
+      solution: 'Removing one square of each colour leaves 31 black and 31 white squares — the colour-count invariant no longer rules anything out. A classical result (Gomory\'s theorem, provable by tracing a Hamiltonian cycle through all 64 squares and pairing consecutive squares along it) guarantees a full tiling always exists in this case, regardless of exactly where the two removed squares are.',
+      commonTrap: 'Assuming that because the two-SAME-colour case (h065) is impossible, removing two DIFFERENT-coloured squares must sometimes also fail depending on position — the colour-count invariant is necessary but the equal-colour-count case is always sufficient here, a genuinely stronger guarantee than parity alone would suggest.', tags: ['invariant', 'parity', 'coloring']
+    },
+    {
+      id: 'h066', topic: 'Brainteasers', subtopic: 'Invariants', difficulty: 4, targetTime: 150,
+      prompt: 'The numbers 1 through 20 are written on a whiteboard. Repeatedly, two numbers a and b are erased and replaced by the single number a + b − 1, reducing the count on the board by one each time. This continues until exactly one number remains. What is that final number?',
+      answerType: 'numeric', correctAnswer: 191, tolerance: 0,
+      hint: 'Track how the TOTAL SUM of all numbers on the board changes with each operation.', recognitionTechnique: 'Other',
+      approach: 'Invariant tracking: each operation replaces a+b with a+b−1, so the total sum on the board decreases by exactly 1 every single operation, regardless of which two numbers are chosen.',
+      solution: 'Initial sum = 1+2+...+20 = 210. Going from 20 numbers to 1 number takes 19 operations, and each operation reduces the total sum by exactly 1, so the final sum (which equals the single remaining number) is 210 − 19 = 191 — the same regardless of which pairs were chosen at each step.',
+      commonTrap: 'Assuming the final answer depends on the specific order in which numbers are combined, when the sum-minus-one-per-operation invariant makes the final result the same no matter what order is used.', tags: ['invariant', 'conservation']
+    },
+    {
+      id: 'h067', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 3, targetTime: 120,
+      prompt: '9 coins are laid out, 5 showing tails and 4 showing heads. A move consists of choosing any two coins and flipping both simultaneously. Is it possible to reach a state where all 9 coins show heads?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if the two chosen coins are adjacent', 'Only after an even number of moves'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Each move changes the number of tails by 0, +2, or −2 — what property of the tails count never changes?', recognitionTechnique: 'Other',
+      approach: 'Invariant identification: the PARITY of the tails count is preserved by every move (each move changes it by an even amount), so it can only reach another value of the same parity.',
+      solution: 'The tails count starts at 5 (odd). Every move changes it by 0, +2, or −2 — always an even amount — so the parity of the tails count never changes. The all-heads target has 0 tails (even), which has different parity from 5, so it can never be reached, regardless of how many moves are made.',
+      commonTrap: 'Assuming enough moves can eventually reach any target state, without checking whether a conserved quantity (here, the parity of the tails count) rules it out entirely.', tags: ['invariant', 'parity']
+    },
+    {
+      id: 'h068', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 4, targetTime: 150,
+      prompt: 'The numbers 1 through 11 are to be arranged around a circle so that every pair of adjacent numbers sums to an odd number. Is this possible?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if 11 is placed first', 'Only if the numbers are arranged in increasing order'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Two numbers sum to an odd number only when one is even and the other is odd — what does that force about the arrangement around the whole circle?', recognitionTechnique: 'Other',
+      approach: 'Parity 2-colouring argument: requiring every adjacent sum to be odd forces even and odd numbers to strictly alternate all the way around the circle — but a circle with an ODD number of positions cannot be 2-coloured in a strictly alternating pattern.',
+      solution: 'Every adjacent pair summing to odd means parities must strictly alternate (even, odd, even, odd, ...) all the way around. But going around a circle of 11 (odd) positions and alternating, the 11th number would need to differ in parity from BOTH its neighbours including the 1st number, yet after an odd number of alternations you return to the same parity as the start — a direct contradiction. (There are 6 odd numbers and 5 even numbers among 1-11, which also cannot alternate evenly around an odd-length circle.) No arrangement can satisfy the condition.',
+      commonTrap: 'Only checking a few sample positions instead of recognizing that alternating parity around an ODD-length cycle is structurally impossible, regardless of which specific numbers are used.', tags: ['invariant', 'parity', 'coloring']
+    },
+    {
+      id: 'h069', topic: 'Brainteasers', subtopic: 'Invariants', difficulty: 4, targetTime: 150,
+      prompt: 'You have two unmarked jugs, one holding exactly 4 litres and the other exactly 6 litres, plus an unlimited water supply and a drain. Using only "fill a jug completely," "empty a jug completely," and "pour from one jug into the other until either the source is empty or the destination is full," is it possible to end up with exactly 3 litres in either jug?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only using the 6-litre jug', 'Only using the 4-litre jug'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Every amount you can ever measure with jugs of capacity a and b is a multiple of gcd(a,b).', recognitionTechnique: 'Other',
+      approach: 'Number-theoretic invariant: with fill/empty/pour operations between two jugs of integer capacities a and b, every reachable water amount is always a multiple of gcd(a,b) (a consequence of Bézout\'s identity).',
+      solution: 'gcd(4,6) = 2. Every quantity reachable in either jug through fill/empty/pour operations must be a multiple of 2 (0, 2, 4, or 6 litres) — 3 is not a multiple of 2, so it can never be measured exactly, no matter how many operations are used.',
+      commonTrap: 'Trying to search for a specific sequence of pours by trial and error, instead of first checking whether the target is even a multiple of gcd(capacity 1, capacity 2), which rules it out immediately when it is not.', tags: ['invariant', 'number theory', 'gcd']
     }
   ];
 
