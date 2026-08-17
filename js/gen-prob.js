@@ -8,6 +8,27 @@
   const add = (g) => G.push(g);
   const fr = (n, d) => { const f = F.make(n, d); return F.str(f); };
   const dec = (n, d) => round(n / d, 4);
+  // Gaussian elimination with partial pivoting — used to solve small (n<=4)
+  // linear systems exactly for Markov hitting-time / stationary-distribution
+  // generators, so every seed gets a verified, closed-system answer rather
+  // than a hand-derived formula that could be mistyped.
+  function solveLinear(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => row.slice().concat([b[i]]));
+    for (let col = 0; col < n; col++) {
+      let piv = col;
+      for (let rr = col + 1; rr < n; rr++) if (Math.abs(M[rr][col]) > Math.abs(M[piv][col])) piv = rr;
+      const tmp = M[col]; M[col] = M[piv]; M[piv] = tmp;
+      const pivVal = M[col][col];
+      for (let c = col; c <= n; c++) M[col][c] /= pivVal;
+      for (let rr = 0; rr < n; rr++) {
+        if (rr === col) continue;
+        const factor = M[rr][col];
+        for (let c = col; c <= n; c++) M[rr][c] -= factor * M[col][c];
+      }
+    }
+    return M.map((row) => row[n]);
+  }
 
   /* ============================ A. PROBABILITY ============================ */
 
@@ -862,6 +883,436 @@
         solution: `E[X_(${k})] = ${k}/(${n}+1) = ${k}/${n + 1} = ${round(k / (n + 1), 4)}.`,
         recognitionTechnique: 'Symmetry', commonTrap: 'Integrating the Beta density under time pressure when symmetry gives it instantly.',
         tags: ['order statistics', 'spacings']
+      };
+    }
+  });
+
+  /* ====================== R. MARKOV / STATE PROBLEMS ======================= */
+
+  add({
+    id: 'rw_hitting_reflect', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([3, 4, 5]);
+      const p = r.pick([0.4, 0.5, 0.6]);
+      const q = round(1 - p, 2);
+      const A = Array.from({ length: n }, () => Array(n).fill(0));
+      const b = Array(n).fill(1);
+      A[0][0] = 1; A[0][1] = -1;
+      for (let i = 1; i <= n - 1; i++) {
+        A[i][i - 1] = -q;
+        A[i][i] = 1;
+        if (i + 1 <= n - 1) A[i][i + 1] = -p;
+      }
+      const h = solveLinear(A, b);
+      const ans = round(h[0], 4);
+      return {
+        prompt: `A particle performs a random walk on states 0, 1, ..., ${n}. At states 1 through ${n - 1} it moves up (+1) with probability ${p} and down (−1) with probability ${q}. State 0 is a reflecting barrier: from state 0 the particle always moves to state 1. State ${n} is absorbing (the walk stops there). Starting at state 0, what is the expected number of steps to reach state ${n}?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.05, Math.abs(ans) * 0.01),
+        hint: 'Set up first-step equations for each state\'s expected hitting time, remembering state 0 always moves to state 1 (costing one step either way).',
+        approach: 'First-step analysis on a birth–death chain with a reflecting lower boundary: h_0 = 1+h_1; h_i = 1+p·h_(i+1)+q·h_(i-1) for interior i; h_n = 0. Solve the resulting linear system.',
+        solution: `Solving the linear system of hitting-time equations (h_${n}=0, h_0=1+h_1, and h_i=1+${p}·h_(i+1)+${q}·h_(i-1) for i=1..${n - 1}) gives h_0 = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Treating state 0 as absorbing instead of reflecting, or forgetting that being forced back to state 1 still costs one step.',
+        tags: ['markov', 'hitting time']
+      };
+    }
+  });
+
+  add({
+    id: 'rw_absorb_asym', topic: 'Recursion', subtopic: 'Absorption probability', difficulty: 4, targetTime: 180,
+    build(r) {
+      const N = r.pick([5, 8, 10]);
+      const k = r.int(1, N - 1);
+      const p = r.pick([0.4, 0.45, 0.55, 0.6]);
+      const q = round(1 - p, 2);
+      const ratio = round(q / p, 4);
+      const ans = round((1 - Math.pow(ratio, k)) / (1 - Math.pow(ratio, N)), 4);
+      return {
+        prompt: `A gambler starts with €${k} and repeatedly bets €1 on a game won with probability ${p} (lost with probability ${q}). They stop when reaching €${N} or going broke. What is the probability they reach €${N} before going broke?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.005, Math.abs(ans) * 0.01),
+        hint: 'This is an asymmetric random walk — the fair-game formula k/N no longer applies once p ≠ 0.5.',
+        approach: "Asymmetric gambler's ruin: P(reach N before 0 | start k) = (1−(q/p)^k) / (1−(q/p)^N) for p ≠ q.",
+        solution: `q/p = ${ratio}. P = (1 − ${ratio}^${k}) / (1 − ${ratio}^${N}) = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Using the fair-game formula k/N, which only holds when p = q = 0.5.',
+        tags: ['markov', "gambler's ruin", 'absorption']
+      };
+    }
+  });
+
+  add({
+    id: 'rw_stationary3', topic: 'Recursion', subtopic: 'Stationary distribution', difficulty: 4, targetTime: 180,
+    build(r) {
+      const labels = ['Sunny', 'Cloudy', 'Rainy'];
+      const P = [];
+      for (let i = 0; i < 3; i++) {
+        const a = r.pick([0.1, 0.2, 0.3]);
+        const b2 = r.pick([0.1, 0.2, 0.3]);
+        const c = round(1 - a - b2, 2);
+        P.push([a, b2, c]);
+      }
+      const A = [
+        [round(P[0][0] - 1, 4), P[1][0], P[2][0]],
+        [P[0][1], round(P[1][1] - 1, 4), P[2][1]],
+        [1, 1, 1]
+      ];
+      const bvec = [0, 0, 1];
+      const pi = solveLinear(A, bvec).map((x) => round(x, 4));
+      const state = r.int(0, 2);
+      const ans = pi[state];
+      const rows = labels.map((l, i) => `<tr><td>${l}</td><td>${P[i][0]}</td><td>${P[i][1]}</td><td>${P[i][2]}</td></tr>`).join('');
+      return {
+        prompt: `<p>A simple weather model has three states with the following daily transition probabilities:</p>
+        <table class="qtable"><thead><tr><th>From \\ To</th><th>${labels[0]}</th><th>${labels[1]}</th><th>${labels[2]}</th></tr></thead><tbody>${rows}</tbody></table>
+        <p>In the long run, what fraction of days is ${labels[state]}? Give the stationary probability, to 4 decimal places.</p>`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: Math.max(0.005, Math.abs(ans) * 0.02),
+        hint: 'Solve π = πP together with the constraint that the three probabilities sum to 1.',
+        approach: 'Stationary distribution: solve the balance equations π = πP plus Σπ = 1 for the 3-state chain.',
+        solution: `Solving π=πP with Σπ=1 gives π(${labels[0]})=${pi[0]}, π(${labels[1]})=${pi[1]}, π(${labels[2]})=${pi[2]}. So π(${labels[state]}) = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Forgetting the normalization constraint Σπ=1 — the balance equations π=πP alone are one equation short of a unique solution.',
+        tags: ['markov', 'stationary distribution']
+      };
+    }
+  });
+
+  /* ==================== S. DICE GAMES / NON-STANDARD DICE ================== */
+
+  add({
+    id: 'dg_compare', topic: 'Dice Games', subtopic: 'Comparing distributions', difficulty: 3, targetTime: 120,
+    build(r) {
+      const facesA = Array.from({ length: 6 }, () => r.int(1, 9));
+      const facesB = Array.from({ length: 6 }, () => r.int(1, 9));
+      let wins = 0;
+      facesA.forEach((a) => facesB.forEach((b) => { if (a > b) wins++; }));
+      const ans = round(wins / 36, 4);
+      return {
+        prompt: `Die A has faces {${facesA.join(', ')}}. Die B has faces {${facesB.join(', ')}}. Both are rolled once, independently, each face equally likely. What is the probability that die A shows a STRICTLY higher number than die B?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.006,
+        hint: 'These are non-standard dice — you cannot use a formula for fair 1-6 dice. Enumerate all 36 equally likely (A,B) pairs directly.',
+        approach: 'Direct enumeration: count how many of the 36 equally likely (A,B) face pairs have A > B, then divide by 36.',
+        solution: `Counting all 36 pairs (face of A, face of B), A shows the strictly higher value in ${wins} of them. P(A beats B) = ${wins}/36 = ${ans}.`,
+        recognitionTechnique: 'Counting', commonTrap: 'Assuming a formula that only applies to standard fair dice (like comparing means) rather than directly enumerating all 36 pairs for these custom, non-standard face values.',
+        tags: ['dice', 'non-transitive']
+      };
+    }
+  });
+
+  add({
+    id: 'dg_conditional_win', topic: 'Dice Games', subtopic: 'Conditional win probability', difficulty: 4, targetTime: 150,
+    build(r) {
+      const evenPool = r.sample([2, 4, 6, 8, 10], 3);
+      const oddPool = r.sample([1, 3, 5, 7, 9], 3);
+      const facesA = r.shuffle(evenPool.concat(oddPool));
+      const facesB = Array.from({ length: 6 }, () => r.int(1, 9));
+      let wins = 0, total = 0;
+      evenPool.forEach((a) => facesB.forEach((b) => { total++; if (a > b) wins++; }));
+      const ans = round(wins / total, 4);
+      return {
+        prompt: `Die A has faces {${facesA.join(', ')}}. Die B has faces {${facesB.join(', ')}}. Both are rolled once, independently. Given that die A shows an EVEN number, what is the probability that die A beats die B (shows a strictly higher number)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.008,
+        hint: 'Conditioning on "A is even" shrinks A\'s sample space to only its even faces before you compare against every face of B.',
+        approach: `Conditional probability by restricting the sample space: only pair A's even faces (${evenPool.length} of them) against all 6 faces of B, then count A-wins among those pairs.`,
+        solution: `A's even faces are {${evenPool.join(', ')}}. Pairing each against all 6 faces of B gives ${total} equally likely outcomes, of which A wins in ${wins}. P(A beats B | A even) = ${wins}/${total} = ${ans}.`,
+        recognitionTechnique: 'Conditional probability', commonTrap: "Computing A's unconditional win probability (using all 6 faces of A) instead of restricting to only the even faces the condition specifies.",
+        tags: ['dice', 'conditional probability']
+      };
+    }
+  });
+
+  /* ==================== T. GEOMETRY / COLLISION PROBABILITY ================ */
+
+  add({
+    id: 'geo_meeting_window', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+    build(r) {
+      const T = r.pick([30, 45, 60, 90]);
+      const w = r.pick([5, 10, 15, 20]);
+      const notMeet = round(Math.pow(T - w, 2) / (T * T), 6);
+      const ans = round(1 - notMeet, 4);
+      return {
+        prompt: `Two colleagues each arrive at a coffee shop at a uniformly random time between 0 and ${T} minutes past the hour, independently. Each waits ${w} minutes for the other before leaving. What is the probability they meet?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.005,
+        hint: 'Map the two arrival times to a point in a T×T square. They meet exactly when the point falls within a diagonal band of the square.',
+        approach: 'Geometric probability on the square: the "do not meet" region is two congruent right triangles, each with legs (T−w).',
+        solution: `They meet iff |X−Y| ≤ ${w}. The complement (they miss each other) is two triangles each with legs (${T}−${w})=${T - w}, total area (${T - w})²=${Math.pow(T - w, 2)}, out of the full ${T}×${T}=${T * T} square. P(miss) = ${T - w}²/${T}² = ${notMeet}. P(meet) = 1 − ${notMeet} = ${ans}.`,
+        recognitionTechnique: 'Complement', commonTrap: 'Forgetting to square the (T−w) term, or computing only one of the two symmetric "miss" triangles instead of both.',
+        tags: ['geometry', 'meeting problem']
+      };
+    }
+  });
+
+  add({
+    id: 'geo_point_corner', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 2, targetTime: 100,
+    build(r) {
+      const radius = r.pick([0.3, 0.4, 0.5, 0.6, 0.7]);
+      const ans = round(Math.PI * radius * radius / 4, 4);
+      return {
+        prompt: `A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is the probability that the point lies within a distance of ${radius} from the corner (0,0)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.004,
+        hint: 'The set of points within distance r of the corner, intersected with the square, is exactly one quarter of a full circle.',
+        approach: 'Geometric probability: the favourable region is a quarter-circle of radius r (since the square only contains the quadrant x,y ≥ 0), and the square has area 1.',
+        solution: `A full circle of radius ${radius} has area π·${radius}² = ${round(Math.PI * radius * radius, 4)}. Only the quarter lying inside the square (x,y ≥ 0) counts, giving π·${radius}²/4 = ${ans}. Since the square has area 1, this is also the probability.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Using the full circle\'s area instead of just the quarter that actually lies inside the square.',
+        tags: ['geometry', 'random point']
+      };
+    }
+  });
+
+  /* ========================= U. NUMBER THEORY BASICS ======================= */
+
+  add({
+    id: 'nt_dice_mod', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 150,
+    build(r) {
+      const n = r.pick([3, 4, 5]);
+      const s = r.pick([4, 6, 8]);
+      const m = r.pick([3, 4, 5]);
+      const target = r.int(0, m - 1);
+      let dp = Array(m).fill(0);
+      dp[0] = 1;
+      for (let k = 0; k < n; k++) {
+        const next = Array(m).fill(0);
+        for (let rem = 0; rem < m; rem++) {
+          if (!dp[rem]) continue;
+          for (let face = 1; face <= s; face++) next[(rem + face) % m] += dp[rem];
+        }
+        dp = next;
+      }
+      const total = Math.pow(s, n);
+      const count = dp[target];
+      const ans = round(count / total, 4);
+      return {
+        prompt: `You roll ${n} fair ${s}-sided dice. What is the probability that the sum of all ${n} rolls is congruent to ${target} modulo ${m} (i.e. leaves remainder ${target} when divided by ${m})?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.005,
+        hint: 'Track only the RUNNING REMAINDER (mod m) after each die, not the running total itself — there are only m possible remainders to keep count of.',
+        approach: 'Dynamic programming over remainders: after each die, update the count of ways to reach each possible remainder mod m, adding each face value and reducing mod m.',
+        solution: `Building up remainder counts die by die (a table of only ${m} running totals, one per residue mod ${m}), after all ${n} dice there are ${count} outcomes (out of ${total} total equally likely outcomes) with sum ≡ ${target} (mod ${m}). P = ${count}/${total} = ${ans}.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Trying to enumerate every possible SUM value directly instead of tracking only the remainder mod m, which collapses the state space from a wide range of sums down to just m buckets.',
+        tags: ['number theory', 'modular arithmetic', 'dice']
+      };
+    }
+  });
+
+  add({
+    id: 'nt_coprime', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 120,
+    build(r) {
+      const N = r.pick([10, 12, 15, 20]);
+      let coprimeCount = 0;
+      for (let x = 1; x <= N; x++) for (let y = 1; y <= N; y++) if (U.gcd(x, y) === 1) coprimeCount++;
+      const total = N * N;
+      const ans = round(coprimeCount / total, 4);
+      return {
+        prompt: `Two integers X and Y are each chosen independently and uniformly at random from {1, 2, ..., ${N}}. What is the probability that X and Y are coprime (gcd(X, Y) = 1)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.004,
+        hint: 'There is no shortcut formula for a small, finite N — count the coprime pairs directly.',
+        approach: `Direct counting: check gcd(x,y) for all ${N}×${N} ordered pairs and count how many have gcd exactly 1.`,
+        solution: `Out of ${total} equally likely ordered pairs (X,Y) with X,Y ∈ {1,...,${N}}, exactly ${coprimeCount} have gcd(X,Y) = 1. P = ${coprimeCount}/${total} = ${ans}.`,
+        recognitionTechnique: 'Counting', commonTrap: `Using the asymptotic constant 6/π² ≈ 0.6079 (the limiting coprime-pair density as N→∞), which is only an approximation and is measurably inaccurate for a small, finite N like ${N}.`,
+        tags: ['number theory', 'gcd', 'coprime']
+      };
+    }
+  });
+
+  /* =================== V. RANDOM PERMUTATIONS: CYCLES ====================== */
+
+  // Generate every permutation of [0..n-1] exactly once — used to compute
+  // exact expectations for small n by full enumeration, rather than trusting
+  // a hand-derived formula (H_n for cycle count, (n+1)/2 for cycle length).
+  function allPermutations(n) {
+    const arr = Array.from({ length: n }, (_, i) => i);
+    const out = [];
+    const used = Array(n).fill(false);
+    const cur = [];
+    function rec() {
+      if (cur.length === n) { out.push(cur.slice()); return; }
+      for (let i = 0; i < n; i++) {
+        if (used[i]) continue;
+        used[i] = true; cur.push(arr[i]);
+        rec();
+        cur.pop(); used[i] = false;
+      }
+    }
+    rec();
+    return out;
+  }
+  function countCycles(perm) {
+    const n = perm.length, visited = Array(n).fill(false);
+    let cycles = 0;
+    for (let i = 0; i < n; i++) {
+      if (visited[i]) continue;
+      cycles++;
+      let j = i;
+      while (!visited[j]) { visited[j] = true; j = perm[j]; }
+    }
+    return cycles;
+  }
+  function cycleLengthOf(perm, elem) {
+    let j = elem, len = 0;
+    do { len++; j = perm[j]; } while (j !== elem);
+    return len;
+  }
+
+  add({
+    id: 'perm_num_cycles', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 5, 6, 7]);
+      const perms = allPermutations(n);
+      const avg = perms.reduce((s, p) => s + countCycles(p), 0) / perms.length;
+      const ans = round(avg, 4);
+      return {
+        prompt: `A uniformly random permutation of ${n} elements is drawn. What is the expected number of cycles in its cycle decomposition? Answer to four decimals.`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.01,
+        hint: 'Build the permutation one element at a time: at each step, there is a fixed probability the next placement closes off a cycle.',
+        approach: 'Sequential construction + linearity of expectation: when placing the k-th element into the permutation, it closes a cycle with probability 1/(n−k+1), so summing over k gives the harmonic number H_n = 1 + 1/2 + ... + 1/n.',
+        solution: `E[number of cycles] = H_${n} = 1 + 1/2 + ... + 1/${n} = ${ans}.`,
+        recognitionTechnique: 'Indicator variables', commonTrap: 'Confusing the EXPECTED NUMBER OF CYCLES (a harmonic-number sum, growing like ln n) with the expected LENGTH of any one particular cycle (which instead grows linearly in n).',
+        tags: ['permutations', 'cycles', 'linearity']
+      };
+    }
+  });
+
+  add({
+    id: 'perm_cycle_length', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 5, 6, 7]);
+      const perms = allPermutations(n);
+      const avg = perms.reduce((s, p) => s + cycleLengthOf(p, 0), 0) / perms.length;
+      const ans = round(avg, 4);
+      return {
+        prompt: `A uniformly random permutation of ${n} elements (labelled 1 through ${n}) is drawn. What is the expected length of the cycle that contains element 1? Answer to four decimals.`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.01,
+        hint: 'For each other specific element, ask: what is the probability it lands in the SAME cycle as element 1?',
+        approach: 'Indicator variables: the cycle length containing element 1 equals 1 plus the number of other elements sharing its cycle; by symmetry, each of the other n−1 elements independently has the same probability of being in that cycle.',
+        solution: `By symmetry (each pair of elements is equally likely to share a cycle), E[cycle length containing element 1] = (${n}+1)/2 = ${ans}.`,
+        recognitionTechnique: 'Symmetry', commonTrap: 'Confusing this with the expected NUMBER of cycles (a harmonic-number sum) — the expected length of one specific cycle instead grows linearly, at exactly half of n+1.',
+        tags: ['permutations', 'cycles', 'symmetry']
+      };
+    }
+  });
+
+  /* =================== W. INFORMATION / IMPOSSIBILITY ====================== */
+
+  add({
+    id: 'info_weighings', topic: 'Information Problems', subtopic: 'Weighings', difficulty: 3, targetTime: 210,
+    build(r) {
+      // Each {N, w} pair is a well-established exact case from the classic
+      // "odd coin" weighing-puzzle family: w is the true minimum (not just
+      // the information-theoretic lower bound) because N sits at or below
+      // the known achievable capacity (3^w − 3)/2 for that many weighings.
+      const pool = [
+        { N: 3, w: 2 },
+        { N: 9, w: 3 },
+        { N: 12, w: 3 },
+        { N: 27, w: 4 },
+        { N: 39, w: 4 }
+      ];
+      const pick = r.pick(pool);
+      const outcomes = 2 * pick.N;
+      const cap3wMinus1 = Math.pow(3, pick.w - 1);
+      const cap3w = Math.pow(3, pick.w);
+      return {
+        prompt: `You have ${pick.N} visually identical balls; exactly one has a different weight (heavier or lighter, unknown which), and the rest are identical. Using a balance scale with no weights, what is the minimum number of weighings that always identifies the odd ball and whether it is heavy or light?`,
+        answerType: 'numeric', correctAnswer: pick.w, tolerance: 0,
+        hint: 'Each weighing has 3 possible outcomes. How many weighings are needed so that 3^(weighings) is at least the number of distinguishable answers?',
+        approach: `Information-theoretic lower bound (3^w ≥ number of possible answers) combined with a known explicit strategy achieving it for this specific N.`,
+        solution: `There are ${outcomes} possible answers (${pick.N} balls × heavy/light). ${pick.w - 1} weighings distinguish at most 3^${pick.w - 1} = ${cap3wMinus1} < ${outcomes}, so ${pick.w - 1} is impossible; ${pick.w} weighings give 3^${pick.w} = ${cap3w} ≥ ${outcomes}, and a known balanced-split strategy achieves it. Answer: ${pick.w}.`,
+        recognitionTechnique: 'Information / impossibility', commonTrap: 'Giving only the achievable strategy without checking the lower bound (or vice versa) — proving a true MINIMUM requires both an achievable strategy AND a proof that one fewer weighing is information-theoretically impossible.',
+        tags: ['lower bound', 'weighings']
+      };
+    }
+  });
+
+  add({
+    id: 'info_maxmin_comparisons', topic: 'Information Problems', subtopic: 'Comparisons', difficulty: 3, targetTime: 180,
+    build(r) {
+      const n = r.pick([4, 6, 8, 10, 12, 14]);
+      const ans = Math.ceil(3 * n / 2) - 2;
+      return {
+        prompt: `What is the minimum number of pairwise comparisons needed to identify both the maximum and the minimum of ${n} distinct numbers, in the worst case?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0,
+        hint: 'Compare the elements in pairs first, then find the max among the winners and the min among the losers separately.',
+        approach: 'Pair-first strategy: split into n/2 pairs (n/2 comparisons), then find the max among the n/2 pair-winners (n/2−1 comparisons) and the min among the n/2 pair-losers (n/2−1 comparisons) — this achieves the matching adversary lower bound ⌈3n/2⌉−2.',
+        solution: `Pairing costs ${n}/2 = ${n / 2} comparisons. Finding the max among the ${n / 2} winners costs ${n / 2 - 1} more; finding the min among the ${n / 2} losers costs ${n / 2 - 1} more. Total = ${n / 2} + ${n / 2 - 1} + ${n / 2 - 1} = ${ans} = ⌈3·${n}/2⌉ − 2.`,
+        recognitionTechnique: 'Information / impossibility', commonTrap: `Running two independent tournaments (one for max, one for min) over all ${n} elements separately, costing 2${n}−3 = ${2 * n - 3} comparisons — noticeably more than the optimal ${ans}, since it wastes the information already learned from each pair's own comparison.`,
+        tags: ['lower bound', 'comparisons']
+      };
+    }
+  });
+
+  /* ==================== X. PATTERN-WAITING TIMES (RECURRENCES) ============= */
+
+  // Next KMP-style match-state after appending one character to the longest
+  // current matched prefix of `pattern` — used to build the pattern-waiting
+  // Markov chain generically for ANY binary pattern, rather than hand-deriving
+  // a bespoke recursion per pattern (as h010-h012 do for HH/HT/HHH alone).
+  function nextPatternState(pattern, i, ch) {
+    const s = pattern.slice(0, i) + ch;
+    for (let len = s.length; len >= 0; len--) {
+      if (s.slice(s.length - len) === pattern.slice(0, len)) return len;
+    }
+    return 0;
+  }
+  function expectedWaitForPattern(pattern) {
+    const L = pattern.length;
+    const A = Array.from({ length: L }, () => Array(L).fill(0));
+    const b = Array(L).fill(1);
+    for (let i = 0; i < L; i++) {
+      const nH = nextPatternState(pattern, i, 'H'), nT = nextPatternState(pattern, i, 'T');
+      A[i][i] += 1;
+      if (nH < L) A[i][nH] -= 0.5;
+      if (nT < L) A[i][nT] -= 0.5;
+    }
+    return solveLinear(A, b)[0];
+  }
+
+  add({
+    id: 'rw_pattern_wait', topic: 'Recursion', subtopic: 'Pattern waiting times', difficulty: 4, targetTime: 180,
+    build(r) {
+      const patterns = ['HH', 'HT', 'TH', 'TT', 'HHH', 'HTH', 'HHT', 'THT', 'THH', 'TTH', 'HTT', 'TTT', 'HTTH', 'HHTH', 'THHT'];
+      const pattern = r.pick(patterns);
+      const ans = round(expectedWaitForPattern(pattern), 4);
+      return {
+        prompt: `A fair coin is flipped repeatedly. What is the expected number of flips needed to first see the pattern ${pattern}?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.05,
+        hint: 'Track the length of the longest prefix of the pattern currently matched by the tail of your flip sequence, and set up a first-step equation for each such "progress" state.',
+        approach: 'State-based first-step recursion: define a state for each length of pattern-prefix currently matched (0 up to the full pattern length, which is absorbing), and solve the resulting linear system of expected hitting times — overlapping patterns (where a failed attempt can still leave partial progress) take longer than non-overlapping ones of the same length.',
+        solution: `Setting up the pattern-matching state chain for "${pattern}" (one state per matched-prefix length, absorbing once the full pattern is matched) and solving the resulting linear system gives an expected wait of ${ans} flips.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Assuming all patterns of the same length have the same expected waiting time — patterns with internal overlap (like HTH, where failing to extend can still leave you partway matched) take longer than non-overlapping patterns of equal length (like HT).',
+        tags: ['markov', 'pattern waiting', 'waiting time']
+      };
+    }
+  });
+
+  /* ==================== Y. ADVANCED COUNTING: CATALAN / BALLOT ============= */
+
+  add({
+    id: 'c_catalan', topic: 'Combinatorics', subtopic: 'Catalan structures', difficulty: 4, targetTime: 150,
+    build(r) {
+      const n = r.pick([3, 4, 5, 6]);
+      const catalan = nCr(2 * n, n) / (n + 1);
+      return {
+        prompt: `How many sequences of ${n} opening and ${n} closing brackets are correctly matched (at every prefix of the sequence, the number of closing brackets seen so far never exceeds the number of opening brackets)?`,
+        answerType: 'numeric', correctAnswer: catalan, tolerance: 0,
+        hint: 'Total unrestricted arrangements minus the "bad" ones, via a reflection argument, gives a clean closed form: the Catalan number.',
+        approach: `Catalan number C_n = C(2n,n)/(n+1), counting exactly the sequences that never let closing brackets get ahead of opening ones.`,
+        solution: `C_${n} = C(${2 * n},${n})/(${n}+1) = ${nCr(2 * n, n)}/${n + 1} = ${catalan}.`,
+        recognitionTechnique: 'Counting', commonTrap: `Answering the unrestricted count C(${2 * n},${n}) = ${nCr(2 * n, n)} directly, forgetting the "never more closing than opening" prefix condition that the ÷(n+1) correction accounts for.`,
+        tags: ['catalan', 'lattice paths']
+      };
+    }
+  });
+
+  add({
+    id: 'c_ballot', topic: 'Combinatorics', subtopic: 'Ballot problems', difficulty: 5, targetTime: 210,
+    build(r) {
+      const a = r.pick([5, 6, 7, 8, 9]);
+      const bOptions = [1, 2, 3, 4].filter((b) => b < a);
+      const b = r.pick(bOptions);
+      const p = round(100 * (a - b) / (a + b), 1);
+      return {
+        prompt: `Candidate A receives ${a} votes and candidate B receives ${b} votes. Votes are counted in a uniformly random order. What is the probability that A is strictly ahead of B throughout the ENTIRE count (never tied, never behind, from the very first vote counted)? Answer as a percentage to one decimal place.`,
+        answerType: 'numeric', correctAnswer: p, tolerance: 0.6,
+        hint: 'This has a one-line closed form — no need to enumerate vote orderings by hand.',
+        approach: "Bertrand's ballot theorem: P(A strictly ahead throughout) = (a−b)/(a+b), given A wins with a > b total votes.",
+        solution: `(${a} − ${b})/(${a} + ${b}) = ${a - b}/${a + b} = ${p}%.`,
+        recognitionTechnique: 'Counting', commonTrap: 'Confusing "strictly ahead throughout the ENTIRE count" with merely "ahead at the very end" (which has probability 1 here, since A wins outright) — the ballot theorem answers the much stronger, harder condition.',
+        tags: ['ballot', 'reflection principle']
       };
     }
   });

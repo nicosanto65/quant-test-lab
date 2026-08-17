@@ -585,6 +585,324 @@
       approach: 'Single-constraint LP: allocate everything to the highest profit per unit of the scarce resource.',
       solution: 'Chairs: €20/hour. Tables: €18/hour. With one binding constraint, produce only chairs: 50 chairs × €40 = €2,000.',
       commonTrap: 'Choosing tables because their absolute profit per unit is higher.', tags: ['optimisation', 'mckinsey']
+    },
+
+    /* ------------------------ MARKOV / STATE PROBLEMS --------------------- */
+    {
+      id: 'h061', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 4, targetTime: 180,
+      prompt: 'A token sits on state 0 of {0, 1, 2}. State 0 is a reflecting barrier (from 0 it always moves to 1). From state 1 it moves to state 0 or to state 2, each with probability 1/2. State 2 is absorbing. What is the expected number of steps, starting from state 0, to reach state 2?',
+      answerType: 'numeric', correctAnswer: 4, tolerance: 0.01,
+      hint: 'Write the two first-step equations for h_0 and h_1, using h_2 = 0.', recognitionTechnique: 'Recursion',
+      approach: 'First-step analysis: h_0 = 1 + h_1 (reflecting); h_1 = 1 + ½h_0 + ½h_2, with h_2 = 0.',
+      solution: 'h_1 = 1 + ½h_0. Substituting into h_0 = 1 + h_1 = 1 + 1 + ½h_0 = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
+      commonTrap: 'Treating state 0 as absorbing (giving h_0 = 0) instead of reflecting, which still costs one step every time the walk lands there.', tags: ['markov', 'hitting time']
+    },
+    {
+      id: 'h062', topic: 'Recursion', subtopic: 'Absorption probability', difficulty: 4, targetTime: 180,
+      prompt: 'A gambler with a biased coin (P(win) = 0.6 each round) starts with €2 and bets €1 per round, stopping at €0 or €4. What is the probability they reach €4 before going broke? Give your answer as an exact fraction or to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.6923, tolerance: 0.002, acceptFraction: [9, 13],
+      hint: 'This is asymmetric — the fair-game formula k/N (which would give 1/2) does not apply here.', recognitionTechnique: 'Recursion',
+      approach: "Asymmetric gambler's ruin: P(hit N before 0 | start k) = (1-(q/p)^k)/(1-(q/p)^N), with p=0.6, q=0.4.",
+      solution: 'q/p = 2/3. P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
+      commonTrap: 'Answering k/N = 2/4 = 0.5 by using the SYMMETRIC gambler\'s-ruin formula, which only holds when p = q = 0.5.', tags: ['markov', "gambler's ruin", 'absorption']
+    },
+    {
+      id: 'h063', topic: 'Recursion', subtopic: 'Stationary distribution', difficulty: 3, targetTime: 150,
+      prompt: 'A machine is either "Up" or "Down" each day. If Up, it stays Up the next day with probability 0.9 (Down with probability 0.1). If Down, it becomes Up the next day with probability 0.6 (stays Down with probability 0.4). In the long run, what fraction of days is the machine Up?',
+      answerType: 'numeric', correctAnswer: 0.8571, tolerance: 0.002, acceptFraction: [6, 7],
+      hint: 'Balance the flow between the two states: the rate of Up→Down transitions must equal the rate of Down→Up transitions in steady state.', recognitionTechnique: 'Recursion',
+      approach: 'Two-state stationary distribution via detailed balance: π_Up · P(Up→Down) = π_Down · P(Down→Up).',
+      solution: 'π_Up·0.1 = π_Down·0.6 ⇒ π_Up/π_Down = 6. With π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
+      commonTrap: 'Averaging the two "stay" probabilities (0.9 and 0.4) instead of solving the actual balance equations.', tags: ['markov', 'stationary distribution']
+    },
+    {
+      id: 'h064', topic: 'Recursion', subtopic: 'Hitting times', difficulty: 3, targetTime: 150,
+      prompt: 'A FAIR coin-flip random walk starts at €3 and stops at €0 or €5 (both ends absorbing — this is the classic gambler\'s ruin setup, NOT a reflecting barrier). What is the expected number of steps until the walk stops?',
+      answerType: 'numeric', correctAnswer: 6, tolerance: 0.01,
+      hint: 'For a symmetric walk with two absorbing barriers, the expected duration has a one-line closed form: k(N−k).', recognitionTechnique: 'Recursion',
+      approach: 'Symmetric gambler\'s ruin duration formula: E[steps | start k, absorbing at 0 and N] = k(N−k).',
+      solution: 'k=3, N=5: E = 3·(5−3) = 3·2 = 6 steps.',
+      commonTrap: 'Confusing this two-sided-absorbing setup with a reflecting-barrier setup (whose expected duration follows a different formula, n² when starting at the reflecting end) — always check whether BOTH ends are absorbing or only one.', tags: ['markov', "gambler's ruin", 'hitting time']
+    },
+
+    /* ------------------------ BRAINTEASERS / INVARIANTS ------------------- */
+    {
+      id: 'h065', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 3, targetTime: 120,
+      prompt: 'A standard 8×8 chessboard has its two diagonally opposite corner squares removed (both corners are the same colour on a standard board). Can the remaining 62 squares be exactly covered by 31 dominoes, each covering two adjacent squares?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if the dominoes can be rotated', 'Only on boards larger than 8×8'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Count how many squares of each colour remain after the two same-coloured corners are removed.', recognitionTechnique: 'Other',
+      approach: 'Colouring/parity invariant: every domino covers exactly one black and one white square, so the two colour-counts must stay equal for a tiling to exist.',
+      solution: 'A full 8×8 board has 32 squares of each colour. The two removed corners are the SAME colour (opposite corners always match on a standard board), leaving 32 of one colour and 30 of the other. Since every domino covers one of each colour, 31 dominoes would need to cover 31+31, not 32+30 — impossible.',
+      commonTrap: 'Trying to find an explicit tiling by trial and error instead of noticing the colour-count invariant rules it out immediately, before any tiling attempt.', tags: ['invariant', 'parity', 'coloring', 'classic']
+    },
+    {
+      id: 'h070', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 4, targetTime: 150,
+      prompt: 'On a standard 8×8 chessboard, ANY one black square and ANY one white square are removed (not necessarily corners, and not necessarily adjacent). Is the remaining 62-square board always guaranteed to be exactly tileable by 31 dominoes, no matter which black square and which white square were chosen?',
+      answerType: 'mc',
+      options: ['Yes — always tileable', 'No — it depends on exactly which two squares were removed', 'Only if the two removed squares are adjacent', 'Only if the two removed squares are far apart'],
+      correctAnswer: 'Yes — always tileable',
+      tolerance: 0,
+      hint: 'The colour-count invariant only tells you when a tiling is IMPOSSIBLE (unequal counts) — here the counts are still equal (31 and 31). A separate, stronger classical result covers this case.', recognitionTechnique: 'Other',
+      approach: "Gomory's theorem: removing any one black square and any one white square from a standard chessboard always leaves a board that can be perfectly tiled by dominoes, regardless of which two squares (of opposite colour) were removed.",
+      solution: 'Removing one square of each colour leaves 31 black and 31 white squares — the colour-count invariant no longer rules anything out. A classical result (Gomory\'s theorem, provable by tracing a Hamiltonian cycle through all 64 squares and pairing consecutive squares along it) guarantees a full tiling always exists in this case, regardless of exactly where the two removed squares are.',
+      commonTrap: 'Assuming that because the two-SAME-colour case (h065) is impossible, removing two DIFFERENT-coloured squares must sometimes also fail depending on position — the colour-count invariant is necessary but the equal-colour-count case is always sufficient here, a genuinely stronger guarantee than parity alone would suggest.', tags: ['invariant', 'parity', 'coloring']
+    },
+    {
+      id: 'h066', topic: 'Brainteasers', subtopic: 'Invariants', difficulty: 4, targetTime: 150,
+      prompt: 'The numbers 1 through 20 are written on a whiteboard. Repeatedly, two numbers a and b are erased and replaced by the single number a + b − 1, reducing the count on the board by one each time. This continues until exactly one number remains. What is that final number?',
+      answerType: 'numeric', correctAnswer: 191, tolerance: 0,
+      hint: 'Track how the TOTAL SUM of all numbers on the board changes with each operation.', recognitionTechnique: 'Other',
+      approach: 'Invariant tracking: each operation replaces a+b with a+b−1, so the total sum on the board decreases by exactly 1 every single operation, regardless of which two numbers are chosen.',
+      solution: 'Initial sum = 1+2+...+20 = 210. Going from 20 numbers to 1 number takes 19 operations, and each operation reduces the total sum by exactly 1, so the final sum (which equals the single remaining number) is 210 − 19 = 191 — the same regardless of which pairs were chosen at each step.',
+      commonTrap: 'Assuming the final answer depends on the specific order in which numbers are combined, when the sum-minus-one-per-operation invariant makes the final result the same no matter what order is used.', tags: ['invariant', 'conservation']
+    },
+    {
+      id: 'h067', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 3, targetTime: 120,
+      prompt: '9 coins are laid out, 5 showing tails and 4 showing heads. A move consists of choosing any two coins and flipping both simultaneously. Is it possible to reach a state where all 9 coins show heads?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if the two chosen coins are adjacent', 'Only after an even number of moves'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Each move changes the number of tails by 0, +2, or −2 — what property of the tails count never changes?', recognitionTechnique: 'Other',
+      approach: 'Invariant identification: the PARITY of the tails count is preserved by every move (each move changes it by an even amount), so it can only reach another value of the same parity.',
+      solution: 'The tails count starts at 5 (odd). Every move changes it by 0, +2, or −2 — always an even amount — so the parity of the tails count never changes. The all-heads target has 0 tails (even), which has different parity from 5, so it can never be reached, regardless of how many moves are made.',
+      commonTrap: 'Assuming enough moves can eventually reach any target state, without checking whether a conserved quantity (here, the parity of the tails count) rules it out entirely.', tags: ['invariant', 'parity']
+    },
+    {
+      id: 'h068', topic: 'Brainteasers', subtopic: 'Parity arguments', difficulty: 4, targetTime: 150,
+      prompt: 'The numbers 1 through 11 are to be arranged around a circle so that every pair of adjacent numbers sums to an odd number. Is this possible?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only if 11 is placed first', 'Only if the numbers are arranged in increasing order'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Two numbers sum to an odd number only when one is even and the other is odd — what does that force about the arrangement around the whole circle?', recognitionTechnique: 'Other',
+      approach: 'Parity 2-colouring argument: requiring every adjacent sum to be odd forces even and odd numbers to strictly alternate all the way around the circle — but a circle with an ODD number of positions cannot be 2-coloured in a strictly alternating pattern.',
+      solution: 'Every adjacent pair summing to odd means parities must strictly alternate (even, odd, even, odd, ...) all the way around. But going around a circle of 11 (odd) positions and alternating, the 11th number would need to differ in parity from BOTH its neighbours including the 1st number, yet after an odd number of alternations you return to the same parity as the start — a direct contradiction. (There are 6 odd numbers and 5 even numbers among 1-11, which also cannot alternate evenly around an odd-length circle.) No arrangement can satisfy the condition.',
+      commonTrap: 'Only checking a few sample positions instead of recognizing that alternating parity around an ODD-length cycle is structurally impossible, regardless of which specific numbers are used.', tags: ['invariant', 'parity', 'coloring']
+    },
+    {
+      id: 'h069', topic: 'Brainteasers', subtopic: 'Invariants', difficulty: 4, targetTime: 150,
+      prompt: 'You have two unmarked jugs, one holding exactly 4 litres and the other exactly 6 litres, plus an unlimited water supply and a drain. Using only "fill a jug completely," "empty a jug completely," and "pour from one jug into the other until either the source is empty or the destination is full," is it possible to end up with exactly 3 litres in either jug?',
+      answerType: 'mc',
+      options: ['No — impossible', 'Yes — always possible', 'Only using the 6-litre jug', 'Only using the 4-litre jug'],
+      correctAnswer: 'No — impossible',
+      tolerance: 0,
+      hint: 'Every amount you can ever measure with jugs of capacity a and b is a multiple of gcd(a,b).', recognitionTechnique: 'Other',
+      approach: 'Number-theoretic invariant: with fill/empty/pour operations between two jugs of integer capacities a and b, every reachable water amount is always a multiple of gcd(a,b) (a consequence of Bézout\'s identity).',
+      solution: 'gcd(4,6) = 2. Every quantity reachable in either jug through fill/empty/pour operations must be a multiple of 2 (0, 2, 4, or 6 litres) — 3 is not a multiple of 2, so it can never be measured exactly, no matter how many operations are used.',
+      commonTrap: 'Trying to search for a specific sequence of pours by trial and error, instead of first checking whether the target is even a multiple of gcd(capacity 1, capacity 2), which rules it out immediately when it is not.', tags: ['invariant', 'number theory', 'gcd']
+    },
+
+    /* --------------------- DICE GAMES / NON-STANDARD DICE ------------------ */
+    {
+      id: 'h071', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 4, targetTime: 180,
+      prompt: 'Three non-standard dice: Die A has faces {2,2,4,4,9,9}. Die B has faces {1,1,6,6,8,8}. Die C has faces {3,3,5,5,7,7}. What is P(A beats B) (A shows the strictly higher number)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.5556, tolerance: 0.001, acceptFraction: [5, 9],
+      hint: 'Enumerate all 36 (A,B) face pairs directly — there is no shortcut formula for custom dice.', recognitionTechnique: 'Counting',
+      approach: 'Direct enumeration of all 36 equally likely face pairs, counting how many have A > B.',
+      solution: 'A=2 (×2 occurrences) beats B\'s two 1s (2 wins) each: 4 wins total, 8 losses. A=4 (×2) same pattern vs B: 4 wins, 8 losses. A=9 (×2) beats all 6 B faces: 12 wins, 0 losses. Total: 20 wins out of 36 = 5/9 ≈ 0.5556.',
+      commonTrap: 'Assuming "beats" is transitive the way it is for numbers — remarkably, B beats C with the same 5/9 probability, and C beats A with the same 5/9 probability too, forming a full non-transitive cycle A→B→C→A despite every pairwise probability being IDENTICAL.', tags: ['dice', 'non-transitive', 'classic']
+    },
+    {
+      id: 'h072', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 3, targetTime: 120,
+      prompt: 'Using the same three dice as above (A beats B with probability 5/9, B beats C with probability 5/9), does it follow that A beats C with probability greater than 1/2?',
+      answerType: 'mc',
+      options: [
+        'No — in fact C beats A (also with probability 5/9), the opposite of what transitivity would suggest',
+        'Yes — "beats" must be transitive, so A beats C with probability greater than 1/2',
+        'It is exactly 1/2, since the three dice are symmetric',
+        'It cannot be determined without simulating the dice'
+      ],
+      correctAnswer: 'No — in fact C beats A (also with probability 5/9), the opposite of what transitivity would suggest',
+      tolerance: 0,
+      hint: 'This is precisely what makes these dice "non-transitive" — check the actual cycle, not an assumed ordering.', recognitionTechnique: 'Other',
+      approach: 'Non-transitivity: with custom dice, "A beats B" and "B beats C" do NOT imply "A beats C" the way ordinary number comparisons would.',
+      solution: 'Direct enumeration of C vs A shows C actually beats A with probability 5/9 — the complete opposite of what transitivity (A>B, B>C ⟹ A>C) would predict. The three dice form a genuine rock-paper-scissors-style cycle: A beats B, B beats C, C beats A, each with the same 5/9 probability.',
+      commonTrap: 'Assuming pairwise "beats" relationships must chain transitively, the way ≥ does for ordinary real numbers — non-standard dice are the classic counterexample showing this assumption can fail completely.', tags: ['dice', 'non-transitive', 'classic']
+    },
+    {
+      id: 'h073', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 4, targetTime: 150,
+      prompt: 'You are shown three non-transitive dice (each beats one of the others with probability 5/9, in a cycle, as above) and are told an opponent will pick one die first, and then you pick one of the remaining two. Should you prefer to pick first or second?',
+      answerType: 'mc',
+      options: [
+        'Second — whichever die the opponent picks, one of the remaining two dice beats it with probability 5/9',
+        'First — picking first always guarantees at least a 50% edge',
+        'It makes no difference — all three dice are equally good against each other',
+        'First, because the opponent might pick a weak die by mistake'
+      ],
+      correctAnswer: 'Second — whichever die the opponent picks, one of the remaining two dice beats it with probability 5/9',
+      tolerance: 0,
+      hint: 'Because the "beats" relationship cycles (A beats B, B beats C, C beats A), every single die is beaten by exactly one other die.',
+      recognitionTechnique: 'Other',
+      approach: 'Exploiting the non-transitive cycle: since every die in the cycle is beaten by exactly one of the other two, the SECOND picker can always identify and choose the die that beats whatever was picked first.',
+      solution: 'Because the three dice form a cycle (A beats B, B beats C, C beats A), every die has exactly one "predator" among the other two. Picking second lets you always select that predator die, giving you a 5/9 edge regardless of what the opponent picked first — picking first is actually the WORSE position here, the opposite of intuition from most games.',
+      commonTrap: 'Assuming picking first is always advantageous, as in most games — non-transitive dice specifically invert this intuition because there is no single "best" die, only a cycle of relative advantages.', tags: ['dice', 'non-transitive', 'strategy']
+    },
+    {
+      id: 'h074', topic: 'Dice Games', subtopic: 'Comparing distributions', difficulty: 3, targetTime: 120,
+      prompt: 'Which has the higher variance: a single roll of a fair 12-sided die (faces 1-12), or the sum of two independent fair 6-sided dice?',
+      answerType: 'mc',
+      options: [
+        'The single d12 roll',
+        'The sum of two d6 rolls',
+        'They have exactly the same variance',
+        'Variance cannot be compared across different numbers of dice'
+      ],
+      correctAnswer: 'The single d12 roll',
+      tolerance: 0,
+      hint: 'Compute each variance directly: Var(uniform 1..n) = (n²−1)/12 for one die; variances of independent dice simply add for a sum.',
+      recognitionTechnique: 'Direct calculation',
+      approach: 'Var(single die, uniform 1..n) = (n²−1)/12. Var(sum of independent dice) = sum of each die\'s individual variance.',
+      solution: 'Var(d12) = (12²−1)/12 = 143/12 ≈ 11.92. Var(one d6) = (6²−1)/12 = 35/12 ≈ 2.92, so Var(sum of two d6) = 2×35/12 ≈ 5.83. The single d12 has roughly double the variance of the two-d6 sum, even though both range from a similar minimum and the d6 sum has a wider raw range (2-12 vs 1-12) — summing independent dice concentrates probability toward the middle (a discrete analogue of the Central Limit Theorem), sharply reducing variance relative to a single flat/uniform roll.',
+      commonTrap: 'Assuming a wider RANGE (2-12 for two d6, vs 1-12 for one d12) means higher variance — range and variance are different measures of spread, and summing independent dice concentrates mass near the middle, reducing variance despite an unchanged or even wider range.', tags: ['dice', 'variance', 'comparing distributions']
+    },
+    {
+      id: 'h075', topic: 'Dice Games', subtopic: 'Conditional win probability', difficulty: 4, targetTime: 150,
+      prompt: 'Die A has faces {1, 3, 5, 6, 8, 10}. Die B has faces {2, 4, 4, 7, 7, 9}. Given that die A shows an ODD number, what is the probability that A beats B (shows a strictly higher number)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.2222, tolerance: 0.001, acceptFraction: [2, 9],
+      hint: 'Restrict die A to only its odd faces {1,3,5}, then compare each against all 6 faces of B.', recognitionTechnique: 'Conditional probability',
+      approach: 'Condition on A\'s odd faces only ({1,3,5}), pair each against all 6 faces of B, and count A-wins among those 18 equally likely outcomes.',
+      solution: 'A\'s odd faces are {1,3,5}. A=1 beats none of B\'s faces {2,4,4,7,7,9} (0 wins). A=3 beats only B\'s 2 (1 win). A=5 beats B\'s 2 and both 4s (3 wins). Total wins = 0+1+3 = 4 out of 3×6=18 equally likely pairs = 4/18 = 2/9 ≈ 0.2222.',
+      commonTrap: 'Comparing A\'s odd faces against only PART of die B\'s faces, or forgetting to restrict A to its odd faces in the first place and using all 6 A faces instead.', tags: ['dice', 'conditional probability']
+    },
+    {
+      id: 'h076', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 3, targetTime: 120,
+      prompt: 'A game uses three non-transitive dice arranged in a cycle (A beats B, B beats C, C beats A, each with probability 5/9). If you play many rounds always picking the die that beats your opponent\'s LAST-round die (switching your choice as needed), can your opponent ever adjust their strategy to beat you consistently?',
+      answerType: 'mc',
+      options: [
+        'No — for any die they choose, you can always pick the one specific die from the cycle that beats it',
+        'Yes — they can always find a die that beats yours in return, since the relationship is symmetric',
+        'It depends on how many total dice are in the game',
+        'Only if they switch dice faster than you do'
+      ],
+      correctAnswer: 'No — for any die they choose, you can always pick the one specific die from the cycle that beats it',
+      tolerance: 0,
+      hint: 'This is the same structural fact as the "pick second" advantage — every die in a 3-cycle has exactly one predator.',
+      recognitionTechnique: 'Other',
+      approach: 'Structural property of a 3-cycle: every die is beaten by exactly one other specific die, so a player who always reacts second (choosing after seeing the opponent\'s die) can always select that predator.',
+      solution: 'Because the cycle has exactly three dice with each beaten by exactly one other, reacting to the opponent\'s choice always lets you pick the one die that beats theirs — the opponent cannot escape this by switching dice, since whichever die they pick, exactly one of the other two beats it with probability 5/9.',
+      commonTrap: 'Assuming the disadvantaged player can "counter-adjust" the way one might in a game with more strategic depth — a 3-cycle\'s structure specifically guarantees the second-mover always has a beating die available, with no escape via switching.', tags: ['dice', 'non-transitive', 'strategy']
+    },
+
+    /* ------------------- GEOMETRY / COLLISION PROBABILITY ------------------ */
+    {
+      id: 'h077', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 2, targetTime: 90,
+      prompt: 'A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is P(X + Y < 1)?',
+      answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.002, acceptFraction: [1, 2],
+      hint: 'Sketch the line X+Y=1 across the unit square — which side has less area, and by how much?', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability: the region X+Y<1 within the unit square is a right triangle; divide its area by the square\'s area (1).',
+      solution: 'The line X+Y=1 cuts the unit square exactly along its diagonal, splitting it into two equal-area right triangles. The region X+Y<1 is one of them, with area 1/2 = 0.5. Since the square has area 1, P(X+Y<1) = 0.5.',
+      commonTrap: 'Overcomplicating a simple linear boundary with integration when the region is visibly just half the square by symmetry.', tags: ['geometry', 'random point']
+    },
+    {
+      id: 'h078', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 4, targetTime: 180,
+      prompt: 'Alice arrives at a cafe at a uniformly random time between 0 and 60 minutes past the hour and waits 10 minutes for Bob. Bob arrives at a uniformly random time between 0 and 60 minutes past the hour and waits 20 minutes for Alice, independently of Alice\'s arrival time. What is the probability they meet? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.4306, tolerance: 0.004,
+      hint: 'The waiting times are no longer equal, so the two "miss" regions in the arrival-time square are DIFFERENT-sized triangles — handle them separately.', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability with asymmetric waits: they meet iff X−Y ≤ 10 AND Y−X ≤ 20, so the two "miss" triangles (one per direction) have different leg lengths, (60−10) and (60−20).',
+      solution: 'The two disjoint "miss" regions have areas (60−10)²/2 = 1250 and (60−20)²/2 = 800, totalling 2050, out of the full 60×60=3600 square. P(miss) = 2050/3600 = 0.5694. P(meet) = 1 − 0.5694 = 0.4306.',
+      commonTrap: 'Reusing the SYMMETRIC formula 1−((T−w)/T)² with a single w, which only applies when both people wait the same amount of time.', tags: ['geometry', 'meeting problem']
+    },
+    {
+      id: 'h079', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+      prompt: 'Two independent points X and Y are each drawn uniformly from [0, 1]. What is E[|X − Y|]?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.002, acceptFraction: [1, 3],
+      hint: '|X−Y| equals the range (max minus min) of the two points — use the known expected max and expected min for n=2 uniform points.', recognitionTechnique: 'Order statistics',
+      approach: 'E[|X−Y|] = E[max(X,Y)] − E[min(X,Y)], using the standard order-statistic results E[max] = n/(n+1) and E[min] = 1/(n+1) for n=2 uniform [0,1] points.',
+      solution: 'For n=2 uniform points, E[max] = 2/3 and E[min] = 1/3, so E[|X−Y|] = E[max]−E[min] = 2/3 − 1/3 = 1/3 ≈ 0.3333.',
+      commonTrap: 'Assuming E[|X−Y|] = |E[X]−E[Y]| = 0 by linearity — absolute value does not commute with expectation, and the two independent points are not literally equal just because their means are.', tags: ['geometry', 'order statistics', 'uniform']
+    },
+    {
+      id: 'h080', topic: 'Probability', subtopic: 'Geometric probability', difficulty: 3, targetTime: 150,
+      prompt: 'A point (X, Y) is chosen uniformly at random inside the unit square [0,1]×[0,1]. What is P(Y < X²)?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.002, acceptFraction: [1, 3],
+      hint: 'The favourable region is bounded by a curve, not a straight line — integrate the curve\'s height across the square.', recognitionTechnique: 'Direct calculation',
+      approach: 'Geometric probability with a curved boundary: the area under y=x² for x from 0 to 1 is ∫₀¹x²dx.',
+      solution: '∫₀¹ x² dx = [x³/3]₀¹ = 1/3 ≈ 0.3333. Since the square has area 1, this integral directly gives P(Y < X²).',
+      commonTrap: 'Treating the curved boundary y=x² as if it were a straight line (which would incorrectly give an area of 1/2, the same as a linear boundary through similar endpoints).', tags: ['geometry', 'random point', 'integration']
+    },
+
+    /* ---------------------------- NUMBER THEORY ---------------------------- */
+    {
+      id: 'h081', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 150,
+      prompt: 'Three fair six-sided dice are rolled. What is the probability that the sum of all three is divisible by 3?',
+      answerType: 'numeric', correctAnswer: 0.3333, tolerance: 0.001, acceptFraction: [1, 3],
+      hint: 'Look at each die\'s value modulo 3 — how many of the 6 faces give each possible remainder?', recognitionTechnique: 'Other',
+      approach: 'Symmetry via modular arithmetic: each die\'s face values {1,...,6} contain exactly two faces giving each residue mod 3 (residue 0: {3,6}; residue 1: {1,4}; residue 2: {2,5}), so each die\'s remainder mod 3 is itself perfectly uniform over {0,1,2}, and the sum of independent uniform-mod-3 remainders is also uniform mod 3.',
+      solution: 'Each die is equally likely to land on remainder 0, 1, or 2 (mod 3), since exactly two of its six faces give each remainder. Because this holds independently for all three dice, the sum\'s remainder mod 3 is also exactly uniform over {0,1,2} — so P(sum divisible by 3) = 1/3 ≈ 0.3333, regardless of how many dice are rolled (as long as each die individually has this uniform-residue property).',
+      commonTrap: 'Assuming you need to enumerate all 216 outcomes by brute force — recognizing that each die is already uniform mod 3 gives the answer immediately, with no counting required at all.', tags: ['number theory', 'modular arithmetic', 'dice']
+    },
+    {
+      id: 'h082', topic: 'Probability', subtopic: 'Number theory', difficulty: 2, targetTime: 100,
+      prompt: 'Two fair six-sided dice are rolled. What is the probability that their sum is divisible by 4?',
+      answerType: 'numeric', correctAnswer: 0.25, tolerance: 0.001, acceptFraction: [1, 4],
+      hint: 'List the sums from 2 to 12 that are multiples of 4, then count the ways to make each.', recognitionTechnique: 'Counting',
+      approach: 'Direct counting: identify which sums (4, 8, 12) are divisible by 4, and count the number of (die 1, die 2) combinations giving each.',
+      solution: 'Sum=4: 3 ways (1+3,2+2,3+1). Sum=8: 5 ways (2+6,3+5,4+4,5+3,6+2). Sum=12: 1 way (6+6). Total = 3+5+1 = 9 out of 36 equally likely outcomes. P = 9/36 = 1/4 = 0.25.',
+      commonTrap: 'Assuming the sum\'s remainder mod 4 is uniform (as it happens to be for mod 3 with a single die) — this does NOT generally hold for every modulus, so it must be checked directly by counting rather than assumed by symmetry.', tags: ['number theory', 'modular arithmetic', 'dice']
+    },
+    {
+      id: 'h083', topic: 'Probability', subtopic: 'Number theory', difficulty: 3, targetTime: 120,
+      prompt: 'Two integers X and Y are each chosen independently and uniformly at random from {1, 2, ..., 12}. What is the probability that X and Y are coprime (gcd(X,Y)=1)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.6319, tolerance: 0.002, acceptFraction: [91, 144],
+      hint: 'For a small, specific N like 12, count the coprime pairs directly rather than using the large-N asymptotic constant 6/π².', recognitionTechnique: 'Counting',
+      approach: 'Direct counting over the 12×12=144 ordered pairs, checking gcd(x,y)=1 for each.',
+      solution: 'Counting all ordered pairs (x,y) with x,y ∈ {1,...,12} and gcd(x,y)=1 gives exactly 91 coprime pairs out of 144 total. P = 91/144 ≈ 0.6319.',
+      commonTrap: 'Using the asymptotic large-N constant 6/π² ≈ 0.6079 as if it applied exactly here — that limit is only approached as N→∞, and is noticeably off for a small, finite N=12.', tags: ['number theory', 'gcd', 'coprime']
+    },
+
+    /* ------------------- RANDOM PERMUTATIONS: CYCLES ----------------------- */
+    {
+      id: 'h084', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
+      prompt: 'A uniformly random permutation of 6 elements (labelled 1 through 6) is drawn. What is the expected length of the cycle that contains element 1?',
+      answerType: 'numeric', correctAnswer: 3.5, tolerance: 0.02, acceptFraction: [7, 2],
+      hint: 'By symmetry, every other element is equally likely to end up sharing a cycle with element 1.', recognitionTechnique: 'Symmetry',
+      approach: 'By symmetry among the other n−1 elements, the expected length of the cycle containing a fixed element is (n+1)/2.',
+      solution: 'E[cycle length containing element 1] = (n+1)/2 = (6+1)/2 = 3.5.',
+      commonTrap: 'Confusing this with the expected NUMBER of cycles in the whole permutation (a harmonic-number sum, H_6 ≈ 2.45) — a different, unrelated quantity from the length of one specific cycle.', tags: ['permutations', 'cycles', 'symmetry']
+    },
+    {
+      id: 'h085', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
+      prompt: 'A uniformly random permutation of 6 elements is drawn. What is the probability that the permutation consists of a SINGLE cycle of length 6 (i.e. it is one big cycle, with no shorter cycles at all)?',
+      answerType: 'numeric', correctAnswer: 0.1667, tolerance: 0.002, acceptFraction: [1, 6],
+      hint: 'Count how many of the 6! permutations are a single 6-cycle, using the standard cycle-counting formula (n−1)!.', recognitionTechnique: 'Counting',
+      approach: 'The number of permutations of n elements forming a single n-cycle is (n−1)!, out of n! total permutations, giving probability (n−1)!/n! = 1/n.',
+      solution: 'Single 6-cycles number (6−1)! = 5! = 120, out of 6! = 720 total permutations. P = 120/720 = 1/6 ≈ 0.1667.',
+      commonTrap: 'Assuming a "random" permutation is unlikely to be a single cycle without checking the actual count — 1/n is often larger than intuition suggests (here, roughly 1 in 6, not some vanishingly small chance).', tags: ['permutations', 'cycles', 'counting']
+    },
+
+    /* ------------------- INFORMATION / IMPOSSIBILITY ----------------------- */
+    {
+      id: 'h086', topic: 'Information Problems', subtopic: 'Search', difficulty: 2, targetTime: 90,
+      prompt: 'Someone is thinking of a whole number from 1 to 100. You may ask only yes/no questions. What is the minimum number of questions that always guarantees identifying the exact number, in the worst case?',
+      answerType: 'numeric', correctAnswer: 7, tolerance: 0,
+      hint: 'Each yes/no question can at best cut the remaining candidates in half — how many halvings does it take to get from 100 down to 1?', recognitionTechnique: 'Information / impossibility',
+      approach: 'Information-theoretic lower bound: each yes/no answer distinguishes at most a factor of 2, so the minimum number of questions is ⌈log₂(number of candidates)⌉, achieved exactly by binary search.',
+      solution: '⌈log₂(100)⌉ = ⌈6.644⌉ = 7. Six questions could distinguish at most 2⁶=64<100 possibilities (not enough), while seven give 2⁷=128≥100, and binary search (always asking "is it above the midpoint of the remaining range?") achieves this.',
+      commonTrap: 'Guessing a round number like 10 or 100 without computing the actual log₂ bound, or forgetting that 2⁶=64 is NOT enough to cover 100 distinct possibilities.', tags: ['lower bound', 'binary search']
+    },
+    {
+      id: 'h087', topic: 'Information Problems', subtopic: 'Comparisons', difficulty: 2, targetTime: 75,
+      prompt: 'What is the minimum number of pairwise comparisons needed to find just the MAXIMUM (not the minimum) of 20 distinct numbers, in the worst case?',
+      answerType: 'numeric', correctAnswer: 19, tolerance: 0,
+      hint: 'Every number except the eventual maximum must "lose" at least one comparison to be ruled out.', recognitionTechnique: 'Information / impossibility',
+      approach: 'Each comparison eliminates at most one candidate from contention for the maximum (the loser of that comparison); with n candidates, at least n−1 eliminations (comparisons) are needed to leave exactly one standing.',
+      solution: 'To find the max, every one of the other 19 numbers must lose at least one direct or indirect comparison to be ruled out, and each single comparison can only eliminate one candidate — so at least 19 comparisons are required, and a simple sequential scan achieves exactly 19.',
+      commonTrap: 'Confusing this with the harder "find BOTH max and min" problem (which needs ⌈3n/2⌉−2 comparisons, not n−1) — finding only the maximum is strictly cheaper.', tags: ['lower bound', 'comparisons']
+    },
+
+    /* ---------------- PATTERN WAITING TIMES (RECURRENCES) ------------------ */
+    {
+      id: 'h088', topic: 'Recursion', subtopic: 'Pattern waiting times', difficulty: 4, targetTime: 180,
+      prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips to first see the pattern THT (tails, heads, tails)?',
+      answerType: 'numeric', correctAnswer: 10, tolerance: 0.05,
+      hint: 'THT has a partial self-overlap (its last letter T matches its first letter T) — set up states for "matched nothing" (h0), "matched T" (h1), and "matched TH" (h2).', recognitionTechnique: 'Recursion',
+      approach: 'State-based first-step recursion with 3 states (matched-prefix length 0, 1, or 2 of "THT", with length 3 absorbing): from state 0, a T advances to state 1 and an H stays at state 0; from state 1, a T stays at state 1 (self-overlap — "TT" still ends in a single matched "T") and an H advances to state 2; from state 2, a T completes the pattern (absorbed) and an H drops all the way back to state 0 ("THH" shares no prefix with "THT").',
+      solution: 'h0 = 1+½h0+½h1; h1 = 1+½h1+½h2; h2 = 1+½h0+½·0. Solving: from h2, h2=1+½h0. Substituting into h1=2+h2 gives h1=2+1+½h0=3+½h0. Substituting into h0=2+h1 gives h0=2+3+½h0=5+½h0, so ½h0=5 and h0=10.',
+      commonTrap: 'Assuming all 3-letter patterns take the same expected 8 flips (the non-overlapping value) — THT\'s partial self-overlap (shares "T" between its start and end) genuinely increases its expected waiting time to 10.', tags: ['markov', 'pattern waiting', 'waiting time']
     }
   ];
 
