@@ -892,6 +892,17 @@
       approach: 'Each comparison eliminates at most one candidate from contention for the maximum (the loser of that comparison); with n candidates, at least n−1 eliminations (comparisons) are needed to leave exactly one standing.',
       solution: 'To find the max, every one of the other 19 numbers must lose at least one direct or indirect comparison to be ruled out, and each single comparison can only eliminate one candidate — so at least 19 comparisons are required, and a simple sequential scan achieves exactly 19.',
       commonTrap: 'Confusing this with the harder "find BOTH max and min" problem (which needs ⌈3n/2⌉−2 comparisons, not n−1) — finding only the maximum is strictly cheaper.', tags: ['lower bound', 'comparisons']
+    },
+
+    /* ---------------- PATTERN WAITING TIMES (RECURRENCES) ------------------ */
+    {
+      id: 'h088', topic: 'Recursion', subtopic: 'Pattern waiting times', difficulty: 4, targetTime: 180,
+      prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips to first see the pattern THT (tails, heads, tails)?',
+      answerType: 'numeric', correctAnswer: 10, tolerance: 0.05,
+      hint: 'THT has a partial self-overlap (its last letter T matches its first letter T) — set up states for "matched nothing" (h0), "matched T" (h1), and "matched TH" (h2).', recognitionTechnique: 'Recursion',
+      approach: 'State-based first-step recursion with 3 states (matched-prefix length 0, 1, or 2 of "THT", with length 3 absorbing): from state 0, a T advances to state 1 and an H stays at state 0; from state 1, a T stays at state 1 (self-overlap — "TT" still ends in a single matched "T") and an H advances to state 2; from state 2, a T completes the pattern (absorbed) and an H drops all the way back to state 0 ("THH" shares no prefix with "THT").',
+      solution: 'h0 = 1+½h0+½h1; h1 = 1+½h1+½h2; h2 = 1+½h0+½·0. Solving: from h2, h2=1+½h0. Substituting into h1=2+h2 gives h1=2+1+½h0=3+½h0. Substituting into h0=2+h1 gives h0=2+3+½h0=5+½h0, so ½h0=5 and h0=10.',
+      commonTrap: 'Assuming all 3-letter patterns take the same expected 8 flips (the non-overlapping value) — THT\'s partial self-overlap (shares "T" between its start and end) genuinely increases its expected waiting time to 10.', tags: ['markov', 'pattern waiting', 'waiting time']
     }
   ];
 

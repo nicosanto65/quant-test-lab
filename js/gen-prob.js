@@ -1235,5 +1235,49 @@
     }
   });
 
+  /* ==================== X. PATTERN-WAITING TIMES (RECURRENCES) ============= */
+
+  // Next KMP-style match-state after appending one character to the longest
+  // current matched prefix of `pattern` — used to build the pattern-waiting
+  // Markov chain generically for ANY binary pattern, rather than hand-deriving
+  // a bespoke recursion per pattern (as h010-h012 do for HH/HT/HHH alone).
+  function nextPatternState(pattern, i, ch) {
+    const s = pattern.slice(0, i) + ch;
+    for (let len = s.length; len >= 0; len--) {
+      if (s.slice(s.length - len) === pattern.slice(0, len)) return len;
+    }
+    return 0;
+  }
+  function expectedWaitForPattern(pattern) {
+    const L = pattern.length;
+    const A = Array.from({ length: L }, () => Array(L).fill(0));
+    const b = Array(L).fill(1);
+    for (let i = 0; i < L; i++) {
+      const nH = nextPatternState(pattern, i, 'H'), nT = nextPatternState(pattern, i, 'T');
+      A[i][i] += 1;
+      if (nH < L) A[i][nH] -= 0.5;
+      if (nT < L) A[i][nT] -= 0.5;
+    }
+    return solveLinear(A, b)[0];
+  }
+
+  add({
+    id: 'rw_pattern_wait', topic: 'Recursion', subtopic: 'Pattern waiting times', difficulty: 4, targetTime: 180,
+    build(r) {
+      const patterns = ['HH', 'HT', 'TH', 'TT', 'HHH', 'HTH', 'HHT', 'THT', 'THH', 'TTH', 'HTT', 'TTT', 'HTTH', 'HHTH', 'THHT'];
+      const pattern = r.pick(patterns);
+      const ans = round(expectedWaitForPattern(pattern), 4);
+      return {
+        prompt: `A fair coin is flipped repeatedly. What is the expected number of flips needed to first see the pattern ${pattern}?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.05,
+        hint: 'Track the length of the longest prefix of the pattern currently matched by the tail of your flip sequence, and set up a first-step equation for each such "progress" state.',
+        approach: 'State-based first-step recursion: define a state for each length of pattern-prefix currently matched (0 up to the full pattern length, which is absorbing), and solve the resulting linear system of expected hitting times — overlapping patterns (where a failed attempt can still leave partial progress) take longer than non-overlapping ones of the same length.',
+        solution: `Setting up the pattern-matching state chain for "${pattern}" (one state per matched-prefix length, absorbing once the full pattern is matched) and solving the resulting linear system gives an expected wait of ${ans} flips.`,
+        recognitionTechnique: 'Recursion', commonTrap: 'Assuming all patterns of the same length have the same expected waiting time — patterns with internal overlap (like HTH, where failing to extend can still leave you partway matched) take longer than non-overlapping patterns of equal length (like HT).',
+        tags: ['markov', 'pattern waiting', 'waiting time']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);
