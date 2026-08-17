@@ -973,5 +973,49 @@
     }
   });
 
+  /* ==================== S. DICE GAMES / NON-STANDARD DICE ================== */
+
+  add({
+    id: 'dg_compare', topic: 'Dice Games', subtopic: 'Comparing distributions', difficulty: 3, targetTime: 120,
+    build(r) {
+      const facesA = Array.from({ length: 6 }, () => r.int(1, 9));
+      const facesB = Array.from({ length: 6 }, () => r.int(1, 9));
+      let wins = 0;
+      facesA.forEach((a) => facesB.forEach((b) => { if (a > b) wins++; }));
+      const ans = round(wins / 36, 4);
+      return {
+        prompt: `Die A has faces {${facesA.join(', ')}}. Die B has faces {${facesB.join(', ')}}. Both are rolled once, independently, each face equally likely. What is the probability that die A shows a STRICTLY higher number than die B?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.006,
+        hint: 'These are non-standard dice — you cannot use a formula for fair 1-6 dice. Enumerate all 36 equally likely (A,B) pairs directly.',
+        approach: 'Direct enumeration: count how many of the 36 equally likely (A,B) face pairs have A > B, then divide by 36.',
+        solution: `Counting all 36 pairs (face of A, face of B), A shows the strictly higher value in ${wins} of them. P(A beats B) = ${wins}/36 = ${ans}.`,
+        recognitionTechnique: 'Counting', commonTrap: 'Assuming a formula that only applies to standard fair dice (like comparing means) rather than directly enumerating all 36 pairs for these custom, non-standard face values.',
+        tags: ['dice', 'non-transitive']
+      };
+    }
+  });
+
+  add({
+    id: 'dg_conditional_win', topic: 'Dice Games', subtopic: 'Conditional win probability', difficulty: 4, targetTime: 150,
+    build(r) {
+      const evenPool = r.sample([2, 4, 6, 8, 10], 3);
+      const oddPool = r.sample([1, 3, 5, 7, 9], 3);
+      const facesA = r.shuffle(evenPool.concat(oddPool));
+      const facesB = Array.from({ length: 6 }, () => r.int(1, 9));
+      let wins = 0, total = 0;
+      evenPool.forEach((a) => facesB.forEach((b) => { total++; if (a > b) wins++; }));
+      const ans = round(wins / total, 4);
+      return {
+        prompt: `Die A has faces {${facesA.join(', ')}}. Die B has faces {${facesB.join(', ')}}. Both are rolled once, independently. Given that die A shows an EVEN number, what is the probability that die A beats die B (shows a strictly higher number)?`,
+        answerType: 'numeric', correctAnswer: ans, tolerance: 0.008,
+        hint: 'Conditioning on "A is even" shrinks A\'s sample space to only its even faces before you compare against every face of B.',
+        approach: `Conditional probability by restricting the sample space: only pair A's even faces (${evenPool.length} of them) against all 6 faces of B, then count A-wins among those pairs.`,
+        solution: `A's even faces are {${evenPool.join(', ')}}. Pairing each against all 6 faces of B gives ${total} equally likely outcomes, of which A wins in ${wins}. P(A beats B | A even) = ${wins}/${total} = ${ans}.`,
+        recognitionTechnique: 'Conditional probability', commonTrap: "Computing A's unconditional win probability (using all 6 faces of A) instead of restricting to only the even faces the condition specifies.",
+        tags: ['dice', 'conditional probability']
+      };
+    }
+  });
+
   global.QTL_GEN_PROB = G;
 })(window);

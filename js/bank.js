@@ -694,6 +694,97 @@
       approach: 'Number-theoretic invariant: with fill/empty/pour operations between two jugs of integer capacities a and b, every reachable water amount is always a multiple of gcd(a,b) (a consequence of Bézout\'s identity).',
       solution: 'gcd(4,6) = 2. Every quantity reachable in either jug through fill/empty/pour operations must be a multiple of 2 (0, 2, 4, or 6 litres) — 3 is not a multiple of 2, so it can never be measured exactly, no matter how many operations are used.',
       commonTrap: 'Trying to search for a specific sequence of pours by trial and error, instead of first checking whether the target is even a multiple of gcd(capacity 1, capacity 2), which rules it out immediately when it is not.', tags: ['invariant', 'number theory', 'gcd']
+    },
+
+    /* --------------------- DICE GAMES / NON-STANDARD DICE ------------------ */
+    {
+      id: 'h071', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 4, targetTime: 180,
+      prompt: 'Three non-standard dice: Die A has faces {2,2,4,4,9,9}. Die B has faces {1,1,6,6,8,8}. Die C has faces {3,3,5,5,7,7}. What is P(A beats B) (A shows the strictly higher number)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.5556, tolerance: 0.001, acceptFraction: [5, 9],
+      hint: 'Enumerate all 36 (A,B) face pairs directly — there is no shortcut formula for custom dice.', recognitionTechnique: 'Counting',
+      approach: 'Direct enumeration of all 36 equally likely face pairs, counting how many have A > B.',
+      solution: 'A=2 (×2 occurrences) beats B\'s two 1s (2 wins) each: 4 wins total, 8 losses. A=4 (×2) same pattern vs B: 4 wins, 8 losses. A=9 (×2) beats all 6 B faces: 12 wins, 0 losses. Total: 20 wins out of 36 = 5/9 ≈ 0.5556.',
+      commonTrap: 'Assuming "beats" is transitive the way it is for numbers — remarkably, B beats C with the same 5/9 probability, and C beats A with the same 5/9 probability too, forming a full non-transitive cycle A→B→C→A despite every pairwise probability being IDENTICAL.', tags: ['dice', 'non-transitive', 'classic']
+    },
+    {
+      id: 'h072', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 3, targetTime: 120,
+      prompt: 'Using the same three dice as above (A beats B with probability 5/9, B beats C with probability 5/9), does it follow that A beats C with probability greater than 1/2?',
+      answerType: 'mc',
+      options: [
+        'No — in fact C beats A (also with probability 5/9), the opposite of what transitivity would suggest',
+        'Yes — "beats" must be transitive, so A beats C with probability greater than 1/2',
+        'It is exactly 1/2, since the three dice are symmetric',
+        'It cannot be determined without simulating the dice'
+      ],
+      correctAnswer: 'No — in fact C beats A (also with probability 5/9), the opposite of what transitivity would suggest',
+      tolerance: 0,
+      hint: 'This is precisely what makes these dice "non-transitive" — check the actual cycle, not an assumed ordering.', recognitionTechnique: 'Other',
+      approach: 'Non-transitivity: with custom dice, "A beats B" and "B beats C" do NOT imply "A beats C" the way ordinary number comparisons would.',
+      solution: 'Direct enumeration of C vs A shows C actually beats A with probability 5/9 — the complete opposite of what transitivity (A>B, B>C ⟹ A>C) would predict. The three dice form a genuine rock-paper-scissors-style cycle: A beats B, B beats C, C beats A, each with the same 5/9 probability.',
+      commonTrap: 'Assuming pairwise "beats" relationships must chain transitively, the way ≥ does for ordinary real numbers — non-standard dice are the classic counterexample showing this assumption can fail completely.', tags: ['dice', 'non-transitive', 'classic']
+    },
+    {
+      id: 'h073', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 4, targetTime: 150,
+      prompt: 'You are shown three non-transitive dice (each beats one of the others with probability 5/9, in a cycle, as above) and are told an opponent will pick one die first, and then you pick one of the remaining two. Should you prefer to pick first or second?',
+      answerType: 'mc',
+      options: [
+        'Second — whichever die the opponent picks, one of the remaining two dice beats it with probability 5/9',
+        'First — picking first always guarantees at least a 50% edge',
+        'It makes no difference — all three dice are equally good against each other',
+        'First, because the opponent might pick a weak die by mistake'
+      ],
+      correctAnswer: 'Second — whichever die the opponent picks, one of the remaining two dice beats it with probability 5/9',
+      tolerance: 0,
+      hint: 'Because the "beats" relationship cycles (A beats B, B beats C, C beats A), every single die is beaten by exactly one other die.',
+      recognitionTechnique: 'Other',
+      approach: 'Exploiting the non-transitive cycle: since every die in the cycle is beaten by exactly one of the other two, the SECOND picker can always identify and choose the die that beats whatever was picked first.',
+      solution: 'Because the three dice form a cycle (A beats B, B beats C, C beats A), every die has exactly one "predator" among the other two. Picking second lets you always select that predator die, giving you a 5/9 edge regardless of what the opponent picked first — picking first is actually the WORSE position here, the opposite of intuition from most games.',
+      commonTrap: 'Assuming picking first is always advantageous, as in most games — non-transitive dice specifically invert this intuition because there is no single "best" die, only a cycle of relative advantages.', tags: ['dice', 'non-transitive', 'strategy']
+    },
+    {
+      id: 'h074', topic: 'Dice Games', subtopic: 'Comparing distributions', difficulty: 3, targetTime: 120,
+      prompt: 'Which has the higher variance: a single roll of a fair 12-sided die (faces 1-12), or the sum of two independent fair 6-sided dice?',
+      answerType: 'mc',
+      options: [
+        'The single d12 roll',
+        'The sum of two d6 rolls',
+        'They have exactly the same variance',
+        'Variance cannot be compared across different numbers of dice'
+      ],
+      correctAnswer: 'The single d12 roll',
+      tolerance: 0,
+      hint: 'Compute each variance directly: Var(uniform 1..n) = (n²−1)/12 for one die; variances of independent dice simply add for a sum.',
+      recognitionTechnique: 'Direct calculation',
+      approach: 'Var(single die, uniform 1..n) = (n²−1)/12. Var(sum of independent dice) = sum of each die\'s individual variance.',
+      solution: 'Var(d12) = (12²−1)/12 = 143/12 ≈ 11.92. Var(one d6) = (6²−1)/12 = 35/12 ≈ 2.92, so Var(sum of two d6) = 2×35/12 ≈ 5.83. The single d12 has roughly double the variance of the two-d6 sum, even though both range from a similar minimum and the d6 sum has a wider raw range (2-12 vs 1-12) — summing independent dice concentrates probability toward the middle (a discrete analogue of the Central Limit Theorem), sharply reducing variance relative to a single flat/uniform roll.',
+      commonTrap: 'Assuming a wider RANGE (2-12 for two d6, vs 1-12 for one d12) means higher variance — range and variance are different measures of spread, and summing independent dice concentrates mass near the middle, reducing variance despite an unchanged or even wider range.', tags: ['dice', 'variance', 'comparing distributions']
+    },
+    {
+      id: 'h075', topic: 'Dice Games', subtopic: 'Conditional win probability', difficulty: 4, targetTime: 150,
+      prompt: 'Die A has faces {1, 3, 5, 6, 8, 10}. Die B has faces {2, 4, 4, 7, 7, 9}. Given that die A shows an ODD number, what is the probability that A beats B (shows a strictly higher number)? Answer to four decimals.',
+      answerType: 'numeric', correctAnswer: 0.2222, tolerance: 0.001, acceptFraction: [2, 9],
+      hint: 'Restrict die A to only its odd faces {1,3,5}, then compare each against all 6 faces of B.', recognitionTechnique: 'Conditional probability',
+      approach: 'Condition on A\'s odd faces only ({1,3,5}), pair each against all 6 faces of B, and count A-wins among those 18 equally likely outcomes.',
+      solution: 'A\'s odd faces are {1,3,5}. A=1 beats none of B\'s faces {2,4,4,7,7,9} (0 wins). A=3 beats only B\'s 2 (1 win). A=5 beats B\'s 2 and both 4s (3 wins). Total wins = 0+1+3 = 4 out of 3×6=18 equally likely pairs = 4/18 = 2/9 ≈ 0.2222.',
+      commonTrap: 'Comparing A\'s odd faces against only PART of die B\'s faces, or forgetting to restrict A to its odd faces in the first place and using all 6 A faces instead.', tags: ['dice', 'conditional probability']
+    },
+    {
+      id: 'h076', topic: 'Dice Games', subtopic: 'Non-transitive dice', difficulty: 3, targetTime: 120,
+      prompt: 'A game uses three non-transitive dice arranged in a cycle (A beats B, B beats C, C beats A, each with probability 5/9). If you play many rounds always picking the die that beats your opponent\'s LAST-round die (switching your choice as needed), can your opponent ever adjust their strategy to beat you consistently?',
+      answerType: 'mc',
+      options: [
+        'No — for any die they choose, you can always pick the one specific die from the cycle that beats it',
+        'Yes — they can always find a die that beats yours in return, since the relationship is symmetric',
+        'It depends on how many total dice are in the game',
+        'Only if they switch dice faster than you do'
+      ],
+      correctAnswer: 'No — for any die they choose, you can always pick the one specific die from the cycle that beats it',
+      tolerance: 0,
+      hint: 'This is the same structural fact as the "pick second" advantage — every die in a 3-cycle has exactly one predator.',
+      recognitionTechnique: 'Other',
+      approach: 'Structural property of a 3-cycle: every die is beaten by exactly one other specific die, so a player who always reacts second (choosing after seeing the opponent\'s die) can always select that predator.',
+      solution: 'Because the cycle has exactly three dice with each beaten by exactly one other, reacting to the opponent\'s choice always lets you pick the one die that beats theirs — the opponent cannot escape this by switching dice, since whichever die they pick, exactly one of the other two beats it with probability 5/9.',
+      commonTrap: 'Assuming the disadvantaged player can "counter-adjust" the way one might in a game with more strategic depth — a 3-cycle\'s structure specifically guarantees the second-mover always has a beating die available, with no escape via switching.', tags: ['dice', 'non-transitive', 'strategy']
     }
   ];
 
