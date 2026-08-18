@@ -102,7 +102,7 @@
             { level: 2, q: 'A card is drawn, replaced, and a second is drawn. Independent?', options: ['Yes', 'No'], a: 0, why: 'Replacing restores the original deck.' },
             { level: 2, q: 'Two cards drawn WITHOUT replacement. Independent?', options: ['Yes', 'No'], a: 1, why: 'Removing the first card changes the deck for the second draw.' },
             { level: 3, q: 'P(A)=0.5, P(B)=0.5, mutually exclusive. Independent?', options: ['Yes', 'No'], a: 1, why: 'P(A∩B)=0 ≠ 0.25 = P(A)P(B).' },
-            { level: 3, q: 'Two fair dice rolled independently. P(first even AND second > 4)?', options: ['1/2 × 1/3', '1/3', '1/2', '1/6'], a: 0, why: 'P(even)=1/2, P(>4)=1/3, multiply: 1/6.' }
+            { level: 3, q: 'Two fair dice rolled independently. P(first even AND second > 4)?', options: ['1/2 × 1/3', '1/3', '1/2', '1/4'], a: 0, why: 'P(even)=1/2, P(>4, i.e. a 5 or 6)=1/3, multiply: 1/6. (1/4 is the trap you get from misreading ">4" as "≥4" and using P=1/2 instead of 1/3.)' }
           ]
         },
         {
