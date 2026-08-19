@@ -32,29 +32,29 @@
     },
     {
       id: 'h003', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
-      prompt: 'A uniformly random permutation of 1..n is drawn. What is the probability that the elements 1 and 2 lie in the same cycle?',
+      prompt: 'A permutation can be broken into "cycles": starting from any element, repeatedly follow where the permutation sends it, and you eventually loop back to where you started — that loop is one cycle (for example, a permutation sending 1→3→1 and 2→2 has a 2-element cycle {1,3} and a separate 1-element cycle {2}). A uniformly random permutation of 1..n is drawn. What is the probability that the elements 1 and 2 end up in the same cycle?',
       answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.001,
-      hint: 'Build the cycle containing 1 step by step and ask when it closes.', recognitionTechnique: 'Symmetry',
+      hint: 'Trace out the cycle containing element 1 one step at a time, and think about how likely element 2 is to join it before the cycle simply closes.', recognitionTechnique: 'Symmetry',
       approach: 'Sequential construction of the cycle containing 1; at the moment the cycle is about to close, 2 is as likely to be inside as outside.',
-      solution: 'Trace the cycle from 1. At each step the next element is uniform over the remaining unvisited elements plus the closing option. A short induction (or the pairing bijection swapping the two cases) gives exactly 1/2 for every n ≥ 2.',
+      solution: 'Build the cycle containing element 1 one step at a time: starting from 1, follow the permutation to whichever element it maps to, then follow that element, and so on, until the chain closes back to 1. At every step, the next element added is chosen uniformly at random from all elements not yet in the chain, OR the chain closes back to 1 — both options are equally likely at each draw. So element 2 (if not yet visited) is exactly as likely to be pulled into the chain at any given step as the chain is to close without it. This head-to-head symmetry between "2 joins next" and "the cycle closes next" gives element 2 a probability of exactly 1/2 = 0.5 of ending up in 1\'s cycle — and this argument never actually depends on n, since it only compares 2\'s chances against the closing option, not against the total number of elements.',
       commonTrap: 'Assuming the answer depends on n.', tags: ['permutations']
     },
     {
       id: 'h004', topic: 'Expected Value', subtopic: 'Cycles', difficulty: 4, targetTime: 150,
-      prompt: 'What is the expected number of cycles in a uniformly random permutation of 5 elements? Give your answer to three decimal places.',
+      prompt: 'A permutation can be broken into "cycles" — closed loops formed by repeatedly following where each element is sent (e.g. a permutation sending 1→3→1 has a 2-element cycle {1,3}; an element sent to itself, like 2→2, is its own 1-element cycle). What is the expected TOTAL NUMBER of cycles in a uniformly random permutation of 5 elements? Give your answer to three decimal places.',
       answerType: 'numeric', correctAnswer: 2.283, tolerance: 0.01,
-      hint: 'Build the permutation one step at a time; at each step there is a fixed chance of closing a cycle.', recognitionTechnique: 'Indicator variables',
+      hint: 'Build the permutation by tracing out one cycle at a time — at the moment k elements are still unplaced, what is the chance THIS step is the one that closes off the current cycle?', recognitionTechnique: 'Indicator variables',
       approach: 'Sequential construction: the k-th step closes a cycle with probability 1/(n−k+1); linearity gives the harmonic number.',
-      solution: 'E[# cycles] = H_n = 1 + 1/2 + 1/3 + 1/4 + 1/5 = 2.2833.',
+      solution: 'Build the permutation by tracing out its cycles one at a time: pick an unvisited element, then repeatedly pick its image uniformly among the still-unvisited elements or the option to close the current cycle. At the moment k elements remain unplaced, the chance THIS step closes off a cycle (rather than continuing it) is exactly 1/k. Using an indicator variable for "a cycle closes at this step" and summing via linearity of expectation as k runs through 5, 4, 3, 2, 1 (the number of elements still unplaced at each successive step) gives E[number of cycles] = 1/5 + 1/4 + 1/3 + 1/2 + 1/1 = 1 + 1/2 + 1/3 + 1/4 + 1/5 = 2.2833. (This sum, 1+1/2+...+1/n, is called the n-th harmonic number, written H_n.)',
       commonTrap: 'Confusing the expected number of cycles with the expected cycle length.', tags: ['permutations', 'linearity']
     },
     {
       id: 'h005', topic: 'Expected Value', subtopic: 'Indicator variables', difficulty: 3, targetTime: 120,
       prompt: 'Five cards are dealt from a standard deck. What is the expected number of distinct suits represented in the hand? Answer to three decimals.',
       answerType: 'numeric', correctAnswer: 3.114, tolerance: 0.01,
-      hint: 'One indicator per suit.', recognitionTechnique: 'Indicator variables',
+      hint: 'For each of the 4 suits, ask: what is the probability that suit is completely ABSENT from the hand? That is usually easier to count directly than "present."', recognitionTechnique: 'Indicator variables',
       approach: 'Indicator per suit: P(suit present) = 1 − C(39,5)/C(52,5); multiply by 4.',
-      solution: 'P(a given suit absent) = C(39,5)/C(52,5) = 575757/2598960 = 0.22153. E = 4·(1 − 0.22153) = 3.1139.',
+      solution: 'For each of the 4 suits, define an indicator that equals 1 if at least one card of that suit appears in the 5-card hand. By linearity of expectation, the expected number of DISTINCT suits represented is just the sum of the 4 individual "this suit appears" probabilities — so start by finding P(a given suit is completely absent), since that is easier to count directly. A suit is absent exactly when all 5 cards are drawn from the other 39 cards (the 3 remaining suits, 13 cards each): P(absent) = C(39,5)/C(52,5) = 575757/2598960 ≈ 0.2215. So P(that suit appears) ≈ 1 − 0.2215 = 0.7785, and by symmetry this is the same for every suit. Summing all 4 (equivalently, 4 × 0.7785) gives E[distinct suits] ≈ 3.114.',
       commonTrap: 'Trying to enumerate suit distribution patterns (4-1, 3-2, …).', tags: ['cards', 'linearity']
     },
 
@@ -101,9 +101,9 @@
       id: 'h010', topic: 'Recursion', subtopic: 'Waiting times', difficulty: 4, targetTime: 210,
       prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips needed to first see two heads in a row (HH)?',
       answerType: 'numeric', correctAnswer: 6, tolerance: 0.05,
-      hint: 'Define states by how much of the pattern you currently hold.', recognitionTechnique: 'Recursion',
+      hint: 'Track two "progress" states — no useful head yet, or one head just seen — and write a first-step equation for the expected remaining flips from each.', recognitionTechnique: 'Recursion',
       approach: 'Markov chain on states {∅, H, HH} and solve the linear system.',
-      solution: 'Let a = E from ∅ and b = E from H. a = 1 + ½b + ½a; b = 1 + ½·0 + ½a. Solving: b = 4, a = 6.',
+      solution: 'Track your progress toward HH with two states: state ∅ (no progress) and state H (you just flipped a head, one more head away from success). Let a = expected additional flips from state ∅, and b = expected additional flips from state H. From state ∅: flip once; with probability ½ it\'s tails, and you\'re still in state ∅ (a more flips needed); with probability ½ it\'s heads, moving you to state H (b more needed). This gives a = 1 + ½a + ½b. From state H: flip once; with probability ½ it\'s heads, completing HH (0 more flips needed); with probability ½ it\'s tails, sending you all the way back to state ∅ (a more flips needed — a single tails wipes out the earlier head entirely). This gives b = 1 + ½a. Substituting b = 1 + ½a into the first equation: a = 1 + ½a + ½(1 + ½a) = 1.5 + ¾a, so ¼a = 1.5, giving a = 6 (and b = 1 + ½·6 = 4).',
       commonTrap: 'Answering 4 — that is the expected wait for HT, not HH. Overlapping patterns wait longer.', tags: ['markov']
     },
     {
@@ -119,36 +119,36 @@
       id: 'h012', topic: 'Recursion', subtopic: 'Waiting times', difficulty: 5, targetTime: 240,
       prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips to first see three heads in a row?',
       answerType: 'numeric', correctAnswer: 14, tolerance: 0.1,
-      hint: 'Each failure sends you all the way back to the start.', recognitionTechnique: 'Recursion',
+      hint: 'Track your progress by the CURRENT RUN LENGTH of consecutive heads (0, 1, or 2) — a single tails at any point resets the run all the way back to 0, not down by one.', recognitionTechnique: 'Recursion',
       approach: 'States by current run length; the general result is 2^{n+1} − 2.',
-      solution: 'E_n = 2^{n+1} − 2. For n = 3: 2⁴ − 2 = 14. (Chain: a=1+½a+½b, b=1+½a+½c, c=1+½a ⇒ a=14.)',
+      solution: 'Track progress by the current run of consecutive heads: state a (run length 0), state b (run length 1), state c (run length 2). From state a: with probability ½ a tails keeps the run at 0 (a more flips needed); with probability ½ a head starts a run of 1 (b more needed): a = 1 + ½a + ½b. From state b: with probability ½ a tails BREAKS the run entirely, back to 0 (a more needed, not "run length 0.5" — a single tails wipes out all progress); with probability ½ a head extends the run to 2 (c more needed): b = 1 + ½a + ½c. From state c: with probability ½ a head completes HHH (0 more needed); with probability ½ a tails resets to 0 (a more needed): c = 1 + ½a. Solving: substitute c = 1+½a into b = 1+½a+½(1+½a) = 1.5+¾a, then substitute into a = 1+½a+½(1.5+¾a) = 1.75+⅞a, giving ⅛a = 1.75, so a = 14. (The general pattern for n heads in a row is 2^(n+1)−2 — each extra required head roughly doubles the wait, since one failure at the end still sends you all the way back to zero progress.)',
       commonTrap: 'Multiplying the HH answer by 1.5.', tags: ['markov']
     },
     {
       id: 'h013', topic: 'Recursion', subtopic: 'Gambler’s ruin', difficulty: 4, targetTime: 180,
       prompt: 'You start with €30 and bet €1 on fair coin flips until you reach €100 or go broke. What is the probability you reach €100?',
       answerType: 'numeric', correctAnswer: 0.3, tolerance: 0.005,
-      hint: 'Your wealth is a martingale under a fair game.', recognitionTechnique: 'Recursion',
+      hint: 'In a fair game, your win probability starting from €k must equal the exact average of the win probabilities starting from €(k+1) and €(k−1) — what kind of function has that property?', recognitionTechnique: 'Recursion',
       approach: 'Gambler’s ruin with p = 1/2: P(hit N before 0 from k) = k/N.',
-      solution: 'By the optional stopping theorem for the fair-game martingale, 30 = 100·P ⇒ P = 0.3.',
+      solution: 'Let P(k) be the probability of reaching €100 before going broke, starting from €k. Since the game is fair, after one bet your wealth becomes k+1 (probability ½) or k−1 (probability ½), so P(k) = ½P(k+1) + ½P(k−1) — meaning P(k) must always equal the exact average of its two neighbouring values. Combined with the boundary conditions P(0)=0 (already broke, can\'t win) and P(100)=1 (already reached the goal), the only function that satisfies "each value is the exact average of its neighbours" everywhere is the straight LINE P(k) = k/100. Starting from k=30: P(30) = 30/100 = 0.3.',
       commonTrap: 'Believing a long enough session improves the odds — it does not in a fair game.', tags: ['martingale']
     },
     {
       id: 'h014', topic: 'Recursion', subtopic: 'Markov chains', difficulty: 4, targetTime: 210,
       prompt: 'An ant walks on the vertices of a cube, at each step moving to one of the three adjacent vertices uniformly at random. Starting at one vertex, what is the expected number of steps to reach the diagonally opposite vertex?',
       answerType: 'numeric', correctAnswer: 10, tolerance: 0.1,
-      hint: 'Lump vertices by their distance from the target: 3, 2, 1, 0.', recognitionTechnique: 'Recursion',
+      hint: 'Group the 8 vertices by their distance (0, 1, 2, or 3 edges away) from the target, and work out how many of each vertex\'s 3 neighbours move it one distance closer versus one distance farther.', recognitionTechnique: 'Recursion',
       approach: 'State lumping by graph distance, then solve three linear equations.',
-      solution: 'Let a, b, c be expected steps from distance 3, 2, 1. a = 1 + b; b = 1 + (2/3)c + (1/3)a; c = 1 + (2/3)b. Solving gives c = 7, b = 9, a = 10.',
+      solution: 'Group the 8 cube vertices by graph distance from the target: distance 3 (the start — the single vertex diagonally opposite the target), distance 2 (3 vertices), distance 1 (3 vertices), and distance 0 (the target). Every vertex has exactly 3 neighbours, and moving along any edge changes the distance to the target by exactly ±1. From the distance-3 start, ALL 3 neighbours are at distance 2 (there is nowhere farther to go from the single most-distant vertex), so a = 1 + b, where a, b, c are the expected remaining steps from distance 3, 2, 1. From a distance-2 vertex, exactly 2 of its 3 neighbours are one step closer (distance 1) and 1 neighbour is one step farther (back to distance 3): b = 1 + (2/3)c + (1/3)a. From a distance-1 vertex, exactly 1 of its 3 neighbours IS the target (distance 0, done) and the other 2 are one step farther (back to distance 2): c = 1 + (2/3)b. Solving: substitute a = 1+b into b\'s equation to get b = 1+(2/3)c+(1/3)(1+b), i.e. (2/3)b = 4/3+(2/3)c, so b = 2+c. Substitute into c = 1+(2/3)b = 1+(2/3)(2+c) to get (1/3)c = 7/3, so c = 7, then b = 9, and a = 1+b = 10.',
       commonTrap: 'Treating all seven non-target vertices as one state.', tags: ['markov']
     },
     {
       id: 'h015', topic: 'Expected Value', subtopic: 'Coupon collector', difficulty: 3, targetTime: 120,
       prompt: 'What is the expected number of rolls of a fair six-sided die needed to see every face at least once? Answer to one decimal place.',
       answerType: 'numeric', correctAnswer: 14.7, tolerance: 0.1,
-      hint: 'Sum the geometric waits between new faces.', recognitionTechnique: 'Conditioning',
+      hint: 'Split the process into 6 stages — one per new face collected — and find the expected number of EXTRA rolls needed at each stage, given how many distinct faces you already have.', recognitionTechnique: 'Conditioning',
       approach: 'Coupon collector: 6(1 + 1/2 + 1/3 + 1/4 + 1/5 + 1/6).',
-      solution: '6·H₆ = 6·2.45 = 14.7 rolls.',
+      solution: 'Break the process into 6 stages, one for each new face collected. In the stage where you already have k distinct faces, each roll shows a genuinely new face with probability (6−k)/6, so the number of rolls needed for that stage is geometric with expected value 6/(6−k). Summing the expected length of all 6 stages, for k=0,1,2,3,4,5 distinct faces already held: 6/6 + 6/5 + 6/4 + 6/3 + 6/2 + 6/1 = 6×(1 + 1/2 + 1/3 + 1/4 + 1/5 + 1/6) = 6×2.45 = 14.7 rolls. (The bracketed sum, 1+1/2+...+1/6, is the 6th harmonic number.)',
       commonTrap: 'Answering 6.', tags: ['stages']
     },
 
@@ -157,9 +157,9 @@
       id: 'h016', topic: 'Combinatorics', subtopic: 'Dice sums', difficulty: 3, targetTime: 120,
       prompt: 'Three fair six-sided dice are rolled. What is the probability their sum is exactly 10?',
       answerType: 'numeric', correctAnswer: 0.125, tolerance: 0.004,
-      hint: 'Count ordered triples; stars and bars needs an upper-bound correction.', recognitionTechnique: 'Counting',
+      hint: 'Shift each die value down by 1 to remove the "≥1" restriction, then count solutions — but watch out, some of those solutions would need a die to show more than 6.', recognitionTechnique: 'Counting',
       approach: 'Stars and bars with inclusion–exclusion for the face-value cap of 6.',
-      solution: 'Solutions to x₁+x₂+x₃ = 10 with 1 ≤ xᵢ ≤ 6: C(9,2) − 3·C(3,2) = 36 − 9 = 27. So 27/216 = 1/8.',
+      solution: 'We want ordered triples (x₁,x₂,x₃), each from 1 to 6, with x₁+x₂+x₃=10. Substitute yᵢ=xᵢ−1 (so each yᵢ runs from 0 to 5): this becomes y₁+y₂+y₃=7 with each 0≤yᵢ≤5. Ignoring the upper limit of 5 for a moment, the number of non-negative integer solutions to y₁+y₂+y₃=7 is C(7+2,2)=C(9,2)=36. But this count includes impossible cases where some yᵢ≥6 (i.e. the original die would need to show more than 6) — if one yᵢ is at least 6, substituting y\'ᵢ=yᵢ−6 turns the equation into y\'ᵢ+(other two)=1, which has C(1+2,2)=C(3,2)=3 solutions; since 7 is too small for two variables to both need this correction, exactly one of the 3 positions can be the oversized one, giving 3×3=9 invalid cases to remove: 36−9=27 valid triples. With 6³=216 equally likely outcomes for three dice, the probability is 27/216 = 1/8 = 0.125.',
       commonTrap: 'Forgetting the cap of 6 and answering 36/216.', tags: ['dice']
     },
     {
@@ -193,27 +193,27 @@
       id: 'h020', topic: 'Combinatorics', subtopic: 'Catalan structures', difficulty: 4, targetTime: 180,
       prompt: 'How many sequences of 4 opening and 4 closing brackets are correctly matched (never more closing than opening at any prefix)?',
       answerType: 'numeric', correctAnswer: 14, tolerance: 0,
-      hint: 'Total arrangements minus the bad ones, via a reflection argument.', recognitionTechnique: 'Counting',
+      hint: 'Total unrestricted arrangements of 4 opens and 4 closes, minus the ones that go negative at some point — count the "bad" ones using a reflection trick that turns each invalid sequence into an arrangement with one extra closing bracket.', recognitionTechnique: 'Counting',
       approach: 'Catalan number C_n = C(2n,n)/(n+1).',
-      solution: 'C₄ = C(8,4)/5 = 70/5 = 14.',
+      solution: 'Without any restriction, there are C(8,4)=70 ways to arrange 4 opening and 4 closing brackets in a row (choose which 4 of the 8 positions are opening brackets). Some of these arrangements are invalid — at some point reading left to right, they have more closing brackets than opening ones so far. By a classical reflection argument: take any INVALID sequence, find the first position where it goes wrong (one more closing than opening), and flip every bracket after that point (swap every "(" for ")" and vice versa) — this bijects each invalid sequence of 4 opens/4 closes to a sequence with 3 opens and 5 closes (one fewer opening bracket than closing, overall), of which there are C(8,3)=56. This means exactly 56 of the 70 total arrangements are invalid, leaving 70−56=14 valid ones. (This count is called the 4th Catalan number, and the general formula C(2n,n)/(n+1) = C(8,4)/5 = 70/5 = 14 gives the same answer.)',
       commonTrap: 'Answering C(8,4) = 70 and ignoring the prefix condition.', tags: ['catalan']
     },
     {
       id: 'h021', topic: 'Combinatorics', subtopic: 'Ballot problems', difficulty: 5, targetTime: 210,
       prompt: 'Candidate A receives 7 votes and candidate B receives 3 votes. Votes are counted in a uniformly random order. What is the probability that A is strictly ahead throughout the entire count? Answer to one decimal place as a percentage.',
       answerType: 'numeric', correctAnswer: 40, tolerance: 0.6,
-      hint: 'There is a one-line formula for this.', recognitionTechnique: 'Counting',
+      hint: 'Start with an easy necessary condition: which candidate must receive the very FIRST vote counted, for "strictly ahead throughout" to even be possible?', recognitionTechnique: 'Counting',
       approach: 'Bertrand’s ballot theorem: P = (a − b)/(a + b).',
-      solution: '(7 − 3)/(7 + 3) = 0.4 = 40%.',
+      solution: 'This is Bertrand\'s ballot problem. A necessary starting observation: the very FIRST vote counted must go to A — if the first counted vote were B\'s, A would already be behind at the very first step, violating "strictly ahead throughout" immediately. Among the P(first vote is A) = a/(a+b) chance the count starts correctly, a further reflection-principle argument (pairing each remaining "bad" sequence, where A ties or falls behind again, with a specific "good" one) shows that, conditional on the first vote being A\'s, A stays strictly ahead throughout with probability (a−b)/a. Multiplying: (a/(a+b)) × ((a−b)/a) = (a−b)/(a+b). Plugging in a=7, b=3: (7−3)/(7+3) = 4/10 = 0.4 = 40%.',
       commonTrap: 'Confusing "always strictly ahead" with "ahead at the end" (which has probability 1 here).', tags: ['ballot']
     },
     {
       id: 'h022', topic: 'Combinatorics', subtopic: 'Number theory counting', difficulty: 2, targetTime: 90,
       prompt: 'How many trailing zeros does 100! have?',
       answerType: 'numeric', correctAnswer: 24, tolerance: 0,
-      hint: 'Zeros come from factors of 10 = 2 × 5; fives are scarcer.', recognitionTechnique: 'Counting',
+      hint: 'Trailing zeros come from factors of 10=2×5; since factors of 2 are far more plentiful than factors of 5 in 100!, count only how many times 5 divides in — but don\'t forget multiples of 25 contribute an extra factor of 5 each.', recognitionTechnique: 'Counting',
       approach: 'Legendre’s formula: count factors of 5.',
-      solution: '⌊100/5⌋ + ⌊100/25⌋ = 20 + 4 = 24.',
+      solution: 'A trailing zero in 100! comes from a factor of 10 = 2×5 in the product 1×2×3×...×100. Since even numbers are far more common than multiples of 5 among 1 to 100, the number of factors of 2 is always much larger than the number of factors of 5 — so the number of trailing zeros is limited entirely by how many times 5 divides into 100!, not by the 2\'s. Count the factors of 5: numbers 5,10,15,...,100 each contribute at least one factor of 5 — there are ⌊100/5⌋=20 of them. But some numbers contribute a SECOND factor of 5: multiples of 25 (25,50,75,100) each contain 5²=25, so they contribute one extra factor of 5 beyond what was already counted — there are ⌊100/25⌋=4 of them. (No number ≤100 is a multiple of 125=5³, so there\'s no third layer.) Total factors of 5 in 100! = 20+4 = 24, so 100! has exactly 24 trailing zeros.',
       commonTrap: 'Answering 20 by forgetting that 25, 50, 75, 100 each contribute an extra 5.', tags: ['number theory']
     },
     {
@@ -240,36 +240,36 @@
       id: 'h025', topic: 'Order Statistics', subtopic: 'Uniform spacings', difficulty: 4, targetTime: 180,
       prompt: 'Three independent uniform points are dropped on [0, 1]. What is the expected length of the gap between the smallest and the largest of them?',
       answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.005,
-      hint: 'E[max] − E[min], each of which has a symmetric closed form.', recognitionTechnique: 'Order statistics',
+      hint: 'Find E[max] and E[min] separately (the CDF of the max is P(max≤x)=xⁿ; the min is a mirror image of the max by symmetry), then subtract.', recognitionTechnique: 'Order statistics',
       approach: 'E[range] = E[max] − E[min] = n/(n+1) − 1/(n+1).',
-      solution: 'E[max] = 3/4, E[min] = 1/4, so E[range] = 1/2. Equivalently (n−1)/(n+1).',
+      solution: 'The gap between the smallest and largest of the 3 points is the RANGE, E[max]−E[min]. For n independent Uniform[0,1] points, the maximum has CDF P(max≤x)=xⁿ (all n points must individually be below x), which gives E[max]=n/(n+1) — for n=3, E[max]=3/4. By the symmetry x↦1−x, the minimum of n uniform points has the mirror-image distribution, giving E[min]=1/(n+1) — for n=3, E[min]=1/4. So E[range] = E[max]−E[min] = 3/4−1/4 = 1/2 = 0.5 (equivalently, the general formula (n−1)/(n+1) = 2/4 = 0.5 for n=3).',
       commonTrap: 'Assuming the range is 1 minus twice the mean of a single point.', tags: ['uniform']
     },
     {
       id: 'h026', topic: 'Order Statistics', subtopic: 'Minimum of exponentials', difficulty: 4, targetTime: 150,
       prompt: 'Three independent exponential clocks have rates 1, 2 and 3 per hour. What is the expected time, in hours, until the first one rings? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.1667, tolerance: 0.004,
-      hint: 'The minimum of independent exponentials is exponential.', recognitionTechnique: 'Order statistics',
+      hint: 'P(the minimum of several independent clocks exceeds t) requires ALL clocks to individually exceed t — multiply their individual survival probabilities together and see what distribution results.', recognitionTechnique: 'Order statistics',
       approach: 'Rates add: min of Exp(λᵢ) is Exp(Σλᵢ), so E = 1/Σλᵢ.',
-      solution: 'Σλ = 6 per hour ⇒ E[min] = 1/6 ≈ 0.1667 hours (10 minutes).',
+      solution: 'For the FIRST of several independent exponential clocks to ring by time t, ALL of them must not yet have rung — so P(min > t) = P(clock 1 > t)×P(clock 2 > t)×P(clock 3 > t) = e^(−1t)×e^(−2t)×e^(−3t) = e^(−(1+2+3)t) = e^(−6t), since independent probabilities multiply and the exponents add. This is exactly the survival function of an exponential distribution with rate 1+2+3=6 — so the minimum itself is exponentially distributed with the SUMMED rate, and its mean is 1/(sum of rates) = 1/6 ≈ 0.1667 hours (10 minutes).',
       commonTrap: 'Averaging the three individual means (1, 1/2, 1/3).', tags: ['exponential']
     },
     {
       id: 'h027', topic: 'Order Statistics', subtopic: 'Competing risks', difficulty: 4, targetTime: 150,
       prompt: 'Two independent exponential clocks have rates 2 and 3 per hour. What is the probability that the rate-2 clock rings first?',
       answerType: 'numeric', correctAnswer: 0.4, tolerance: 0.005,
-      hint: 'The winner is chosen in proportion to the rates.', recognitionTechnique: 'Order statistics',
+      hint: 'The clock with the higher rate should intuitively be more likely to ring first — the exact probability turns out to be its rate as a fraction of the combined rate.', recognitionTechnique: 'Order statistics',
       approach: 'Competing exponentials: P(i first) = λᵢ/Σλ.',
-      solution: '2/(2+3) = 0.4.',
+      solution: 'When two independent exponential clocks "race" to ring first, the probability that the rate-λ₁ clock wins is λ₁/(λ₁+λ₂) — intuitively, a clock that rings more frequently (higher rate) is proportionally more likely to be the one that happens to ring first. (This follows from integrating over the time the winning clock rings: P(clock 1 rings first) = ∫₀^∞ λ₁e^(−λ₁t)·e^(−λ₂t) dt = λ₁/(λ₁+λ₂), since the density of clock 1 ringing at time t, times the probability clock 2 hasn\'t rung yet, integrates to that ratio.) Here λ₁=2 and λ₂=3, so P(rate-2 clock rings first) = 2/(2+3) = 2/5 = 0.4.',
       commonTrap: 'Inverting the ratio because "faster means smaller mean".', tags: ['exponential']
     },
     {
       id: 'h028', topic: 'Order Statistics', subtopic: 'Discrete maxima', difficulty: 4, targetTime: 180,
       prompt: 'Four fair six-sided dice are rolled. What is the probability that the maximum shown is exactly 5?',
       answerType: 'numeric', correctAnswer: 0.3117, tolerance: 0.004,
-      hint: 'P(max = k) = P(max ≤ k) − P(max ≤ k−1).', recognitionTechnique: 'Order statistics',
+      hint: 'P(max ≤ k) is easy: it just means every one of the 4 dice individually lands at or below k. Use that to sandwich P(max = exactly 5) between P(max≤5) and P(max≤4).', recognitionTechnique: 'Order statistics',
       approach: 'Use the CDF of the maximum: P(max ≤ k) = (k/6)ⁿ.',
-      solution: '(5/6)⁴ − (4/6)⁴ = 625/1296 − 256/1296 = 369/1296 ≈ 0.3117.',
+      solution: 'P(max ≤ k) means ALL 4 dice show at most k, which happens with probability (k/6)⁴ since each die independently must land in {1,...,k}. The event "max is EXACTLY 5" is the same as "max ≤ 5" but NOT "max ≤ 4" (i.e., at least one die actually reaches 5), so P(max=5) = P(max≤5) − P(max≤4) = (5/6)⁴ − (4/6)⁴ = 625/1296 − 256/1296 = 369/1296 ≈ 0.3117.',
       commonTrap: 'Requiring exactly one die to show 5 rather than at least one.', tags: ['dice']
     },
 
@@ -278,45 +278,45 @@
       id: 'h029', topic: 'Variance', subtopic: 'Correlation bounds', difficulty: 5, targetTime: 240,
       prompt: 'X and Y have correlation 0.8, and Y and Z have correlation 0.8. What is the smallest possible correlation between X and Z? Answer to two decimals.',
       answerType: 'numeric', correctAnswer: 0.28, tolerance: 0.01,
-      hint: 'Correlations behave like cosines of angles between vectors.', recognitionTechnique: 'Other',
+      hint: 'Picture each variable as a unit vector, with correlation = cosine of the angle between vectors. If X-Y and Y-Z each make a known angle, what is the WIDEST possible angle between X and Z, and what correlation does that correspond to?', recognitionTechnique: 'Other',
       approach: 'Positive semi-definiteness of the correlation matrix, or the cosine-of-angles geometry.',
-      solution: 'ρ₁₃ ≥ ρ₁₂ρ₂₃ − √((1−ρ₁₂²)(1−ρ₂₃²)) = 0.64 − (0.6)(0.6) = 0.28.',
+      solution: 'Think of each random variable as a UNIT VECTOR, where the correlation between two variables equals the COSINE of the angle between their vectors (a standard geometric representation of correlation). If the angle between vectors X and Y is θ₁₂ (with cos θ₁₂=0.8) and the angle between Y and Z is θ₂₃ (with cos θ₂₃=0.8), then by the triangle inequality for angles, the angle between X and Z can range from |θ₁₂−θ₂₃| up to θ₁₂+θ₂₃ — the SMALLEST possible correlation ρ₁₃ = cos(θ₁₂+θ₂₃) occurs at the WIDEST possible angle between X and Z. Using the cosine addition formula, cos(θ₁₂+θ₂₃) = cos θ₁₂ cos θ₂₃ − sin θ₁₂ sin θ₂₃ = ρ₁₂ρ₂₃ − √(1−ρ₁₂²)·√(1−ρ₂₃²) = (0.8)(0.8) − √(1−0.64)·√(1−0.64) = 0.64 − (0.6)(0.6) = 0.64 − 0.36 = 0.28.',
       commonTrap: 'Assuming correlation is transitive and answering 0.64 or 0.8.', tags: ['correlation']
     },
     {
       id: 'h030', topic: 'Variance', subtopic: 'Hat-check variance', difficulty: 5, targetTime: 240,
       prompt: 'n coats are returned to n people in a uniformly random order. What is the variance of the number of people who receive their own coat (for n ≥ 2)?',
       answerType: 'numeric', correctAnswer: 1, tolerance: 0.02,
-      hint: 'Compute E[M²] using pairs of indicators.', recognitionTechnique: 'Indicator variables',
+      hint: 'Use indicators Iᵢ = 1 if person i gets their own coat. You\'ll need E[Iᵢ²] AND E[IᵢIⱼ] for i≠j (the probability BOTH i and j get their own coats) to build E[M²].', recognitionTechnique: 'Indicator variables',
       approach: 'Var = E[M²] − (E[M])² with E[M²] = ΣE[Iᵢ] + Σ_{i≠j}E[IᵢIⱼ].',
-      solution: 'E[M] = 1. E[M²] = n(1/n) + n(n−1)·1/(n(n−1)) = 2. So Var = 2 − 1 = 1, independent of n.',
+      solution: 'Let Iᵢ = 1 if person i receives their own coat, and M = ΣIᵢ be the total number of correct matches. E[Iᵢ] = 1/n (person i\'s coat is equally likely to be any of the n coats), so by linearity E[M] = n×(1/n) = 1. For the variance, we need E[M²] = ΣE[Iᵢ²] + Σ_{i≠j}E[IᵢIⱼ]. Since Iᵢ is 0 or 1, Iᵢ²=Iᵢ, so the first sum is just ΣE[Iᵢ] = n×(1/n) = 1. For the second sum: E[IᵢIⱼ] = P(BOTH i and j get their own coat) = 1/(n(n−1)) (person i\'s coat is fixed with probability 1/n, and GIVEN that, person j\'s coat is separately fixed with probability 1/(n−1) among the remaining coats) — there are n(n−1) ordered pairs (i,j) with i≠j, so this sum contributes n(n−1)×1/(n(n−1)) = 1. Total: E[M²] = 1+1 = 2. So Var(M) = E[M²]−(E[M])² = 2−1 = 1, remarkably independent of n.',
       commonTrap: 'Assuming independence of the indicators — they are dependent, but the covariances happen to sum neatly.', tags: ['linearity']
     },
     {
       id: 'h031', topic: 'Variance', subtopic: 'Conditional variance', difficulty: 5, targetTime: 240,
       prompt: 'N is Poisson with mean 4. Given N = n, X is the sum of n independent fair coin indicators (each 1 with probability 1/2). What is Var(X)?',
       answerType: 'numeric', correctAnswer: 2, tolerance: 0.05,
-      hint: 'Use the law of total variance, or notice X is itself Poisson.', recognitionTechnique: 'Conditioning',
+      hint: 'Var(X) = E[Var(X|N)] + Var(E[X|N]) (the law of total variance) — you\'ll need both the conditional variance/mean formulas for a Binomial(N,½), AND the fact that a Poisson distribution\'s variance equals its mean.', recognitionTechnique: 'Conditioning',
       approach: 'Poisson thinning, or Var(X) = E[Var(X|N)] + Var(E[X|N]).',
-      solution: 'E[X|N] = N/2, Var(X|N) = N/4. So Var(X) = E[N]/4 + Var(N)/4 = 1 + 1 = 2. (Consistent with thinning: X ~ Poisson(2).)',
+      solution: 'Given N=n, X is a sum of n independent fair-coin indicators, so X is Binomial(n, ½): E[X|N]=N/2 and Var(X|N)=N×½×½=N/4. To find the overall variance of X, use the law of total variance: Var(X) = E[Var(X|N)] + Var(E[X|N]) — this splits the total variability into "variability within a fixed N" (averaged over N) plus "variability caused by N itself changing." Here E[Var(X|N)] = E[N]/4, and Var(E[X|N]) = Var(N)/4. Since N is Poisson with mean 4, and a defining property of the Poisson distribution is that its mean EQUALS its variance, E[N]=Var(N)=4. So Var(X) = 4/4 + 4/4 = 1+1 = 2. (Consistent with Poisson thinning: taking a Poisson(4) count and independently keeping each item with probability ½ produces a new Poisson(4×½)=Poisson(2) count, whose variance also equals its mean, 2.)',
       commonTrap: 'Using only E[Var(X|N)] and dropping the variance of the conditional mean.', tags: ['law of total variance']
     },
     {
       id: 'h032', topic: 'Distributions', subtopic: 'Normal comparisons', difficulty: 4, targetTime: 180,
       prompt: 'X ~ N(100, 15²) and Y ~ N(94, 20²) are independent. What is P(X > Y)? Answer to three decimals.',
       answerType: 'numeric', correctAnswer: 0.594, tolerance: 0.012,
-      hint: 'Study the single variable X − Y.', recognitionTechnique: 'Direct calculation',
+      hint: 'P(X>Y) is the same as P(X−Y>0) — study the single variable D=X−Y, which is normal too, with mean = difference of the two means, but variance = SUM (not difference) of the two variances.', recognitionTechnique: 'Direct calculation',
       approach: 'Difference of independent normals is normal with variances adding.',
-      solution: 'X − Y ~ N(6, 15²+20² = 625), sd 25. P(X−Y > 0) = Φ(6/25) = Φ(0.24) ≈ 0.5948.',
+      solution: 'P(X>Y) is the same as P(X−Y>0), so study the single variable D=X−Y. A difference of two INDEPENDENT normal variables is itself normal, with mean = difference of means (100−94=6) and VARIANCE = SUM of the two individual variances (variances always add for independent variables, regardless of whether you are adding or subtracting the variables themselves): Var(D)=15²+20²=225+400=625, so D ~ N(6, 625), with standard deviation √625=25. Standardizing: P(D>0) = P((D−6)/25 > (0−6)/25) = P(Z > −0.24) = P(Z < 0.24) = Φ(0.24), where Φ denotes the standard normal cumulative distribution function (the probability that a standard normal variable is below a given value), and Φ(0.24) ≈ 0.5948 from the standard normal table.',
       commonTrap: 'Adding the standard deviations instead of the variances.', tags: ['normal']
     },
     {
       id: 'h033', topic: 'Distributions', subtopic: 'Poisson thinning', difficulty: 4, targetTime: 150,
       prompt: 'Orders arrive as a Poisson process at 10 per minute, and each independently is a buy with probability 0.3. What is the probability that exactly 2 buy orders arrive in a given minute? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.224, tolerance: 0.006,
-      hint: 'Thinning a Poisson process leaves a Poisson process.', recognitionTechnique: 'Direct calculation',
+      hint: 'Poisson thinning: independently keeping each arrival of a Poisson process with a fixed probability produces another Poisson process, with the rate scaled down by that same probability.', recognitionTechnique: 'Direct calculation',
       approach: 'Poisson thinning gives buys ~ Poisson(10 × 0.3 = 3).',
-      solution: 'e⁻³·3²/2! = 0.0498·4.5 = 0.2240.',
+      solution: 'Orders arrive as a Poisson process at rate 10/minute, and each is independently a "buy" with probability 0.3. A key fact (Poisson thinning) is that independently filtering a Poisson process — keeping each arrival with some fixed probability — produces ANOTHER Poisson process, with rate equal to the original rate times the keep-probability: buy orders alone therefore arrive as Poisson(10×0.3)=Poisson(3) per minute. Using the Poisson probability mass formula P(exactly k arrivals) = e^(−λ)λᵏ/k! with λ=3 and k=2: P(exactly 2 buy orders) = e^(−3)·3²/2! = 0.0498×9/2 = 0.0498×4.5 ≈ 0.2240.',
       commonTrap: 'Using a binomial with n = 10 — the total count is itself random.', tags: ['poisson']
     },
     {
@@ -361,18 +361,18 @@
       id: 'h038', topic: 'Game Theory', subtopic: 'Dominance', difficulty: 3, targetTime: 120,
       prompt: 'Two players simultaneously name an integer from 0 to 100; the winner is whoever is closest to two-thirds of the average of all numbers named. If both players are perfectly rational and know the other is, what number should you name?',
       answerType: 'numeric', correctAnswer: 0, tolerance: 0,
-      hint: 'Iteratively delete dominated strategies.', recognitionTechnique: 'Game theory',
+      hint: 'Think about what the HIGHEST possible number could ever be worth naming, then repeat the same logic against an opponent who also reasons that way.', recognitionTechnique: 'Game theory',
       approach: 'Iterated elimination of strictly dominated strategies converges to the unique equilibrium.',
-      solution: 'Nothing above 67 can ever win, so those are deleted; then nothing above 44; iterating drives the upper bound to 0. The unique Nash equilibrium is 0 for both players.',
+      solution: 'Since the winning number is two-thirds of the AVERAGE of the two numbers named, and that average can never exceed 100, the winning number itself can never exceed (2/3)×100 ≈ 66.7 — so naming anything above 67 is never optimal and can be ruled out. But if both players know neither would ever name above 67, the average can never exceed 67 either, so the winning number can never exceed (2/3)×67 ≈ 44.4 — anything above 44 is now also ruled out. Repeating this reasoning indefinitely (each round shrinking the upper bound by a further factor of 2/3) drives the bound all the way down to 0. Since both players are assumed to reason this way without limit, the unique Nash equilibrium is for both players to name 0.',
       commonTrap: 'Stopping the iteration after one or two rounds (answering 33 or 22) — that is optimal against real humans, not against a rational opponent.', tags: ['nash']
     },
     {
       id: 'h039', topic: 'Game Theory', subtopic: 'Combinatorial games', difficulty: 4, targetTime: 180,
       prompt: 'A pile has 21 stones. Players alternate removing 1, 2 or 3 stones; whoever takes the last stone wins. You move first. How many stones should you take to guarantee a win?',
       answerType: 'numeric', correctAnswer: 1, tolerance: 0,
-      hint: 'Which pile sizes are losing for the player about to move?', recognitionTechnique: 'Game theory',
+      hint: 'Work backwards from small piles: figure out which pile sizes are forced losses for whoever must move next, and look for a repeating pattern.', recognitionTechnique: 'Game theory',
       approach: 'Nim-style parity: multiples of 4 are losing positions for the player to move.',
-      solution: 'Positions divisible by 4 are losses for the mover. 21 = 4·5 + 1, so take 1 and leave 20; thereafter always complete the opponent’s move to 4.',
+      solution: 'Define a pile size as a "losing position" if the player who must move next will lose under best play from both sides. From a pile of 1, 2, or 3 stones, the mover can simply take all of them and win — these are winning positions. From a pile of exactly 4, whatever the mover takes (1, 2, or 3), they leave 3, 2, or 1 stones — each a winning position for the OPPONENT — so 4 is a losing position. This pattern repeats: from any pile that is a multiple of 4, every possible move leaves a pile that is NOT a multiple of 4 (winning for the opponent, since the opponent can always remove just enough — 1 to 3 stones — to bring the total back down to the next multiple of 4). So piles that are multiples of 4 are exactly the losing positions. With 21 stones (21 = 4×5+1, not a multiple of 4), the first player wins by taking 1 stone, leaving 20 (a multiple of 4, a losing position for the opponent) — then on every later turn, taking enough to bring the total removed that round to 4 keeps handing the opponent a multiple of 4, until the last stone is taken by you.',
       commonTrap: 'Taking the maximum of 3 each turn.', tags: ['nim']
     },
 
@@ -419,9 +419,9 @@
       id: 'h044', topic: 'Market Making', subtopic: 'Kelly sizing', difficulty: 4, targetTime: 180,
       prompt: 'You can bet on an event with true probability 0.60 at even money (win 1 for 1). What fraction of your bankroll maximises the long-run growth rate?',
       answerType: 'numeric', correctAnswer: 0.2, tolerance: 0.01,
-      hint: 'Edge divided by odds.', recognitionTechnique: 'Other',
+      hint: 'The Kelly fraction balances edge against odds: f* = (bp−q)/b, where b is the net odds, p is your win probability, and q=1−p.', recognitionTechnique: 'Other',
       approach: 'Kelly criterion f* = (bp − q)/b.',
-      solution: 'b = 1, p = 0.6, q = 0.4 ⇒ f* = (0.6 − 0.4)/1 = 0.2, i.e. 20% of bankroll.',
+      solution: 'The Kelly criterion picks the bet size that maximizes the long-run growth rate of wealth, rather than its expected value — betting your whole edge or bankroll grows expected wealth fastest on a single bet, but risks eventual ruin over repeated bets, since one bad streak can be catastrophic. The formula is f* = (bp − q)/b, where b is the net odds received on a win (here b=1, even money), p is your true win probability (0.6), and q=1−p is the loss probability (0.4). Plugging in: f* = (1×0.6 − 0.4)/1 = 0.2/1 = 0.2, meaning you should bet 20% of your bankroll.',
       commonTrap: 'Betting the full edge (60%) or the whole bankroll — that maximises expected wealth but ruins growth.', tags: ['kelly']
     },
     {
@@ -446,9 +446,9 @@
       id: 'h047', topic: 'Finance', subtopic: 'Duration', difficulty: 3, targetTime: 120,
       prompt: 'A bond has modified duration 6.5 and trades at 98. If yields rise by 40 basis points, approximately what is the new price?',
       answerType: 'numeric', correctAnswer: 95.45, tolerance: 0.3,
-      hint: 'Percentage price change ≈ −duration × yield change.', recognitionTechnique: 'Direct calculation',
+      hint: 'A bond\'s "modified duration" measures how sensitive its price is to a small yield change — treat the price change as approximately linear: %ΔP ≈ −(modified duration)×Δy.', recognitionTechnique: 'Direct calculation',
       approach: 'First-order duration approximation ΔP/P ≈ −D_mod·Δy.',
-      solution: 'ΔP/P ≈ −6.5 × 0.0040 = −2.6%. New price ≈ 98 × 0.974 = 95.45.',
+      solution: '"Modified duration" measures a bond\'s price sensitivity to yield changes: for a small yield change Δy, the price changes by approximately −(modified duration)×Δy in percentage terms (negative because prices and yields move in opposite directions). Here modified duration = 6.5 and yields rise by Δy = 0.40% = 0.0040, so ΔP/P ≈ −6.5 × 0.0040 = −0.026 = −2.6%. Applying this to the current price of 98: new price ≈ 98 × (1 − 0.026) = 98 × 0.974 = 95.45.',
       commonTrap: 'Subtracting 2.6 points instead of 2.6 percent.', tags: ['rates']
     },
     {
@@ -472,9 +472,9 @@
       id: 'h049', topic: 'Finance', subtopic: 'Options intuition', difficulty: 4, targetTime: 180,
       prompt: 'A stock trades at 100. A digital option pays €1 if the stock is above 110 in one year and nothing otherwise. Annual volatility is 20%, the drift is zero and rates are zero. Using a normal approximation to log-returns, what is the approximate value of the option? Answer to two decimals.',
       answerType: 'numeric', correctAnswer: 0.31, tolerance: 0.035,
-      hint: 'Convert the barrier into a z-score in log space.', recognitionTechnique: 'Direct calculation',
+      hint: 'The value of a digital option is just a probability: convert the barrier into a z-score in log-return space and use the normal CDF, Φ.', recognitionTechnique: 'Direct calculation',
       approach: 'Digital value = risk-neutral probability of finishing above the strike = 1 − Φ(z).',
-      solution: 'ln(110/100) = 0.0953. With drift −σ²/2 = −0.02, z = (0.0953 + 0.02)/0.20 ≈ 0.577 (or ≈0.477 ignoring the convexity term). 1 − Φ(0.5) ≈ 0.31.',
+      solution: 'A digital (cash-or-nothing) option paying €1 if S_T > K is worth exactly the probability that this happens — no option Greeks needed. Work in log space: with zero drift and zero rates, ln(S_T/S_0) is approximately Normal(0, σ²). The barrier corresponds to a log-return of ln(110/100) ≈ 0.0953, which in standard-deviation units is z = 0.0953/0.20 ≈ 0.48. The option pays only if the stock ends up MORE than 0.48 standard deviations above where it started, so its value is 1 − Φ(z) = 1 − Φ(0.48) ≈ 1 − 0.685 = 0.315 ≈ 0.31, where Φ is the standard normal cumulative distribution function (the probability a standard normal variable falls below a given value). (A fully precise risk-neutral treatment shifts z down slightly, by about σ/2 ≈ 0.10, to account for the lognormal mean sitting above its median — this nudges the estimate to about 0.28, still close given the tolerance here; the simple z-score above is the standard first approximation.)',
       commonTrap: 'Working in price space rather than log space, or forgetting that a digital is just a probability.', tags: ['options']
     },
     {
@@ -492,36 +492,36 @@
       id: 'h051', topic: 'Mental Maths', subtopic: 'Approximation', difficulty: 3, targetTime: 45,
       prompt: 'Estimate 1.03^12 to two decimal places.',
       answerType: 'numeric', correctAnswer: 1.43, tolerance: 0.05,
-      hint: 'Rule of 72, or (1+x)ⁿ ≈ e^{nx}.', recognitionTechnique: 'Direct calculation',
+      hint: 'For small x and moderate n, (1+x)ⁿ ≈ e^(nx) — compute nx first, then estimate e raised to that power.', recognitionTechnique: 'Direct calculation',
       approach: 'Exponential approximation e^{0.36} with a small convexity correction.',
-      solution: 'e^{0.36} ≈ 1.433; the true value is 1.4258.',
+      solution: 'For a small growth rate x compounded n times, (1+x)ⁿ ≈ e^(nx) (since ln(1+x)≈x for small x, so n·ln(1+x)≈nx, and (1+x)ⁿ=e^(n·ln(1+x))). Here x=0.03 and n=12, so nx=0.36, giving (1.03)¹² ≈ e^0.36. Estimating e^0.36 by splitting it as e^0.3 × e^0.06 ≈ 1.35 × 1.06 ≈ 1.43. (The true value is 1.4258, very close to this estimate.)',
       commonTrap: 'Answering 1.36 by using simple interest.', tags: ['speed']
     },
     {
       id: 'h052', topic: 'Mental Maths', subtopic: 'Percentages', difficulty: 3, targetTime: 40,
       prompt: 'A position loses 20% and then gains 20%. What is the net percentage change, to one decimal place (use a negative sign for a loss)?',
       answerType: 'numeric', correctAnswer: -4, tolerance: 0.15,
-      hint: 'Multiply the factors.', recognitionTechnique: 'Direct calculation',
+      hint: 'A 20% loss and a 20% gain are NOT symmetric in dollar terms — the gain applies to a smaller base than the loss did. Multiply the growth factors instead of adding the percentages.', recognitionTechnique: 'Direct calculation',
       approach: 'Compounding is multiplicative, so symmetric percentage moves do not cancel.',
-      solution: '0.8 × 1.2 = 0.96 ⇒ −4%.',
+      solution: 'Percentage changes compound multiplicatively, not additively, so a 20% loss followed by a 20% gain do NOT cancel out. Starting from a factor of 1, a 20% loss leaves 1−0.20=0.8, and a 20% gain on THAT smaller amount multiplies by 1+0.20=1.2: 0.8×1.2=0.96 — a net factor of 0.96, i.e. a 4% loss overall, because the 20% gain is computed on a smaller starting base than the original 20% loss was, so it doesn\'t fully recover it. Net change: −4%.',
       commonTrap: 'Answering 0%.', tags: ['speed']
     },
     {
       id: 'h053', topic: 'Probability', subtopic: 'Conditional probability', difficulty: 4, targetTime: 180,
       prompt: 'A family has two children. You are told that at least one is a boy born on a Tuesday. What is the probability both children are boys? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.4815, tolerance: 0.01,
-      hint: 'Count the 14 × 14 equally likely (gender, day) pairs.', recognitionTechnique: 'Conditional probability',
+      hint: 'Build the full sample space: each child independently has one of 2 genders × 7 weekdays = 14 equally likely (gender, day) combinations, giving 14×14=196 equally likely combinations for the family. Count how many satisfy "at least one Tuesday boy," then how many of those have two boys.', recognitionTechnique: 'Conditional probability',
       approach: 'Careful sample-space construction over (gender, weekday) pairs for each child.',
-      solution: 'Of 196 equally likely combinations, 27 include at least one Tuesday boy, and 13 of those have two boys: 13/27 ≈ 0.4815.',
+      solution: 'Model each child as an independent, uniformly random (gender, day-of-week) pair — 2×7=14 equally likely combinations per child, so 14×14=196 equally likely combinations for the family. We\'re told "at least one child is a boy born on a Tuesday" (event T): child 1 is a Tuesday-boy (1 fixed combo) with child 2 being anything (14 combos) gives 14, or child 2 is a Tuesday-boy similarly gives 14, but this double-counts "both are Tuesday-boys" (1 combo), so |T| = 14+14−1 = 27. Now count how many of those 27 have BOTH children boys: child 1 is a Tuesday-boy with child 2 any of the 7 boy-days gives 7, or child 2 is a Tuesday-boy with child 1 any of the 7 boy-days gives 7, minus the double-counted both-Tuesday-boys case (1): 7+7−1 = 13. So P(both boys | T) = 13/27 ≈ 0.4815 — noticeably different from the "no day information" answer of 1/3, because the specific, unlikely detail (Tuesday) makes it disproportionately likely that only ONE child triggered the event, not both.',
       commonTrap: 'Answering 1/3 (ignoring the day) or 1/2 — the extra information genuinely shifts the answer.', tags: ['paradox']
     },
     {
       id: 'h054', topic: 'Probability', subtopic: 'Bayes', difficulty: 4, targetTime: 180,
       prompt: 'A coin is picked at random from two: one fair, one double-headed. It is flipped three times and lands heads all three times. What is the probability it is the double-headed coin? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.8889, tolerance: 0.01,
-      hint: 'Likelihoods are 1 and 1/8.', recognitionTechnique: 'Bayes',
+      hint: 'Compare the LIKELIHOODS of seeing three heads under each hypothesis (fair vs double-headed), then combine with the equal 50/50 prior using Bayes\' rule.', recognitionTechnique: 'Bayes',
       approach: 'Bayes with equal priors: posterior odds = likelihood ratio.',
-      solution: 'Posterior odds = 1 : 1/8 = 8 : 1, so P = 8/9 ≈ 0.8889.',
+      solution: 'There are two equally likely hypotheses to start (prior 50/50): the coin is FAIR or DOUBLE-HEADED. Compute the likelihood of the observed data (three heads in three flips) under each: if fair, P(3 heads)=(1/2)³=1/8; if double-headed, P(3 heads)=1 (it always lands heads). By Bayes\' rule, posterior odds = prior odds × likelihood ratio: (double-headed : fair) = 1:1 × (1 : 1/8) = 1 : 1/8, the same as 8 : 1. Converting odds of 8:1 to a probability: P(double-headed) = 8/(8+1) = 8/9 ≈ 0.8889.',
       commonTrap: 'Answering 1 — three heads is still possible with a fair coin.', tags: ['bayes']
     },
     {
@@ -546,9 +546,9 @@
       id: 'h057', topic: 'Combinatorics', subtopic: 'Inclusion-exclusion', difficulty: 4, targetTime: 210,
       prompt: 'How many permutations of the letters A, B, C, D, E have no letter in its original alphabetical position?',
       answerType: 'numeric', correctAnswer: 44, tolerance: 0,
-      hint: 'Inclusion–exclusion over the five "letter is fixed" events.', recognitionTechnique: 'Counting',
+      hint: 'Use inclusion-exclusion: start with all 5! arrangements, subtract those that fix at least one letter, add back those fixing at least two (to correct for double-subtracting), and so on.', recognitionTechnique: 'Counting',
       approach: 'Derangement of 5 elements: D(5) = 5!·Σ(−1)^k/k!.',
-      solution: 'D(5) = 120(1 − 1 + 1/2 − 1/6 + 1/24 − 1/120) = 44.',
+      solution: 'This is a "derangement" count — an arrangement where NO letter ends up in its original position (e.g. for {A,B,C}, {B,C,A} is a derangement but {A,C,B} is not, since A stays in position 1). Use inclusion-exclusion over the 5 "letter i is fixed" events: start with all 5!=120 permutations, subtract those fixing at least one letter, add back those fixing at least two (since they were subtracted twice), subtract those fixing at least three, and so on, alternating signs: D(5) = 120×(1 − 1 + 1/2 − 1/6 + 1/24 − 1/120) = 120×(60/120 − 20/120 + 5/120 − 1/120) = 120×(44/120) = 44.',
       commonTrap: 'Answering 120 − 5 = 115.', tags: ['derangement']
     },
     {
@@ -594,7 +594,7 @@
       answerType: 'numeric', correctAnswer: 4, tolerance: 0.01,
       hint: 'Write the two first-step equations for h_0 and h_1, using h_2 = 0.', recognitionTechnique: 'Recursion',
       approach: 'First-step analysis: h_0 = 1 + h_1 (reflecting); h_1 = 1 + ½h_0 + ½h_2, with h_2 = 0.',
-      solution: 'h_1 = 1 + ½h_0. Substituting into h_0 = 1 + h_1 = 1 + 1 + ½h_0 = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
+      solution: 'Let h_i be the expected number of steps to reach state 2, starting from state i. From state 0 (reflecting), the token always moves to state 1 in one step, so h_0 = 1 + h_1. From state 1, it moves to state 0 or to the absorbing state 2, each with probability 1/2, taking one step either way, so h_1 = 1 + ½h_0 + ½h_2 — and since h_2=0 (already there), this is h_1 = 1 + ½h_0. Substituting into the first equation: h_0 = 1 + (1 + ½h_0) = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
       commonTrap: 'Treating state 0 as absorbing (giving h_0 = 0) instead of reflecting, which still costs one step every time the walk lands there.', tags: ['markov', 'hitting time']
     },
     {
@@ -603,7 +603,7 @@
       answerType: 'numeric', correctAnswer: 0.6923, tolerance: 0.002, acceptFraction: [9, 13],
       hint: 'This is asymmetric — the fair-game formula k/N (which would give 1/2) does not apply here.', recognitionTechnique: 'Recursion',
       approach: "Asymmetric gambler's ruin: P(hit N before 0 | start k) = (1-(q/p)^k)/(1-(q/p)^N), with p=0.6, q=0.4.",
-      solution: 'q/p = 2/3. P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
+      solution: 'This is an asymmetric gambler\'s ruin: starting with €k=2 out of a target €N=4, with win probability p=0.6 and loss probability q=0.4 each round. Because the coin is biased (p≠q), the naive "fair game" formula k/N does NOT apply — the general formula is P(reach N before 0 | start k) = (1−(q/p)^k)/(1−(q/p)^N), which only reduces to k/N in the special symmetric case p=q=0.5. Here q/p = 0.4/0.6 = 2/3. Plugging in k=2, N=4: P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
       commonTrap: 'Answering k/N = 2/4 = 0.5 by using the SYMMETRIC gambler\'s-ruin formula, which only holds when p = q = 0.5.', tags: ['markov', "gambler's ruin", 'absorption']
     },
     {
@@ -612,7 +612,7 @@
       answerType: 'numeric', correctAnswer: 0.8571, tolerance: 0.002, acceptFraction: [6, 7],
       hint: 'Balance the flow between the two states: the rate of Up→Down transitions must equal the rate of Down→Up transitions in steady state.', recognitionTechnique: 'Recursion',
       approach: 'Two-state stationary distribution via detailed balance: π_Up · P(Up→Down) = π_Down · P(Down→Up).',
-      solution: 'π_Up·0.1 = π_Down·0.6 ⇒ π_Up/π_Down = 6. With π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
+      solution: 'In steady state (the "stationary distribution"), the fraction of days spent Up (π_Up) and Down (π_Down) must satisfy detailed balance: the long-run RATE of transitions from Up to Down must exactly equal the rate of transitions from Down to Up — otherwise probability mass would keep drifting from one state to the other and the split wouldn\'t be stable. The rate of Up→Down transitions is π_Up×P(Up→Down)=π_Up×0.1, and the rate of Down→Up transitions is π_Down×P(Down→Up)=π_Down×0.6. Setting these equal: π_Up×0.1 = π_Down×0.6, so π_Up/π_Down = 0.6/0.1 = 6. Combined with π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
       commonTrap: 'Averaging the two "stay" probabilities (0.9 and 0.4) instead of solving the actual balance equations.', tags: ['markov', 'stationary distribution']
     },
     {
@@ -621,7 +621,7 @@
       answerType: 'numeric', correctAnswer: 6, tolerance: 0.01,
       hint: 'For a symmetric walk with two absorbing barriers, the expected duration has a one-line closed form: k(N−k).', recognitionTechnique: 'Recursion',
       approach: 'Symmetric gambler\'s ruin duration formula: E[steps | start k, absorbing at 0 and N] = k(N−k).',
-      solution: 'k=3, N=5: E = 3·(5−3) = 3·2 = 6 steps.',
+      solution: 'For a FAIR (p=q=1/2) random walk with two absorbing barriers at 0 and N, starting from k, the expected number of steps until absorption has the closed form E[steps] = k(N−k) — a symmetric formula reflecting that starting near the middle takes longest to resolve on average, while starting near either edge resolves fastest. (This follows from the first-step equations E_k = 1 + ½E_{k-1} + ½E_{k+1} with E_0=E_N=0, whose solution is exactly the quadratic k(N−k).) Here k=3 and N=5, so E = 3×(5−3) = 3×2 = 6 steps.',
       commonTrap: 'Confusing this two-sided-absorbing setup with a reflecting-barrier setup (whose expected duration follows a different formula, n² when starting at the reflecting end) — always check whether BOTH ends are absorbing or only one.', tags: ['markov', "gambler's ruin", 'hitting time']
     },
 
