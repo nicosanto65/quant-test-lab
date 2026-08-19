@@ -426,12 +426,12 @@
     },
     {
       id: 'h045', topic: 'Market Making', subtopic: 'Fair value', difficulty: 4, targetTime: 210,
-      prompt: 'A contract pays €100 if a fair coin lands heads twice in a row within the next two flips, and €0 otherwise. You are shown a market of 20 bid / 30 offered. What is your expected profit, in euros, from taking the best available trade for one contract?',
+      prompt: 'A contract pays €100 if a fair coin lands heads twice in a row within the next two flips, and €0 otherwise. You are shown a market of 15 bid / 20 offered. What is your expected profit, in euros, from taking the best available trade for one contract?',
       answerType: 'numeric', correctAnswer: 5, tolerance: 0.5,
       hint: 'Fair value first, then compare with both sides of the market.', recognitionTechnique: 'Direct calculation',
       approach: 'Compute fair value, then take the side offering positive edge and size the edge.',
-      solution: 'P(HH in exactly two flips) = 1/4, so fair value is €25. The offer at 30 is above fair value, so sell at 30 for €5 of expected edge. (Buying at 20 would also be a €5 edge — either side works here; the answer is €5.)',
-      commonTrap: 'Assuming you must buy because the payoff is positive.', tags: ['market making']
+      solution: 'P(HH in exactly two flips) = (1/2)×(1/2) = 1/4, so fair value is €25. In a "X bid / Y offered" market, you can SELL into the bid (receiving X) or BUY at the offer (paying Y) — never the reverse. The offer of 20 sits below fair value (25), so buying at 20 captures 25−20=€5 of expected edge; the bid of 15 is also below fair value, so selling there would mean giving away value, not capturing any. The best available trade is buying at the offer, for €5 of expected edge.',
+      commonTrap: 'Confusing which side you transact on — the "offer" is the price at which the MARKET sells to you (so it is where YOU buy); the "bid" is where the market buys from you (so it is where YOU sell). Getting this backwards makes losing trades look profitable.', tags: ['market making']
     },
     {
       id: 'h046', topic: 'Market Making', subtopic: 'Arbitrage', difficulty: 3, targetTime: 150,
@@ -479,12 +479,12 @@
     },
     {
       id: 'h050', topic: 'Finance', subtopic: 'Expected value in markets', difficulty: 3, targetTime: 150,
-      prompt: 'A binary event has a true probability of 35%. The market quotes it at 30 bid / 40 offered (payout 100). Playing only when you have positive expected value, what is your expected profit per contract in the best available trade?',
+      prompt: 'A binary event has a true probability of 35%. The market quotes it at 25 bid / 30 offered (payout 100). Playing only when you have positive expected value, what is your expected profit per contract in the best available trade?',
       answerType: 'numeric', correctAnswer: 5, tolerance: 0.5,
-      hint: 'Fair value is 35; compare with both sides.', recognitionTechnique: 'Direct calculation',
+      hint: 'Fair value is 35; compare with both sides — remember you BUY at the offer and SELL at the bid, never the reverse.', recognitionTechnique: 'Direct calculation',
       approach: 'Compare fair value with bid and offer; edge is the distance to the side you can trade on.',
-      solution: 'Fair value 35. Selling at the offer of 40 gives +5 expected; buying at the bid of 30 also gives +5. Best available edge is 5 per contract.',
-      commonTrap: 'Computing the edge from the mid rather than from the price you actually transact at.', tags: ['market making']
+      solution: 'Fair value = 35% × 100 = €35. In a "X bid / Y offered" market, you can only SELL into the bid (receiving X) or BUY at the offer (paying Y). The offer of 30 sits below fair value (35), so buying at 30 captures 35−30=€5 of expected edge; the bid of 25 is also below fair value, so selling there would mean giving away value, not capturing edge. Best available trade: buy at the offer for €5 per contract.',
+      commonTrap: 'Computing the edge from the mid rather than from the price you actually transact at, or mixing up which side you buy versus sell on.', tags: ['market making']
     },
 
     /* -------------------- MIXED / SPEED / SIG STYLE ------------------ */
