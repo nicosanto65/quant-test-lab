@@ -193,27 +193,27 @@
       id: 'h020', topic: 'Combinatorics', subtopic: 'Catalan structures', difficulty: 4, targetTime: 180,
       prompt: 'How many sequences of 4 opening and 4 closing brackets are correctly matched (never more closing than opening at any prefix)?',
       answerType: 'numeric', correctAnswer: 14, tolerance: 0,
-      hint: 'Total arrangements minus the bad ones, via a reflection argument.', recognitionTechnique: 'Counting',
+      hint: 'Total unrestricted arrangements of 4 opens and 4 closes, minus the ones that go negative at some point — count the "bad" ones using a reflection trick that turns each invalid sequence into an arrangement with one extra closing bracket.', recognitionTechnique: 'Counting',
       approach: 'Catalan number C_n = C(2n,n)/(n+1).',
-      solution: 'C₄ = C(8,4)/5 = 70/5 = 14.',
+      solution: 'Without any restriction, there are C(8,4)=70 ways to arrange 4 opening and 4 closing brackets in a row (choose which 4 of the 8 positions are opening brackets). Some of these arrangements are invalid — at some point reading left to right, they have more closing brackets than opening ones so far. By a classical reflection argument: take any INVALID sequence, find the first position where it goes wrong (one more closing than opening), and flip every bracket after that point (swap every "(" for ")" and vice versa) — this bijects each invalid sequence of 4 opens/4 closes to a sequence with 3 opens and 5 closes (one fewer opening bracket than closing, overall), of which there are C(8,3)=56. This means exactly 56 of the 70 total arrangements are invalid, leaving 70−56=14 valid ones. (This count is called the 4th Catalan number, and the general formula C(2n,n)/(n+1) = C(8,4)/5 = 70/5 = 14 gives the same answer.)',
       commonTrap: 'Answering C(8,4) = 70 and ignoring the prefix condition.', tags: ['catalan']
     },
     {
       id: 'h021', topic: 'Combinatorics', subtopic: 'Ballot problems', difficulty: 5, targetTime: 210,
       prompt: 'Candidate A receives 7 votes and candidate B receives 3 votes. Votes are counted in a uniformly random order. What is the probability that A is strictly ahead throughout the entire count? Answer to one decimal place as a percentage.',
       answerType: 'numeric', correctAnswer: 40, tolerance: 0.6,
-      hint: 'There is a one-line formula for this.', recognitionTechnique: 'Counting',
+      hint: 'Start with an easy necessary condition: which candidate must receive the very FIRST vote counted, for "strictly ahead throughout" to even be possible?', recognitionTechnique: 'Counting',
       approach: 'Bertrand’s ballot theorem: P = (a − b)/(a + b).',
-      solution: '(7 − 3)/(7 + 3) = 0.4 = 40%.',
+      solution: 'This is Bertrand\'s ballot problem. A necessary starting observation: the very FIRST vote counted must go to A — if the first counted vote were B\'s, A would already be behind at the very first step, violating "strictly ahead throughout" immediately. Among the P(first vote is A) = a/(a+b) chance the count starts correctly, a further reflection-principle argument (pairing each remaining "bad" sequence, where A ties or falls behind again, with a specific "good" one) shows that, conditional on the first vote being A\'s, A stays strictly ahead throughout with probability (a−b)/a. Multiplying: (a/(a+b)) × ((a−b)/a) = (a−b)/(a+b). Plugging in a=7, b=3: (7−3)/(7+3) = 4/10 = 0.4 = 40%.',
       commonTrap: 'Confusing "always strictly ahead" with "ahead at the end" (which has probability 1 here).', tags: ['ballot']
     },
     {
       id: 'h022', topic: 'Combinatorics', subtopic: 'Number theory counting', difficulty: 2, targetTime: 90,
       prompt: 'How many trailing zeros does 100! have?',
       answerType: 'numeric', correctAnswer: 24, tolerance: 0,
-      hint: 'Zeros come from factors of 10 = 2 × 5; fives are scarcer.', recognitionTechnique: 'Counting',
+      hint: 'Trailing zeros come from factors of 10=2×5; since factors of 2 are far more plentiful than factors of 5 in 100!, count only how many times 5 divides in — but don\'t forget multiples of 25 contribute an extra factor of 5 each.', recognitionTechnique: 'Counting',
       approach: 'Legendre’s formula: count factors of 5.',
-      solution: '⌊100/5⌋ + ⌊100/25⌋ = 20 + 4 = 24.',
+      solution: 'A trailing zero in 100! comes from a factor of 10 = 2×5 in the product 1×2×3×...×100. Since even numbers are far more common than multiples of 5 among 1 to 100, the number of factors of 2 is always much larger than the number of factors of 5 — so the number of trailing zeros is limited entirely by how many times 5 divides into 100!, not by the 2\'s. Count the factors of 5: numbers 5,10,15,...,100 each contribute at least one factor of 5 — there are ⌊100/5⌋=20 of them. But some numbers contribute a SECOND factor of 5: multiples of 25 (25,50,75,100) each contain 5²=25, so they contribute one extra factor of 5 beyond what was already counted — there are ⌊100/25⌋=4 of them. (No number ≤100 is a multiple of 125=5³, so there\'s no third layer.) Total factors of 5 in 100! = 20+4 = 24, so 100! has exactly 24 trailing zeros.',
       commonTrap: 'Answering 20 by forgetting that 25, 50, 75, 100 each contribute an extra 5.', tags: ['number theory']
     },
     {
@@ -240,36 +240,36 @@
       id: 'h025', topic: 'Order Statistics', subtopic: 'Uniform spacings', difficulty: 4, targetTime: 180,
       prompt: 'Three independent uniform points are dropped on [0, 1]. What is the expected length of the gap between the smallest and the largest of them?',
       answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.005,
-      hint: 'E[max] − E[min], each of which has a symmetric closed form.', recognitionTechnique: 'Order statistics',
+      hint: 'Find E[max] and E[min] separately (the CDF of the max is P(max≤x)=xⁿ; the min is a mirror image of the max by symmetry), then subtract.', recognitionTechnique: 'Order statistics',
       approach: 'E[range] = E[max] − E[min] = n/(n+1) − 1/(n+1).',
-      solution: 'E[max] = 3/4, E[min] = 1/4, so E[range] = 1/2. Equivalently (n−1)/(n+1).',
+      solution: 'The gap between the smallest and largest of the 3 points is the RANGE, E[max]−E[min]. For n independent Uniform[0,1] points, the maximum has CDF P(max≤x)=xⁿ (all n points must individually be below x), which gives E[max]=n/(n+1) — for n=3, E[max]=3/4. By the symmetry x↦1−x, the minimum of n uniform points has the mirror-image distribution, giving E[min]=1/(n+1) — for n=3, E[min]=1/4. So E[range] = E[max]−E[min] = 3/4−1/4 = 1/2 = 0.5 (equivalently, the general formula (n−1)/(n+1) = 2/4 = 0.5 for n=3).',
       commonTrap: 'Assuming the range is 1 minus twice the mean of a single point.', tags: ['uniform']
     },
     {
       id: 'h026', topic: 'Order Statistics', subtopic: 'Minimum of exponentials', difficulty: 4, targetTime: 150,
       prompt: 'Three independent exponential clocks have rates 1, 2 and 3 per hour. What is the expected time, in hours, until the first one rings? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.1667, tolerance: 0.004,
-      hint: 'The minimum of independent exponentials is exponential.', recognitionTechnique: 'Order statistics',
+      hint: 'P(the minimum of several independent clocks exceeds t) requires ALL clocks to individually exceed t — multiply their individual survival probabilities together and see what distribution results.', recognitionTechnique: 'Order statistics',
       approach: 'Rates add: min of Exp(λᵢ) is Exp(Σλᵢ), so E = 1/Σλᵢ.',
-      solution: 'Σλ = 6 per hour ⇒ E[min] = 1/6 ≈ 0.1667 hours (10 minutes).',
+      solution: 'For the FIRST of several independent exponential clocks to ring by time t, ALL of them must not yet have rung — so P(min > t) = P(clock 1 > t)×P(clock 2 > t)×P(clock 3 > t) = e^(−1t)×e^(−2t)×e^(−3t) = e^(−(1+2+3)t) = e^(−6t), since independent probabilities multiply and the exponents add. This is exactly the survival function of an exponential distribution with rate 1+2+3=6 — so the minimum itself is exponentially distributed with the SUMMED rate, and its mean is 1/(sum of rates) = 1/6 ≈ 0.1667 hours (10 minutes).',
       commonTrap: 'Averaging the three individual means (1, 1/2, 1/3).', tags: ['exponential']
     },
     {
       id: 'h027', topic: 'Order Statistics', subtopic: 'Competing risks', difficulty: 4, targetTime: 150,
       prompt: 'Two independent exponential clocks have rates 2 and 3 per hour. What is the probability that the rate-2 clock rings first?',
       answerType: 'numeric', correctAnswer: 0.4, tolerance: 0.005,
-      hint: 'The winner is chosen in proportion to the rates.', recognitionTechnique: 'Order statistics',
+      hint: 'The clock with the higher rate should intuitively be more likely to ring first — the exact probability turns out to be its rate as a fraction of the combined rate.', recognitionTechnique: 'Order statistics',
       approach: 'Competing exponentials: P(i first) = λᵢ/Σλ.',
-      solution: '2/(2+3) = 0.4.',
+      solution: 'When two independent exponential clocks "race" to ring first, the probability that the rate-λ₁ clock wins is λ₁/(λ₁+λ₂) — intuitively, a clock that rings more frequently (higher rate) is proportionally more likely to be the one that happens to ring first. (This follows from integrating over the time the winning clock rings: P(clock 1 rings first) = ∫₀^∞ λ₁e^(−λ₁t)·e^(−λ₂t) dt = λ₁/(λ₁+λ₂), since the density of clock 1 ringing at time t, times the probability clock 2 hasn\'t rung yet, integrates to that ratio.) Here λ₁=2 and λ₂=3, so P(rate-2 clock rings first) = 2/(2+3) = 2/5 = 0.4.',
       commonTrap: 'Inverting the ratio because "faster means smaller mean".', tags: ['exponential']
     },
     {
       id: 'h028', topic: 'Order Statistics', subtopic: 'Discrete maxima', difficulty: 4, targetTime: 180,
       prompt: 'Four fair six-sided dice are rolled. What is the probability that the maximum shown is exactly 5?',
       answerType: 'numeric', correctAnswer: 0.3117, tolerance: 0.004,
-      hint: 'P(max = k) = P(max ≤ k) − P(max ≤ k−1).', recognitionTechnique: 'Order statistics',
+      hint: 'P(max ≤ k) is easy: it just means every one of the 4 dice individually lands at or below k. Use that to sandwich P(max = exactly 5) between P(max≤5) and P(max≤4).', recognitionTechnique: 'Order statistics',
       approach: 'Use the CDF of the maximum: P(max ≤ k) = (k/6)ⁿ.',
-      solution: '(5/6)⁴ − (4/6)⁴ = 625/1296 − 256/1296 = 369/1296 ≈ 0.3117.',
+      solution: 'P(max ≤ k) means ALL 4 dice show at most k, which happens with probability (k/6)⁴ since each die independently must land in {1,...,k}. The event "max is EXACTLY 5" is the same as "max ≤ 5" but NOT "max ≤ 4" (i.e., at least one die actually reaches 5), so P(max=5) = P(max≤5) − P(max≤4) = (5/6)⁴ − (4/6)⁴ = 625/1296 − 256/1296 = 369/1296 ≈ 0.3117.',
       commonTrap: 'Requiring exactly one die to show 5 rather than at least one.', tags: ['dice']
     },
 
@@ -278,45 +278,45 @@
       id: 'h029', topic: 'Variance', subtopic: 'Correlation bounds', difficulty: 5, targetTime: 240,
       prompt: 'X and Y have correlation 0.8, and Y and Z have correlation 0.8. What is the smallest possible correlation between X and Z? Answer to two decimals.',
       answerType: 'numeric', correctAnswer: 0.28, tolerance: 0.01,
-      hint: 'Correlations behave like cosines of angles between vectors.', recognitionTechnique: 'Other',
+      hint: 'Picture each variable as a unit vector, with correlation = cosine of the angle between vectors. If X-Y and Y-Z each make a known angle, what is the WIDEST possible angle between X and Z, and what correlation does that correspond to?', recognitionTechnique: 'Other',
       approach: 'Positive semi-definiteness of the correlation matrix, or the cosine-of-angles geometry.',
-      solution: 'ρ₁₃ ≥ ρ₁₂ρ₂₃ − √((1−ρ₁₂²)(1−ρ₂₃²)) = 0.64 − (0.6)(0.6) = 0.28.',
+      solution: 'Think of each random variable as a UNIT VECTOR, where the correlation between two variables equals the COSINE of the angle between their vectors (a standard geometric representation of correlation). If the angle between vectors X and Y is θ₁₂ (with cos θ₁₂=0.8) and the angle between Y and Z is θ₂₃ (with cos θ₂₃=0.8), then by the triangle inequality for angles, the angle between X and Z can range from |θ₁₂−θ₂₃| up to θ₁₂+θ₂₃ — the SMALLEST possible correlation ρ₁₃ = cos(θ₁₂+θ₂₃) occurs at the WIDEST possible angle between X and Z. Using the cosine addition formula, cos(θ₁₂+θ₂₃) = cos θ₁₂ cos θ₂₃ − sin θ₁₂ sin θ₂₃ = ρ₁₂ρ₂₃ − √(1−ρ₁₂²)·√(1−ρ₂₃²) = (0.8)(0.8) − √(1−0.64)·√(1−0.64) = 0.64 − (0.6)(0.6) = 0.64 − 0.36 = 0.28.',
       commonTrap: 'Assuming correlation is transitive and answering 0.64 or 0.8.', tags: ['correlation']
     },
     {
       id: 'h030', topic: 'Variance', subtopic: 'Hat-check variance', difficulty: 5, targetTime: 240,
       prompt: 'n coats are returned to n people in a uniformly random order. What is the variance of the number of people who receive their own coat (for n ≥ 2)?',
       answerType: 'numeric', correctAnswer: 1, tolerance: 0.02,
-      hint: 'Compute E[M²] using pairs of indicators.', recognitionTechnique: 'Indicator variables',
+      hint: 'Use indicators Iᵢ = 1 if person i gets their own coat. You\'ll need E[Iᵢ²] AND E[IᵢIⱼ] for i≠j (the probability BOTH i and j get their own coats) to build E[M²].', recognitionTechnique: 'Indicator variables',
       approach: 'Var = E[M²] − (E[M])² with E[M²] = ΣE[Iᵢ] + Σ_{i≠j}E[IᵢIⱼ].',
-      solution: 'E[M] = 1. E[M²] = n(1/n) + n(n−1)·1/(n(n−1)) = 2. So Var = 2 − 1 = 1, independent of n.',
+      solution: 'Let Iᵢ = 1 if person i receives their own coat, and M = ΣIᵢ be the total number of correct matches. E[Iᵢ] = 1/n (person i\'s coat is equally likely to be any of the n coats), so by linearity E[M] = n×(1/n) = 1. For the variance, we need E[M²] = ΣE[Iᵢ²] + Σ_{i≠j}E[IᵢIⱼ]. Since Iᵢ is 0 or 1, Iᵢ²=Iᵢ, so the first sum is just ΣE[Iᵢ] = n×(1/n) = 1. For the second sum: E[IᵢIⱼ] = P(BOTH i and j get their own coat) = 1/(n(n−1)) (person i\'s coat is fixed with probability 1/n, and GIVEN that, person j\'s coat is separately fixed with probability 1/(n−1) among the remaining coats) — there are n(n−1) ordered pairs (i,j) with i≠j, so this sum contributes n(n−1)×1/(n(n−1)) = 1. Total: E[M²] = 1+1 = 2. So Var(M) = E[M²]−(E[M])² = 2−1 = 1, remarkably independent of n.',
       commonTrap: 'Assuming independence of the indicators — they are dependent, but the covariances happen to sum neatly.', tags: ['linearity']
     },
     {
       id: 'h031', topic: 'Variance', subtopic: 'Conditional variance', difficulty: 5, targetTime: 240,
       prompt: 'N is Poisson with mean 4. Given N = n, X is the sum of n independent fair coin indicators (each 1 with probability 1/2). What is Var(X)?',
       answerType: 'numeric', correctAnswer: 2, tolerance: 0.05,
-      hint: 'Use the law of total variance, or notice X is itself Poisson.', recognitionTechnique: 'Conditioning',
+      hint: 'Var(X) = E[Var(X|N)] + Var(E[X|N]) (the law of total variance) — you\'ll need both the conditional variance/mean formulas for a Binomial(N,½), AND the fact that a Poisson distribution\'s variance equals its mean.', recognitionTechnique: 'Conditioning',
       approach: 'Poisson thinning, or Var(X) = E[Var(X|N)] + Var(E[X|N]).',
-      solution: 'E[X|N] = N/2, Var(X|N) = N/4. So Var(X) = E[N]/4 + Var(N)/4 = 1 + 1 = 2. (Consistent with thinning: X ~ Poisson(2).)',
+      solution: 'Given N=n, X is a sum of n independent fair-coin indicators, so X is Binomial(n, ½): E[X|N]=N/2 and Var(X|N)=N×½×½=N/4. To find the overall variance of X, use the law of total variance: Var(X) = E[Var(X|N)] + Var(E[X|N]) — this splits the total variability into "variability within a fixed N" (averaged over N) plus "variability caused by N itself changing." Here E[Var(X|N)] = E[N]/4, and Var(E[X|N]) = Var(N)/4. Since N is Poisson with mean 4, and a defining property of the Poisson distribution is that its mean EQUALS its variance, E[N]=Var(N)=4. So Var(X) = 4/4 + 4/4 = 1+1 = 2. (Consistent with Poisson thinning: taking a Poisson(4) count and independently keeping each item with probability ½ produces a new Poisson(4×½)=Poisson(2) count, whose variance also equals its mean, 2.)',
       commonTrap: 'Using only E[Var(X|N)] and dropping the variance of the conditional mean.', tags: ['law of total variance']
     },
     {
       id: 'h032', topic: 'Distributions', subtopic: 'Normal comparisons', difficulty: 4, targetTime: 180,
       prompt: 'X ~ N(100, 15²) and Y ~ N(94, 20²) are independent. What is P(X > Y)? Answer to three decimals.',
       answerType: 'numeric', correctAnswer: 0.594, tolerance: 0.012,
-      hint: 'Study the single variable X − Y.', recognitionTechnique: 'Direct calculation',
+      hint: 'P(X>Y) is the same as P(X−Y>0) — study the single variable D=X−Y, which is normal too, with mean = difference of the two means, but variance = SUM (not difference) of the two variances.', recognitionTechnique: 'Direct calculation',
       approach: 'Difference of independent normals is normal with variances adding.',
-      solution: 'X − Y ~ N(6, 15²+20² = 625), sd 25. P(X−Y > 0) = Φ(6/25) = Φ(0.24) ≈ 0.5948.',
+      solution: 'P(X>Y) is the same as P(X−Y>0), so study the single variable D=X−Y. A difference of two INDEPENDENT normal variables is itself normal, with mean = difference of means (100−94=6) and VARIANCE = SUM of the two individual variances (variances always add for independent variables, regardless of whether you are adding or subtracting the variables themselves): Var(D)=15²+20²=225+400=625, so D ~ N(6, 625), with standard deviation √625=25. Standardizing: P(D>0) = P((D−6)/25 > (0−6)/25) = P(Z > −0.24) = P(Z < 0.24) = Φ(0.24), where Φ denotes the standard normal cumulative distribution function (the probability that a standard normal variable is below a given value), and Φ(0.24) ≈ 0.5948 from the standard normal table.',
       commonTrap: 'Adding the standard deviations instead of the variances.', tags: ['normal']
     },
     {
       id: 'h033', topic: 'Distributions', subtopic: 'Poisson thinning', difficulty: 4, targetTime: 150,
       prompt: 'Orders arrive as a Poisson process at 10 per minute, and each independently is a buy with probability 0.3. What is the probability that exactly 2 buy orders arrive in a given minute? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.224, tolerance: 0.006,
-      hint: 'Thinning a Poisson process leaves a Poisson process.', recognitionTechnique: 'Direct calculation',
+      hint: 'Poisson thinning: independently keeping each arrival of a Poisson process with a fixed probability produces another Poisson process, with the rate scaled down by that same probability.', recognitionTechnique: 'Direct calculation',
       approach: 'Poisson thinning gives buys ~ Poisson(10 × 0.3 = 3).',
-      solution: 'e⁻³·3²/2! = 0.0498·4.5 = 0.2240.',
+      solution: 'Orders arrive as a Poisson process at rate 10/minute, and each is independently a "buy" with probability 0.3. A key fact (Poisson thinning) is that independently filtering a Poisson process — keeping each arrival with some fixed probability — produces ANOTHER Poisson process, with rate equal to the original rate times the keep-probability: buy orders alone therefore arrive as Poisson(10×0.3)=Poisson(3) per minute. Using the Poisson probability mass formula P(exactly k arrivals) = e^(−λ)λᵏ/k! with λ=3 and k=2: P(exactly 2 buy orders) = e^(−3)·3²/2! = 0.0498×9/2 = 0.0498×4.5 ≈ 0.2240.',
       commonTrap: 'Using a binomial with n = 10 — the total count is itself random.', tags: ['poisson']
     },
     {
