@@ -32,29 +32,29 @@
     },
     {
       id: 'h003', topic: 'Symmetry', subtopic: 'Random permutations', difficulty: 4, targetTime: 150,
-      prompt: 'A uniformly random permutation of 1..n is drawn. What is the probability that the elements 1 and 2 lie in the same cycle?',
+      prompt: 'A permutation can be broken into "cycles": starting from any element, repeatedly follow where the permutation sends it, and you eventually loop back to where you started — that loop is one cycle (for example, a permutation sending 1→3→1 and 2→2 has a 2-element cycle {1,3} and a separate 1-element cycle {2}). A uniformly random permutation of 1..n is drawn. What is the probability that the elements 1 and 2 end up in the same cycle?',
       answerType: 'numeric', correctAnswer: 0.5, tolerance: 0.001,
-      hint: 'Build the cycle containing 1 step by step and ask when it closes.', recognitionTechnique: 'Symmetry',
+      hint: 'Trace out the cycle containing element 1 one step at a time, and think about how likely element 2 is to join it before the cycle simply closes.', recognitionTechnique: 'Symmetry',
       approach: 'Sequential construction of the cycle containing 1; at the moment the cycle is about to close, 2 is as likely to be inside as outside.',
-      solution: 'Trace the cycle from 1. At each step the next element is uniform over the remaining unvisited elements plus the closing option. A short induction (or the pairing bijection swapping the two cases) gives exactly 1/2 for every n ≥ 2.',
+      solution: 'Build the cycle containing element 1 one step at a time: starting from 1, follow the permutation to whichever element it maps to, then follow that element, and so on, until the chain closes back to 1. At every step, the next element added is chosen uniformly at random from all elements not yet in the chain, OR the chain closes back to 1 — both options are equally likely at each draw. So element 2 (if not yet visited) is exactly as likely to be pulled into the chain at any given step as the chain is to close without it. This head-to-head symmetry between "2 joins next" and "the cycle closes next" gives element 2 a probability of exactly 1/2 = 0.5 of ending up in 1\'s cycle — and this argument never actually depends on n, since it only compares 2\'s chances against the closing option, not against the total number of elements.',
       commonTrap: 'Assuming the answer depends on n.', tags: ['permutations']
     },
     {
       id: 'h004', topic: 'Expected Value', subtopic: 'Cycles', difficulty: 4, targetTime: 150,
-      prompt: 'What is the expected number of cycles in a uniformly random permutation of 5 elements? Give your answer to three decimal places.',
+      prompt: 'A permutation can be broken into "cycles" — closed loops formed by repeatedly following where each element is sent (e.g. a permutation sending 1→3→1 has a 2-element cycle {1,3}; an element sent to itself, like 2→2, is its own 1-element cycle). What is the expected TOTAL NUMBER of cycles in a uniformly random permutation of 5 elements? Give your answer to three decimal places.',
       answerType: 'numeric', correctAnswer: 2.283, tolerance: 0.01,
-      hint: 'Build the permutation one step at a time; at each step there is a fixed chance of closing a cycle.', recognitionTechnique: 'Indicator variables',
+      hint: 'Build the permutation by tracing out one cycle at a time — at the moment k elements are still unplaced, what is the chance THIS step is the one that closes off the current cycle?', recognitionTechnique: 'Indicator variables',
       approach: 'Sequential construction: the k-th step closes a cycle with probability 1/(n−k+1); linearity gives the harmonic number.',
-      solution: 'E[# cycles] = H_n = 1 + 1/2 + 1/3 + 1/4 + 1/5 = 2.2833.',
+      solution: 'Build the permutation by tracing out its cycles one at a time: pick an unvisited element, then repeatedly pick its image uniformly among the still-unvisited elements or the option to close the current cycle. At the moment k elements remain unplaced, the chance THIS step closes off a cycle (rather than continuing it) is exactly 1/k. Using an indicator variable for "a cycle closes at this step" and summing via linearity of expectation as k runs through 5, 4, 3, 2, 1 (the number of elements still unplaced at each successive step) gives E[number of cycles] = 1/5 + 1/4 + 1/3 + 1/2 + 1/1 = 1 + 1/2 + 1/3 + 1/4 + 1/5 = 2.2833. (This sum, 1+1/2+...+1/n, is called the n-th harmonic number, written H_n.)',
       commonTrap: 'Confusing the expected number of cycles with the expected cycle length.', tags: ['permutations', 'linearity']
     },
     {
       id: 'h005', topic: 'Expected Value', subtopic: 'Indicator variables', difficulty: 3, targetTime: 120,
       prompt: 'Five cards are dealt from a standard deck. What is the expected number of distinct suits represented in the hand? Answer to three decimals.',
       answerType: 'numeric', correctAnswer: 3.114, tolerance: 0.01,
-      hint: 'One indicator per suit.', recognitionTechnique: 'Indicator variables',
+      hint: 'For each of the 4 suits, ask: what is the probability that suit is completely ABSENT from the hand? That is usually easier to count directly than "present."', recognitionTechnique: 'Indicator variables',
       approach: 'Indicator per suit: P(suit present) = 1 − C(39,5)/C(52,5); multiply by 4.',
-      solution: 'P(a given suit absent) = C(39,5)/C(52,5) = 575757/2598960 = 0.22153. E = 4·(1 − 0.22153) = 3.1139.',
+      solution: 'For each of the 4 suits, define an indicator that equals 1 if at least one card of that suit appears in the 5-card hand. By linearity of expectation, the expected number of DISTINCT suits represented is just the sum of the 4 individual "this suit appears" probabilities — so start by finding P(a given suit is completely absent), since that is easier to count directly. A suit is absent exactly when all 5 cards are drawn from the other 39 cards (the 3 remaining suits, 13 cards each): P(absent) = C(39,5)/C(52,5) = 575757/2598960 ≈ 0.2215. So P(that suit appears) ≈ 1 − 0.2215 = 0.7785, and by symmetry this is the same for every suit. Summing all 4 (equivalently, 4 × 0.7785) gives E[distinct suits] ≈ 3.114.',
       commonTrap: 'Trying to enumerate suit distribution patterns (4-1, 3-2, …).', tags: ['cards', 'linearity']
     },
 
@@ -101,9 +101,9 @@
       id: 'h010', topic: 'Recursion', subtopic: 'Waiting times', difficulty: 4, targetTime: 210,
       prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips needed to first see two heads in a row (HH)?',
       answerType: 'numeric', correctAnswer: 6, tolerance: 0.05,
-      hint: 'Define states by how much of the pattern you currently hold.', recognitionTechnique: 'Recursion',
+      hint: 'Track two "progress" states — no useful head yet, or one head just seen — and write a first-step equation for the expected remaining flips from each.', recognitionTechnique: 'Recursion',
       approach: 'Markov chain on states {∅, H, HH} and solve the linear system.',
-      solution: 'Let a = E from ∅ and b = E from H. a = 1 + ½b + ½a; b = 1 + ½·0 + ½a. Solving: b = 4, a = 6.',
+      solution: 'Track your progress toward HH with two states: state ∅ (no progress) and state H (you just flipped a head, one more head away from success). Let a = expected additional flips from state ∅, and b = expected additional flips from state H. From state ∅: flip once; with probability ½ it\'s tails, and you\'re still in state ∅ (a more flips needed); with probability ½ it\'s heads, moving you to state H (b more needed). This gives a = 1 + ½a + ½b. From state H: flip once; with probability ½ it\'s heads, completing HH (0 more flips needed); with probability ½ it\'s tails, sending you all the way back to state ∅ (a more flips needed — a single tails wipes out the earlier head entirely). This gives b = 1 + ½a. Substituting b = 1 + ½a into the first equation: a = 1 + ½a + ½(1 + ½a) = 1.5 + ¾a, so ¼a = 1.5, giving a = 6 (and b = 1 + ½·6 = 4).',
       commonTrap: 'Answering 4 — that is the expected wait for HT, not HH. Overlapping patterns wait longer.', tags: ['markov']
     },
     {
@@ -119,36 +119,36 @@
       id: 'h012', topic: 'Recursion', subtopic: 'Waiting times', difficulty: 5, targetTime: 240,
       prompt: 'A fair coin is flipped repeatedly. What is the expected number of flips to first see three heads in a row?',
       answerType: 'numeric', correctAnswer: 14, tolerance: 0.1,
-      hint: 'Each failure sends you all the way back to the start.', recognitionTechnique: 'Recursion',
+      hint: 'Track your progress by the CURRENT RUN LENGTH of consecutive heads (0, 1, or 2) — a single tails at any point resets the run all the way back to 0, not down by one.', recognitionTechnique: 'Recursion',
       approach: 'States by current run length; the general result is 2^{n+1} − 2.',
-      solution: 'E_n = 2^{n+1} − 2. For n = 3: 2⁴ − 2 = 14. (Chain: a=1+½a+½b, b=1+½a+½c, c=1+½a ⇒ a=14.)',
+      solution: 'Track progress by the current run of consecutive heads: state a (run length 0), state b (run length 1), state c (run length 2). From state a: with probability ½ a tails keeps the run at 0 (a more flips needed); with probability ½ a head starts a run of 1 (b more needed): a = 1 + ½a + ½b. From state b: with probability ½ a tails BREAKS the run entirely, back to 0 (a more needed, not "run length 0.5" — a single tails wipes out all progress); with probability ½ a head extends the run to 2 (c more needed): b = 1 + ½a + ½c. From state c: with probability ½ a head completes HHH (0 more needed); with probability ½ a tails resets to 0 (a more needed): c = 1 + ½a. Solving: substitute c = 1+½a into b = 1+½a+½(1+½a) = 1.5+¾a, then substitute into a = 1+½a+½(1.5+¾a) = 1.75+⅞a, giving ⅛a = 1.75, so a = 14. (The general pattern for n heads in a row is 2^(n+1)−2 — each extra required head roughly doubles the wait, since one failure at the end still sends you all the way back to zero progress.)',
       commonTrap: 'Multiplying the HH answer by 1.5.', tags: ['markov']
     },
     {
       id: 'h013', topic: 'Recursion', subtopic: 'Gambler’s ruin', difficulty: 4, targetTime: 180,
       prompt: 'You start with €30 and bet €1 on fair coin flips until you reach €100 or go broke. What is the probability you reach €100?',
       answerType: 'numeric', correctAnswer: 0.3, tolerance: 0.005,
-      hint: 'Your wealth is a martingale under a fair game.', recognitionTechnique: 'Recursion',
+      hint: 'In a fair game, your win probability starting from €k must equal the exact average of the win probabilities starting from €(k+1) and €(k−1) — what kind of function has that property?', recognitionTechnique: 'Recursion',
       approach: 'Gambler’s ruin with p = 1/2: P(hit N before 0 from k) = k/N.',
-      solution: 'By the optional stopping theorem for the fair-game martingale, 30 = 100·P ⇒ P = 0.3.',
+      solution: 'Let P(k) be the probability of reaching €100 before going broke, starting from €k. Since the game is fair, after one bet your wealth becomes k+1 (probability ½) or k−1 (probability ½), so P(k) = ½P(k+1) + ½P(k−1) — meaning P(k) must always equal the exact average of its two neighbouring values. Combined with the boundary conditions P(0)=0 (already broke, can\'t win) and P(100)=1 (already reached the goal), the only function that satisfies "each value is the exact average of its neighbours" everywhere is the straight LINE P(k) = k/100. Starting from k=30: P(30) = 30/100 = 0.3.',
       commonTrap: 'Believing a long enough session improves the odds — it does not in a fair game.', tags: ['martingale']
     },
     {
       id: 'h014', topic: 'Recursion', subtopic: 'Markov chains', difficulty: 4, targetTime: 210,
       prompt: 'An ant walks on the vertices of a cube, at each step moving to one of the three adjacent vertices uniformly at random. Starting at one vertex, what is the expected number of steps to reach the diagonally opposite vertex?',
       answerType: 'numeric', correctAnswer: 10, tolerance: 0.1,
-      hint: 'Lump vertices by their distance from the target: 3, 2, 1, 0.', recognitionTechnique: 'Recursion',
+      hint: 'Group the 8 vertices by their distance (0, 1, 2, or 3 edges away) from the target, and work out how many of each vertex\'s 3 neighbours move it one distance closer versus one distance farther.', recognitionTechnique: 'Recursion',
       approach: 'State lumping by graph distance, then solve three linear equations.',
-      solution: 'Let a, b, c be expected steps from distance 3, 2, 1. a = 1 + b; b = 1 + (2/3)c + (1/3)a; c = 1 + (2/3)b. Solving gives c = 7, b = 9, a = 10.',
+      solution: 'Group the 8 cube vertices by graph distance from the target: distance 3 (the start — the single vertex diagonally opposite the target), distance 2 (3 vertices), distance 1 (3 vertices), and distance 0 (the target). Every vertex has exactly 3 neighbours, and moving along any edge changes the distance to the target by exactly ±1. From the distance-3 start, ALL 3 neighbours are at distance 2 (there is nowhere farther to go from the single most-distant vertex), so a = 1 + b, where a, b, c are the expected remaining steps from distance 3, 2, 1. From a distance-2 vertex, exactly 2 of its 3 neighbours are one step closer (distance 1) and 1 neighbour is one step farther (back to distance 3): b = 1 + (2/3)c + (1/3)a. From a distance-1 vertex, exactly 1 of its 3 neighbours IS the target (distance 0, done) and the other 2 are one step farther (back to distance 2): c = 1 + (2/3)b. Solving: substitute a = 1+b into b\'s equation to get b = 1+(2/3)c+(1/3)(1+b), i.e. (2/3)b = 4/3+(2/3)c, so b = 2+c. Substitute into c = 1+(2/3)b = 1+(2/3)(2+c) to get (1/3)c = 7/3, so c = 7, then b = 9, and a = 1+b = 10.',
       commonTrap: 'Treating all seven non-target vertices as one state.', tags: ['markov']
     },
     {
       id: 'h015', topic: 'Expected Value', subtopic: 'Coupon collector', difficulty: 3, targetTime: 120,
       prompt: 'What is the expected number of rolls of a fair six-sided die needed to see every face at least once? Answer to one decimal place.',
       answerType: 'numeric', correctAnswer: 14.7, tolerance: 0.1,
-      hint: 'Sum the geometric waits between new faces.', recognitionTechnique: 'Conditioning',
+      hint: 'Split the process into 6 stages — one per new face collected — and find the expected number of EXTRA rolls needed at each stage, given how many distinct faces you already have.', recognitionTechnique: 'Conditioning',
       approach: 'Coupon collector: 6(1 + 1/2 + 1/3 + 1/4 + 1/5 + 1/6).',
-      solution: '6·H₆ = 6·2.45 = 14.7 rolls.',
+      solution: 'Break the process into 6 stages, one for each new face collected. In the stage where you already have k distinct faces, each roll shows a genuinely new face with probability (6−k)/6, so the number of rolls needed for that stage is geometric with expected value 6/(6−k). Summing the expected length of all 6 stages, for k=0,1,2,3,4,5 distinct faces already held: 6/6 + 6/5 + 6/4 + 6/3 + 6/2 + 6/1 = 6×(1 + 1/2 + 1/3 + 1/4 + 1/5 + 1/6) = 6×2.45 = 14.7 rolls. (The bracketed sum, 1+1/2+...+1/6, is the 6th harmonic number.)',
       commonTrap: 'Answering 6.', tags: ['stages']
     },
 
@@ -157,9 +157,9 @@
       id: 'h016', topic: 'Combinatorics', subtopic: 'Dice sums', difficulty: 3, targetTime: 120,
       prompt: 'Three fair six-sided dice are rolled. What is the probability their sum is exactly 10?',
       answerType: 'numeric', correctAnswer: 0.125, tolerance: 0.004,
-      hint: 'Count ordered triples; stars and bars needs an upper-bound correction.', recognitionTechnique: 'Counting',
+      hint: 'Shift each die value down by 1 to remove the "≥1" restriction, then count solutions — but watch out, some of those solutions would need a die to show more than 6.', recognitionTechnique: 'Counting',
       approach: 'Stars and bars with inclusion–exclusion for the face-value cap of 6.',
-      solution: 'Solutions to x₁+x₂+x₃ = 10 with 1 ≤ xᵢ ≤ 6: C(9,2) − 3·C(3,2) = 36 − 9 = 27. So 27/216 = 1/8.',
+      solution: 'We want ordered triples (x₁,x₂,x₃), each from 1 to 6, with x₁+x₂+x₃=10. Substitute yᵢ=xᵢ−1 (so each yᵢ runs from 0 to 5): this becomes y₁+y₂+y₃=7 with each 0≤yᵢ≤5. Ignoring the upper limit of 5 for a moment, the number of non-negative integer solutions to y₁+y₂+y₃=7 is C(7+2,2)=C(9,2)=36. But this count includes impossible cases where some yᵢ≥6 (i.e. the original die would need to show more than 6) — if one yᵢ is at least 6, substituting y\'ᵢ=yᵢ−6 turns the equation into y\'ᵢ+(other two)=1, which has C(1+2,2)=C(3,2)=3 solutions; since 7 is too small for two variables to both need this correction, exactly one of the 3 positions can be the oversized one, giving 3×3=9 invalid cases to remove: 36−9=27 valid triples. With 6³=216 equally likely outcomes for three dice, the probability is 27/216 = 1/8 = 0.125.',
       commonTrap: 'Forgetting the cap of 6 and answering 36/216.', tags: ['dice']
     },
     {
