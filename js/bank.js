@@ -594,7 +594,7 @@
       answerType: 'numeric', correctAnswer: 4, tolerance: 0.01,
       hint: 'Write the two first-step equations for h_0 and h_1, using h_2 = 0.', recognitionTechnique: 'Recursion',
       approach: 'First-step analysis: h_0 = 1 + h_1 (reflecting); h_1 = 1 + ½h_0 + ½h_2, with h_2 = 0.',
-      solution: 'h_1 = 1 + ½h_0. Substituting into h_0 = 1 + h_1 = 1 + 1 + ½h_0 = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
+      solution: 'Let h_i be the expected number of steps to reach state 2, starting from state i. From state 0 (reflecting), the token always moves to state 1 in one step, so h_0 = 1 + h_1. From state 1, it moves to state 0 or to the absorbing state 2, each with probability 1/2, taking one step either way, so h_1 = 1 + ½h_0 + ½h_2 — and since h_2=0 (already there), this is h_1 = 1 + ½h_0. Substituting into the first equation: h_0 = 1 + (1 + ½h_0) = 2 + ½h_0, so ½h_0 = 2 and h_0 = 4. (This matches the general symmetric-reflecting-barrier result h_0 = n² for n=2 states of travel.)',
       commonTrap: 'Treating state 0 as absorbing (giving h_0 = 0) instead of reflecting, which still costs one step every time the walk lands there.', tags: ['markov', 'hitting time']
     },
     {
@@ -603,7 +603,7 @@
       answerType: 'numeric', correctAnswer: 0.6923, tolerance: 0.002, acceptFraction: [9, 13],
       hint: 'This is asymmetric — the fair-game formula k/N (which would give 1/2) does not apply here.', recognitionTechnique: 'Recursion',
       approach: "Asymmetric gambler's ruin: P(hit N before 0 | start k) = (1-(q/p)^k)/(1-(q/p)^N), with p=0.6, q=0.4.",
-      solution: 'q/p = 2/3. P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
+      solution: 'This is an asymmetric gambler\'s ruin: starting with €k=2 out of a target €N=4, with win probability p=0.6 and loss probability q=0.4 each round. Because the coin is biased (p≠q), the naive "fair game" formula k/N does NOT apply — the general formula is P(reach N before 0 | start k) = (1−(q/p)^k)/(1−(q/p)^N), which only reduces to k/N in the special symmetric case p=q=0.5. Here q/p = 0.4/0.6 = 2/3. Plugging in k=2, N=4: P = (1 − (2/3)²)/(1 − (2/3)⁴) = (5/9)/(65/81) = 45/65 = 9/13 ≈ 0.6923.',
       commonTrap: 'Answering k/N = 2/4 = 0.5 by using the SYMMETRIC gambler\'s-ruin formula, which only holds when p = q = 0.5.', tags: ['markov', "gambler's ruin", 'absorption']
     },
     {
@@ -612,7 +612,7 @@
       answerType: 'numeric', correctAnswer: 0.8571, tolerance: 0.002, acceptFraction: [6, 7],
       hint: 'Balance the flow between the two states: the rate of Up→Down transitions must equal the rate of Down→Up transitions in steady state.', recognitionTechnique: 'Recursion',
       approach: 'Two-state stationary distribution via detailed balance: π_Up · P(Up→Down) = π_Down · P(Down→Up).',
-      solution: 'π_Up·0.1 = π_Down·0.6 ⇒ π_Up/π_Down = 6. With π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
+      solution: 'In steady state (the "stationary distribution"), the fraction of days spent Up (π_Up) and Down (π_Down) must satisfy detailed balance: the long-run RATE of transitions from Up to Down must exactly equal the rate of transitions from Down to Up — otherwise probability mass would keep drifting from one state to the other and the split wouldn\'t be stable. The rate of Up→Down transitions is π_Up×P(Up→Down)=π_Up×0.1, and the rate of Down→Up transitions is π_Down×P(Down→Up)=π_Down×0.6. Setting these equal: π_Up×0.1 = π_Down×0.6, so π_Up/π_Down = 0.6/0.1 = 6. Combined with π_Up+π_Down=1: π_Up = 6/7 ≈ 0.8571, π_Down = 1/7 ≈ 0.1429.',
       commonTrap: 'Averaging the two "stay" probabilities (0.9 and 0.4) instead of solving the actual balance equations.', tags: ['markov', 'stationary distribution']
     },
     {
@@ -621,7 +621,7 @@
       answerType: 'numeric', correctAnswer: 6, tolerance: 0.01,
       hint: 'For a symmetric walk with two absorbing barriers, the expected duration has a one-line closed form: k(N−k).', recognitionTechnique: 'Recursion',
       approach: 'Symmetric gambler\'s ruin duration formula: E[steps | start k, absorbing at 0 and N] = k(N−k).',
-      solution: 'k=3, N=5: E = 3·(5−3) = 3·2 = 6 steps.',
+      solution: 'For a FAIR (p=q=1/2) random walk with two absorbing barriers at 0 and N, starting from k, the expected number of steps until absorption has the closed form E[steps] = k(N−k) — a symmetric formula reflecting that starting near the middle takes longest to resolve on average, while starting near either edge resolves fastest. (This follows from the first-step equations E_k = 1 + ½E_{k-1} + ½E_{k+1} with E_0=E_N=0, whose solution is exactly the quadratic k(N−k).) Here k=3 and N=5, so E = 3×(5−3) = 3×2 = 6 steps.',
       commonTrap: 'Confusing this two-sided-absorbing setup with a reflecting-barrier setup (whose expected duration follows a different formula, n² when starting at the reflecting end) — always check whether BOTH ends are absorbing or only one.', tags: ['markov', "gambler's ruin", 'hitting time']
     },
 
