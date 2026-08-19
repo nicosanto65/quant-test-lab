@@ -361,18 +361,18 @@
       id: 'h038', topic: 'Game Theory', subtopic: 'Dominance', difficulty: 3, targetTime: 120,
       prompt: 'Two players simultaneously name an integer from 0 to 100; the winner is whoever is closest to two-thirds of the average of all numbers named. If both players are perfectly rational and know the other is, what number should you name?',
       answerType: 'numeric', correctAnswer: 0, tolerance: 0,
-      hint: 'Iteratively delete dominated strategies.', recognitionTechnique: 'Game theory',
+      hint: 'Think about what the HIGHEST possible number could ever be worth naming, then repeat the same logic against an opponent who also reasons that way.', recognitionTechnique: 'Game theory',
       approach: 'Iterated elimination of strictly dominated strategies converges to the unique equilibrium.',
-      solution: 'Nothing above 67 can ever win, so those are deleted; then nothing above 44; iterating drives the upper bound to 0. The unique Nash equilibrium is 0 for both players.',
+      solution: 'Since the winning number is two-thirds of the AVERAGE of the two numbers named, and that average can never exceed 100, the winning number itself can never exceed (2/3)×100 ≈ 66.7 — so naming anything above 67 is never optimal and can be ruled out. But if both players know neither would ever name above 67, the average can never exceed 67 either, so the winning number can never exceed (2/3)×67 ≈ 44.4 — anything above 44 is now also ruled out. Repeating this reasoning indefinitely (each round shrinking the upper bound by a further factor of 2/3) drives the bound all the way down to 0. Since both players are assumed to reason this way without limit, the unique Nash equilibrium is for both players to name 0.',
       commonTrap: 'Stopping the iteration after one or two rounds (answering 33 or 22) — that is optimal against real humans, not against a rational opponent.', tags: ['nash']
     },
     {
       id: 'h039', topic: 'Game Theory', subtopic: 'Combinatorial games', difficulty: 4, targetTime: 180,
       prompt: 'A pile has 21 stones. Players alternate removing 1, 2 or 3 stones; whoever takes the last stone wins. You move first. How many stones should you take to guarantee a win?',
       answerType: 'numeric', correctAnswer: 1, tolerance: 0,
-      hint: 'Which pile sizes are losing for the player about to move?', recognitionTechnique: 'Game theory',
+      hint: 'Work backwards from small piles: figure out which pile sizes are forced losses for whoever must move next, and look for a repeating pattern.', recognitionTechnique: 'Game theory',
       approach: 'Nim-style parity: multiples of 4 are losing positions for the player to move.',
-      solution: 'Positions divisible by 4 are losses for the mover. 21 = 4·5 + 1, so take 1 and leave 20; thereafter always complete the opponent’s move to 4.',
+      solution: 'Define a pile size as a "losing position" if the player who must move next will lose under best play from both sides. From a pile of 1, 2, or 3 stones, the mover can simply take all of them and win — these are winning positions. From a pile of exactly 4, whatever the mover takes (1, 2, or 3), they leave 3, 2, or 1 stones — each a winning position for the OPPONENT — so 4 is a losing position. This pattern repeats: from any pile that is a multiple of 4, every possible move leaves a pile that is NOT a multiple of 4 (winning for the opponent, since the opponent can always remove just enough — 1 to 3 stones — to bring the total back down to the next multiple of 4). So piles that are multiples of 4 are exactly the losing positions. With 21 stones (21 = 4×5+1, not a multiple of 4), the first player wins by taking 1 stone, leaving 20 (a multiple of 4, a losing position for the opponent) — then on every later turn, taking enough to bring the total removed that round to 4 keeps handing the opponent a multiple of 4, until the last stone is taken by you.',
       commonTrap: 'Taking the maximum of 3 each turn.', tags: ['nim']
     },
 
@@ -419,9 +419,9 @@
       id: 'h044', topic: 'Market Making', subtopic: 'Kelly sizing', difficulty: 4, targetTime: 180,
       prompt: 'You can bet on an event with true probability 0.60 at even money (win 1 for 1). What fraction of your bankroll maximises the long-run growth rate?',
       answerType: 'numeric', correctAnswer: 0.2, tolerance: 0.01,
-      hint: 'Edge divided by odds.', recognitionTechnique: 'Other',
+      hint: 'The Kelly fraction balances edge against odds: f* = (bp−q)/b, where b is the net odds, p is your win probability, and q=1−p.', recognitionTechnique: 'Other',
       approach: 'Kelly criterion f* = (bp − q)/b.',
-      solution: 'b = 1, p = 0.6, q = 0.4 ⇒ f* = (0.6 − 0.4)/1 = 0.2, i.e. 20% of bankroll.',
+      solution: 'The Kelly criterion picks the bet size that maximizes the long-run growth rate of wealth, rather than its expected value — betting your whole edge or bankroll grows expected wealth fastest on a single bet, but risks eventual ruin over repeated bets, since one bad streak can be catastrophic. The formula is f* = (bp − q)/b, where b is the net odds received on a win (here b=1, even money), p is your true win probability (0.6), and q=1−p is the loss probability (0.4). Plugging in: f* = (1×0.6 − 0.4)/1 = 0.2/1 = 0.2, meaning you should bet 20% of your bankroll.',
       commonTrap: 'Betting the full edge (60%) or the whole bankroll — that maximises expected wealth but ruins growth.', tags: ['kelly']
     },
     {
@@ -446,9 +446,9 @@
       id: 'h047', topic: 'Finance', subtopic: 'Duration', difficulty: 3, targetTime: 120,
       prompt: 'A bond has modified duration 6.5 and trades at 98. If yields rise by 40 basis points, approximately what is the new price?',
       answerType: 'numeric', correctAnswer: 95.45, tolerance: 0.3,
-      hint: 'Percentage price change ≈ −duration × yield change.', recognitionTechnique: 'Direct calculation',
+      hint: 'A bond\'s "modified duration" measures how sensitive its price is to a small yield change — treat the price change as approximately linear: %ΔP ≈ −(modified duration)×Δy.', recognitionTechnique: 'Direct calculation',
       approach: 'First-order duration approximation ΔP/P ≈ −D_mod·Δy.',
-      solution: 'ΔP/P ≈ −6.5 × 0.0040 = −2.6%. New price ≈ 98 × 0.974 = 95.45.',
+      solution: '"Modified duration" measures a bond\'s price sensitivity to yield changes: for a small yield change Δy, the price changes by approximately −(modified duration)×Δy in percentage terms (negative because prices and yields move in opposite directions). Here modified duration = 6.5 and yields rise by Δy = 0.40% = 0.0040, so ΔP/P ≈ −6.5 × 0.0040 = −0.026 = −2.6%. Applying this to the current price of 98: new price ≈ 98 × (1 − 0.026) = 98 × 0.974 = 95.45.',
       commonTrap: 'Subtracting 2.6 points instead of 2.6 percent.', tags: ['rates']
     },
     {
@@ -472,9 +472,9 @@
       id: 'h049', topic: 'Finance', subtopic: 'Options intuition', difficulty: 4, targetTime: 180,
       prompt: 'A stock trades at 100. A digital option pays €1 if the stock is above 110 in one year and nothing otherwise. Annual volatility is 20%, the drift is zero and rates are zero. Using a normal approximation to log-returns, what is the approximate value of the option? Answer to two decimals.',
       answerType: 'numeric', correctAnswer: 0.31, tolerance: 0.035,
-      hint: 'Convert the barrier into a z-score in log space.', recognitionTechnique: 'Direct calculation',
+      hint: 'The value of a digital option is just a probability: convert the barrier into a z-score in log-return space and use the normal CDF, Φ.', recognitionTechnique: 'Direct calculation',
       approach: 'Digital value = risk-neutral probability of finishing above the strike = 1 − Φ(z).',
-      solution: 'ln(110/100) = 0.0953. With drift −σ²/2 = −0.02, z = (0.0953 + 0.02)/0.20 ≈ 0.577 (or ≈0.477 ignoring the convexity term). 1 − Φ(0.5) ≈ 0.31.',
+      solution: 'A digital (cash-or-nothing) option paying €1 if S_T > K is worth exactly the probability that this happens — no option Greeks needed. Work in log space: with zero drift and zero rates, ln(S_T/S_0) is approximately Normal(0, σ²). The barrier corresponds to a log-return of ln(110/100) ≈ 0.0953, which in standard-deviation units is z = 0.0953/0.20 ≈ 0.48. The option pays only if the stock ends up MORE than 0.48 standard deviations above where it started, so its value is 1 − Φ(z) = 1 − Φ(0.48) ≈ 1 − 0.685 = 0.315 ≈ 0.31, where Φ is the standard normal cumulative distribution function (the probability a standard normal variable falls below a given value). (A fully precise risk-neutral treatment shifts z down slightly, by about σ/2 ≈ 0.10, to account for the lognormal mean sitting above its median — this nudges the estimate to about 0.28, still close given the tolerance here; the simple z-score above is the standard first approximation.)',
       commonTrap: 'Working in price space rather than log space, or forgetting that a digital is just a probability.', tags: ['options']
     },
     {
@@ -492,36 +492,36 @@
       id: 'h051', topic: 'Mental Maths', subtopic: 'Approximation', difficulty: 3, targetTime: 45,
       prompt: 'Estimate 1.03^12 to two decimal places.',
       answerType: 'numeric', correctAnswer: 1.43, tolerance: 0.05,
-      hint: 'Rule of 72, or (1+x)ⁿ ≈ e^{nx}.', recognitionTechnique: 'Direct calculation',
+      hint: 'For small x and moderate n, (1+x)ⁿ ≈ e^(nx) — compute nx first, then estimate e raised to that power.', recognitionTechnique: 'Direct calculation',
       approach: 'Exponential approximation e^{0.36} with a small convexity correction.',
-      solution: 'e^{0.36} ≈ 1.433; the true value is 1.4258.',
+      solution: 'For a small growth rate x compounded n times, (1+x)ⁿ ≈ e^(nx) (since ln(1+x)≈x for small x, so n·ln(1+x)≈nx, and (1+x)ⁿ=e^(n·ln(1+x))). Here x=0.03 and n=12, so nx=0.36, giving (1.03)¹² ≈ e^0.36. Estimating e^0.36 by splitting it as e^0.3 × e^0.06 ≈ 1.35 × 1.06 ≈ 1.43. (The true value is 1.4258, very close to this estimate.)',
       commonTrap: 'Answering 1.36 by using simple interest.', tags: ['speed']
     },
     {
       id: 'h052', topic: 'Mental Maths', subtopic: 'Percentages', difficulty: 3, targetTime: 40,
       prompt: 'A position loses 20% and then gains 20%. What is the net percentage change, to one decimal place (use a negative sign for a loss)?',
       answerType: 'numeric', correctAnswer: -4, tolerance: 0.15,
-      hint: 'Multiply the factors.', recognitionTechnique: 'Direct calculation',
+      hint: 'A 20% loss and a 20% gain are NOT symmetric in dollar terms — the gain applies to a smaller base than the loss did. Multiply the growth factors instead of adding the percentages.', recognitionTechnique: 'Direct calculation',
       approach: 'Compounding is multiplicative, so symmetric percentage moves do not cancel.',
-      solution: '0.8 × 1.2 = 0.96 ⇒ −4%.',
+      solution: 'Percentage changes compound multiplicatively, not additively, so a 20% loss followed by a 20% gain do NOT cancel out. Starting from a factor of 1, a 20% loss leaves 1−0.20=0.8, and a 20% gain on THAT smaller amount multiplies by 1+0.20=1.2: 0.8×1.2=0.96 — a net factor of 0.96, i.e. a 4% loss overall, because the 20% gain is computed on a smaller starting base than the original 20% loss was, so it doesn\'t fully recover it. Net change: −4%.',
       commonTrap: 'Answering 0%.', tags: ['speed']
     },
     {
       id: 'h053', topic: 'Probability', subtopic: 'Conditional probability', difficulty: 4, targetTime: 180,
       prompt: 'A family has two children. You are told that at least one is a boy born on a Tuesday. What is the probability both children are boys? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.4815, tolerance: 0.01,
-      hint: 'Count the 14 × 14 equally likely (gender, day) pairs.', recognitionTechnique: 'Conditional probability',
+      hint: 'Build the full sample space: each child independently has one of 2 genders × 7 weekdays = 14 equally likely (gender, day) combinations, giving 14×14=196 equally likely combinations for the family. Count how many satisfy "at least one Tuesday boy," then how many of those have two boys.', recognitionTechnique: 'Conditional probability',
       approach: 'Careful sample-space construction over (gender, weekday) pairs for each child.',
-      solution: 'Of 196 equally likely combinations, 27 include at least one Tuesday boy, and 13 of those have two boys: 13/27 ≈ 0.4815.',
+      solution: 'Model each child as an independent, uniformly random (gender, day-of-week) pair — 2×7=14 equally likely combinations per child, so 14×14=196 equally likely combinations for the family. We\'re told "at least one child is a boy born on a Tuesday" (event T): child 1 is a Tuesday-boy (1 fixed combo) with child 2 being anything (14 combos) gives 14, or child 2 is a Tuesday-boy similarly gives 14, but this double-counts "both are Tuesday-boys" (1 combo), so |T| = 14+14−1 = 27. Now count how many of those 27 have BOTH children boys: child 1 is a Tuesday-boy with child 2 any of the 7 boy-days gives 7, or child 2 is a Tuesday-boy with child 1 any of the 7 boy-days gives 7, minus the double-counted both-Tuesday-boys case (1): 7+7−1 = 13. So P(both boys | T) = 13/27 ≈ 0.4815 — noticeably different from the "no day information" answer of 1/3, because the specific, unlikely detail (Tuesday) makes it disproportionately likely that only ONE child triggered the event, not both.',
       commonTrap: 'Answering 1/3 (ignoring the day) or 1/2 — the extra information genuinely shifts the answer.', tags: ['paradox']
     },
     {
       id: 'h054', topic: 'Probability', subtopic: 'Bayes', difficulty: 4, targetTime: 180,
       prompt: 'A coin is picked at random from two: one fair, one double-headed. It is flipped three times and lands heads all three times. What is the probability it is the double-headed coin? Answer to four decimals.',
       answerType: 'numeric', correctAnswer: 0.8889, tolerance: 0.01,
-      hint: 'Likelihoods are 1 and 1/8.', recognitionTechnique: 'Bayes',
+      hint: 'Compare the LIKELIHOODS of seeing three heads under each hypothesis (fair vs double-headed), then combine with the equal 50/50 prior using Bayes\' rule.', recognitionTechnique: 'Bayes',
       approach: 'Bayes with equal priors: posterior odds = likelihood ratio.',
-      solution: 'Posterior odds = 1 : 1/8 = 8 : 1, so P = 8/9 ≈ 0.8889.',
+      solution: 'There are two equally likely hypotheses to start (prior 50/50): the coin is FAIR or DOUBLE-HEADED. Compute the likelihood of the observed data (three heads in three flips) under each: if fair, P(3 heads)=(1/2)³=1/8; if double-headed, P(3 heads)=1 (it always lands heads). By Bayes\' rule, posterior odds = prior odds × likelihood ratio: (double-headed : fair) = 1:1 × (1 : 1/8) = 1 : 1/8, the same as 8 : 1. Converting odds of 8:1 to a probability: P(double-headed) = 8/(8+1) = 8/9 ≈ 0.8889.',
       commonTrap: 'Answering 1 — three heads is still possible with a fair coin.', tags: ['bayes']
     },
     {
@@ -546,9 +546,9 @@
       id: 'h057', topic: 'Combinatorics', subtopic: 'Inclusion-exclusion', difficulty: 4, targetTime: 210,
       prompt: 'How many permutations of the letters A, B, C, D, E have no letter in its original alphabetical position?',
       answerType: 'numeric', correctAnswer: 44, tolerance: 0,
-      hint: 'Inclusion–exclusion over the five "letter is fixed" events.', recognitionTechnique: 'Counting',
+      hint: 'Use inclusion-exclusion: start with all 5! arrangements, subtract those that fix at least one letter, add back those fixing at least two (to correct for double-subtracting), and so on.', recognitionTechnique: 'Counting',
       approach: 'Derangement of 5 elements: D(5) = 5!·Σ(−1)^k/k!.',
-      solution: 'D(5) = 120(1 − 1 + 1/2 − 1/6 + 1/24 − 1/120) = 44.',
+      solution: 'This is a "derangement" count — an arrangement where NO letter ends up in its original position (e.g. for {A,B,C}, {B,C,A} is a derangement but {A,C,B} is not, since A stays in position 1). Use inclusion-exclusion over the 5 "letter i is fixed" events: start with all 5!=120 permutations, subtract those fixing at least one letter, add back those fixing at least two (since they were subtracted twice), subtract those fixing at least three, and so on, alternating signs: D(5) = 120×(1 − 1 + 1/2 − 1/6 + 1/24 − 1/120) = 120×(60/120 − 20/120 + 5/120 − 1/120) = 120×(44/120) = 44.',
       commonTrap: 'Answering 120 − 5 = 115.', tags: ['derangement']
     },
     {
