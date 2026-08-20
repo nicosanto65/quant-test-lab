@@ -108,6 +108,13 @@
   --neg-soft: rgba(208, 136, 134, 0.14);
   --info: var(--brand);
 
+  /* third accent — teal, coherent with navy+gold, reserved for "worked examples" content
+     so a reader recognises that section by colour, the way tracks already have colours */
+  --teal: #4FAFA8;
+  --teal-2: #6FC4BD;
+  --teal-soft: rgba(79, 175, 168, 0.14);
+  --teal-line: rgba(79, 175, 168, 0.4);
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
   --heat-0: var(--panel-2);
@@ -163,6 +170,11 @@ html[data-theme="light"] {
   --neg: #AB4C4A;
   --neg-soft: #F5E7E6;
   --info: var(--brand);
+
+  --teal: #2B8A82;
+  --teal-2: #1F6F68;
+  --teal-soft: #E3F2F0;
+  --teal-line: #A9D8D3;
 
   --shadow-sm: 0 1px 2px rgba(30, 40, 50, 0.06);
   --shadow: 0 8px 24px rgba(30, 40, 50, 0.08);
@@ -574,6 +586,10 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   color: var(--text);
 }
 .lead-word { font-weight: 700; }
+/* Mejora C: a term the content is already marking with double quotes as "being defined
+   right here" gets a soft blue highlight — the same brand blue as navigation, softened for
+   the reading area, never the vivid nav tone itself. */
+.key-term { color: var(--brand-2); background: var(--brand-soft); border-radius: 3px; padding: 0 3px; }
 
 /* -------------------- expandable block accordion (Mejora A/B) -------------------- */
 /* Each block of a long reading field (primer paragraphs, worked-example levels) renders as
@@ -728,11 +744,19 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .concept-stepper button:hover { color: var(--brand); border-color: var(--brand-line); }
 .concept-stepper i { flex: 1 1 12px; max-width: 24px; height: 1px; background: var(--line); }
+/* progress breadcrumb: once a concept is fully studied, its stepper picks up the same
+   achievement gold used everywhere else completion is marked (studied-dot, correct answers) */
+.concept-stepper.stepper-done button { color: var(--accent-2); border-color: var(--accent-line); }
+.concept-stepper.stepper-done i { background: var(--accent-line); }
 
-/* the merged Core/When/Formulas/Intuition card — one continuous surface, no isolated boxes */
+/* the merged Core/When/Formulas/Intuition card — one continuous surface, no isolated boxes.
+   Mejora C: a colour-coded left border gives each stage of a concept its own identity at a
+   glance — brand blue here (foundational material), teal for worked examples, gold for
+   practice below — the same "recognise the section without reading the label" idea the
+   track picker already uses colour for. */
 .concept-flow {
   background: var(--panel-2); border-radius: var(--radius-sm); padding: var(--sp-4);
-  margin: var(--sp-3) 0;
+  margin: var(--sp-3) 0; border-left: 3px solid var(--brand-line);
 }
 .flow-item { padding: var(--sp-2) 0; }
 .flow-item + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
@@ -749,6 +773,17 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .concept-transition .micro-label { margin: 0; white-space: nowrap; }
 .concept-transition::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+
+/* Mejora C: teal identifies worked examples specifically — every example card picks up a
+   teal left border and its "Level N" eyebrow recolors, so scrolling past this zone reads as
+   "now in examples" before the label is even read. */
+.examples-flow .expand-card { border-left: 3px solid var(--teal-line); }
+.examples-flow .eyebrow { color: var(--teal-2); }
+
+/* Mejora C: gold identifies the practice zone — same accent already used for correct
+   answers and the studied-dot, so "you're now in the part that counts toward mastery"
+   reads consistently with the rest of the app. */
+.checks { border-left: 3px solid var(--accent-line); padding-left: var(--sp-3); }
 
 .concept-nav-footer {
   display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap;

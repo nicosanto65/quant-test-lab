@@ -95,10 +95,30 @@
      is exactly the raw first sentence (splitIntoSentences includes any leading whitespace
      it inherited from the previous split), and first + rest is exactly rawText — nothing
      is trimmed, added, or reordered, only re-wrapped in spans. */
-  function renderLeadInParagraph(rawText, shift) {
+  /* Wraps "quoted phrases" in a colored .key-term span — this dataset already uses double
+     quotes as its own convention for marking a term right as it's being defined (Mejora C:
+     "detectando el patrón de comillas dobles... que ya usa el contenido para marcar
+     definiciones"). Pure rendering: every character of the source, including the quote
+     marks themselves, passes through esc() untouched — only wrapped in a span, nothing
+     added, removed, or reordered, so this never affects the exact-text-reconstruction
+     guarantee the paragraph splitter already relies on. */
+  const QUOTED_TERM_RE = /"[^"]{2,40}"/g;
+  function highlightKeyTerms(rawText) {
+    let out = '', last = 0, m;
+    QUOTED_TERM_RE.lastIndex = 0;
+    while ((m = QUOTED_TERM_RE.exec(rawText))) {
+      out += esc(rawText.slice(last, m.index));
+      out += `<span class="key-term">${esc(m[0])}</span>`;
+      last = m.index + m[0].length;
+    }
+    out += esc(rawText.slice(last));
+    return out;
+  }
+  function renderLeadInParagraph(rawText, shift, highlight) {
+    const escRest = highlight ? highlightKeyTerms : esc;
     const sentences = splitIntoSentences(rawText);
     const cls = `prose-p${shift ? ' topic-shift' : ''}`;
-    if (!sentences.length) return `<p class="${cls}">${esc(rawText)}</p>`;
+    if (!sentences.length) return `<p class="${cls}">${escRest(rawText)}</p>`;
     const first = sentences[0];
     const rest = rawText.slice(first.length);
     const trimmedFirst = first.replace(/^\s+/, '');
@@ -106,22 +126,23 @@
     const wordMatch = trimmedFirst.match(/^\S+/);
     const firstWord = wordMatch ? wordMatch[0] : '';
     const afterWord = trimmedFirst.slice(firstWord.length);
-    const leadHtml = `${esc(leadWhitespace)}<span class="lead-in"><span class="lead-word">${esc(firstWord)}</span>${esc(afterWord)}</span>`;
-    return `<p class="${cls}">${leadHtml}${esc(rest)}</p>`;
+    const leadHtml = `${esc(leadWhitespace)}<span class="lead-in"><span class="lead-word">${esc(firstWord)}</span>${escRest(afterWord)}</span>`;
+    return `<p class="${cls}">${leadHtml}${escRest(rest)}</p>`;
   }
   function renderProse(text, options) {
     options = options || {};
     text = text || '';
+    const escFn = options.highlightTerms ? highlightKeyTerms : esc;
     if (text.length < 260) {
-      return options.leadIn ? renderLeadInParagraph(text, false) : `<p>${esc(text)}</p>`;
+      return options.leadIn ? renderLeadInParagraph(text, false, options.highlightTerms) : `<p>${escFn(text)}</p>`;
     }
     const paras = splitIntoDigestibleParagraphs(text);
     if (paras.length <= 1) {
       return paras.map((p) => options.leadIn
-        ? renderLeadInParagraph(p.text, p.shift)
-        : `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+        ? renderLeadInParagraph(p.text, p.shift, options.highlightTerms)
+        : `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${escFn(p.text)}</p>`).join('');
     }
-    return renderExpandableBlocks(paras, { mode: 'toggle', leadIn: options.leadIn });
+    return renderExpandableBlocks(paras, { mode: 'toggle', leadIn: options.leadIn, highlightTerms: options.highlightTerms });
   }
 
   /* ---------------------- expandable block accordion (Mejora A) -------------------- */
@@ -164,8 +185,8 @@
       // are fully locked away until their turn
       const locked = mode === 'sequential' && i > 1;
       const body = b.bodyHtml !== undefined ? b.bodyHtml
-        : (i === 0 && options.leadIn) ? renderLeadInParagraph(b.text, b.shift)
-        : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
+        : (i === 0 && options.leadIn) ? renderLeadInParagraph(b.text, b.shift, options.highlightTerms)
+        : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${(options.highlightTerms ? highlightKeyTerms : esc)(b.text)}</p>`;
       const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
       const expandLabel = b.ctaLabel || 'Continue reading';
       const collapseLabel = b.collapseLabel || '− Collapse';
@@ -1178,13 +1199,13 @@
         d.innerHTML = `<summary><span class="concept-title">${esc(c.name)}</span><span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
             <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
-            <div class="concept-stepper">
+            <div class="concept-stepper${studied ? ' stepper-done' : ''}">
               <button data-jump="context">Context</button><i></i>
               <button data-jump="core">Core</button><i></i>
               <button data-jump="examples">Examples</button><i></i>
               <button data-jump="practice">Practice</button>
             </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true }) : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
@@ -1243,6 +1264,8 @@
               });
               const dot = $('.studied-dot', d);
               if (dot) dot.classList.add('done');
+              const stepper = $('.concept-stepper', d);
+              if (stepper) stepper.classList.add('stepper-done');
             };
             wrap.appendChild(b);
           });
