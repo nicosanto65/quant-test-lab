@@ -77,11 +77,84 @@
      whitespace at the start of a block box for display (so it's visually invisible),
      while textContent (and this app's own concatenation check) still sees the exact,
      unmodified source characters — no word or space is ever added or dropped. */
-  function renderProse(text) {
+  /* Flat variant with no accordion — every paragraph as a plain <p>, never wrapped in
+     expand-cards. Used inside content that is already someone else's expand-card body (a
+     worked example's own text, nested inside the Level 1/2/3 sequential accordion): nesting
+     a second independent accordion inside an already-collapsible block would just stack two
+     layers of "click to reveal" on top of each other for no reason. */
+  function renderPlainProse(text) {
     text = text || '';
     if (text.length < 260) return `<p>${esc(text)}</p>`;
     const paras = splitIntoDigestibleParagraphs(text);
     return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+  }
+  function renderProse(text) {
+    text = text || '';
+    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    const paras = splitIntoDigestibleParagraphs(text);
+    if (paras.length <= 1) return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+    return renderExpandableBlocks(paras, { mode: 'toggle' });
+  }
+
+  /* ---------------------- expandable block accordion (Mejora A) -------------------- */
+  /* Renders a set of blocks as independent cards — each with its own background, padding
+     and margin, never one shared box — with the first card open and every later one
+     collapsed behind a short preview. One reusable component behind every long-form field
+     in the app (primer, worked examples, long solution/why), so they all get the same
+     accordion behaviour instead of a bespoke implementation per field.
+     CUMULATIVE_EXPAND controls what happens when a new card opens in 'toggle' mode: true
+     (default) leaves every previously opened card visible, so a reader can scroll back up
+     through everything already read. Flip this one constant to collapse others instead. */
+  const CUMULATIVE_EXPAND = true;
+  let expandGroupSeq = 0;
+  function previewWords(text, n) {
+    n = n || 8;
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length <= n) return words.join(' ');
+    return words.slice(0, n).join(' ') + '…';
+  }
+  /* blocks: array of { text, shift?, bodyHtml?, preview?, ctaLabel? }. bodyHtml/preview let
+     a caller (worked examples) supply already-rendered markup and a hand-picked preview
+     instead of plain escaped paragraph text; otherwise the body is one <p class="prose-p">
+     and the preview is auto-derived from the block's own first words.
+     options.mode: 'toggle' (default) — every collapsed card opens independently, in any
+     order. 'sequential' — a card stays locked (no preview, not interactive) until the one
+     before it has been opened, for content that only makes sense read in order. */
+  function renderExpandableBlocks(blocks, options) {
+    options = options || {};
+    const mode = options.mode || 'toggle';
+    const groupId = 'eg' + (++expandGroupSeq);
+    return `<div class="expand-group" data-eg="${groupId}" data-mode="${esc(mode)}">` +
+      blocks.map((b, i) => {
+        const open = i === 0;
+        // in sequential mode the very next block stays visible (collapsed, with its own
+        // preview + toggle) so the reader can see what's coming; only blocks further out
+        // are fully locked away until their turn
+        const locked = mode === 'sequential' && i > 1;
+        const body = b.bodyHtml !== undefined ? b.bodyHtml : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
+        const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
+        const cta = b.ctaLabel || 'Continue reading';
+        const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
+        return `<div class="${cls}" data-idx="${i}">
+          <button class="expand-toggle" type="button" data-expand-toggle tabindex="${locked ? '-1' : '0'}">
+            <span class="expand-preview-text">${esc(preview)}</span>
+            <span class="expand-cta">${esc(cta)}</span>
+          </button>
+          <div class="expand-body">${body}</div>
+        </div>`;
+      }).join('') + `</div>`;
+  }
+  /* Short text gets the old single "callout" box (a colored, left-bordered card — fine for
+     one or two sentences). Long text drops that shared box in favour of the independent
+     cards above; the box would otherwise just nest a second frame around content that
+     already frames itself, so it's dropped in exactly this case, not removed everywhere. */
+  function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr) {
+    text = text || '';
+    const cls = extraClass ? ' ' + extraClass : '';
+    const idStr = idAttr ? ` id="${esc(idAttr)}"` : '';
+    const eyebrow = eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '';
+    if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
+    return `<div class="reading-block${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
   }
 
   /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
@@ -378,7 +451,7 @@
 
     const head = el('div', 'panel');
     head.innerHTML = `
-      <div class="flex between wrap" style="margin-bottom:8px">
+      <div class="flex between wrap mb-2">
         <span class="eyebrow">${esc(cfg.title || cfg.mode)}</span>
         <span class="flex">
           ${cfg.perQuestion ? '<span id="pq-timer" class="timer"></span>' : ''}
@@ -435,7 +508,7 @@
 
     if (!rec) {
       const conf = el('div');
-      conf.innerHTML = `<div class="eyebrow" style="margin:12px 0 6px">Confidence</div>
+      conf.innerHTML = `<div class="eyebrow mt-3 mb-2">Confidence</div>
         <div class="chips" id="conf-chips">${['Guess', 'Low', 'Medium', 'High'].map((c) =>
         `<button class="chip ${c === session.confidence ? 'on' : ''}" data-c="${c}">${c}</button>`).join('')}</div>`;
       conf.querySelectorAll('.chip').forEach((c) => {
@@ -477,16 +550,16 @@
           <span>${rec.correct ? 'Correct' : rec.timedOut ? 'Timed out' : 'Incorrect'}
           · ${fmtTime(rec.timeSec)} vs target ${fmtTime(q.targetTime || 90)}
           · confidence ${esc(rec.confidence)}</span></div>
-        <div class="grid c2" style="margin-bottom:10px">
+        <div class="grid c2 mb-2">
           <div class="stat"><span class="label">Correct answer</span><span class="value" style="font-size:18px">${esc(String(q.correctAnswer))}</span></div>
           <div class="stat"><span class="label">Your answer</span><span class="value" style="font-size:18px">${rec.given === null ? '—' : esc(String(rec.given))}</span></div>
         </div>
-        <div class="reveal prose-block"><span class="eyebrow">Best solution</span>${renderProse(q.solution)}</div>
+        ${renderReadingBlock('Best solution', q.solution, 'prose-block')}
         ${alt}
         <div class="reveal"><span class="eyebrow">Main concept · recognition clue</span>
           <strong>${esc(q.recognitionTechnique || '—')}</strong> — ${esc(q.approach || '')}</div>
         <div class="reveal"><span class="eyebrow">Common trap</span>${esc(q.commonTrap || '—')}</div>
-        ${!rec.correct ? `<label class="field" style="margin-top:10px"><span>Error type (editable)</span>
+        ${!rec.correct ? `<label class="field mt-2"><span>Error type (editable)</span>
           <select id="err-sel">${S.ERROR_TYPES.map((t) =>
         `<option ${t === rec.errorType ? 'selected' : ''}>${t}</option>`).join('')}</select></label>` : ''}`;
       const row = el('div', 'btn-row');
@@ -516,7 +589,7 @@
     /* navigator */
     if (!cfg.noSkip && n > 1) {
       const nav = el('div', 'panel');
-      nav.innerHTML = '<span class="eyebrow">Navigator</span><div class="navgrid" style="margin-top:8px"></div>';
+      nav.innerHTML = '<span class="eyebrow">Navigator</span><div class="navgrid mt-2"></div>';
       const g = $('.navgrid', nav);
       session.items.forEach((_, i) => {
         const b = el('button', (session.records[i] ? 'done ' : '') + (session.flags[i] ? 'flag ' : '') + (i === session.idx ? 'cur' : ''), String(i + 1));
@@ -565,11 +638,11 @@
       const ob = el('div', 'panel');
       ob.style.borderColor = 'var(--brand-line)';
       ob.innerHTML = `<span class="eyebrow">Six tracks, one offline lab</span>
-        <p style="margin-top:8px">This runs entirely on your device — no account, no network calls after
+        <p class="mt-2">This runs entirely on your device — no account, no network calls after
         the first load. Pick a track below (quant trading, reasoning speed, IB, AM, WM or consulting),
         then use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong> for
         practice. Your progress, streak and history are saved locally and never leave this browser.</p>
-        <div class="chips" style="margin-top:10px">
+        <div class="chips mt-2">
           ${S.tracks().map((t) => `<span class="chip" data-ob-track="${esc(t.id)}">${esc(t.label)}</span>`).join('')}
         </div>`;
       ob.querySelectorAll('[data-ob-track]').forEach((c) => {
@@ -619,12 +692,12 @@
     /* ---- usage streak / contribution history ---- */
     const hp = el('div', 'panel');
     hp.innerHTML = `<span class="eyebrow">Consistency</span>
-      <div style="margin-top:10px">${heatmap(S.contributionDays(70))}</div>`;
+      <div class="mt-2">${heatmap(S.contributionDays(70))}</div>`;
     root.appendChild(hp);
 
     /* ---- track progress at a glance ---- */
     const tp = el('div', 'panel');
-    tp.innerHTML = '<span class="eyebrow">Progress by track</span><div class="grid c3" style="margin-top:10px" id="track-progress-grid"></div>';
+    tp.innerHTML = '<span class="eyebrow">Progress by track</span><div class="grid c3 mt-2" id="track-progress-grid"></div>';
     root.appendChild(tp);
     const tgrid = $('#track-progress-grid', tp);
     S.tracks().forEach((t) => {
@@ -662,10 +735,10 @@
 
     const cols = el('div', 'grid c2');
     const p1 = el('div', 'panel');
-    p1.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div style="margin-top:8px">' +
+    p1.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div class="mt-2">' +
       bars(S.byKey('topic', track).sort((a, b) => b.n - a.n)) + '</div>';
     const p2 = el('div', 'panel');
-    p2.innerHTML = '<span class="eyebrow">Accuracy by difficulty</span><div style="margin-top:8px">' +
+    p2.innerHTML = '<span class="eyebrow">Accuracy by difficulty</span><div class="mt-2">' +
       bars(S.byKey('difficulty', track).sort((a, b) => a.key - b.key).map((r) => Object.assign({}, r, { key: 'Level ' + r.key }))) + '</div>';
     cols.appendChild(p1); cols.appendChild(p2);
     root.appendChild(cols);
@@ -763,7 +836,7 @@
               <button data-jump="examples">Examples</button><i></i>
               <button data-jump="practice">Practice</button>
             </div>
-            ${c.primer ? `<div class="reveal primer" id="${cid(c.id)}-context"><span class="eyebrow">Start from zero</span>${renderProse(c.primer)}</div>` : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context') : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
@@ -773,28 +846,22 @@
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            <div class="reveal"><span class="eyebrow">Common trap</span>${renderProse(c.trap)}</div>
+            ${renderReadingBlock('Common trap', c.trap)}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
             <div class="concept-nav-footer"></div>
           </div>`;
 
-        // progressive worked-example reveal: level 1 shown, later levels unlocked one at a time
+        // progressive worked-example reveal: Level 1 open, later levels locked behind their
+        // own preview until the one before them opens — the same expandable-block accordion
+        // used for the primer/solution text above, just in 'sequential' mode.
         const exBox = $('.examples-flow', d);
         const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
-        function renderExampleAt(i) {
-          if (i >= sortedEx.length) return;
-          const ex = sortedEx[i];
-          const block = el('div', 'reveal', `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderProse(ex.text)}`);
-          exBox.appendChild(block);
-          if (i < sortedEx.length - 1) {
-            const nxt = sortedEx[i + 1];
-            const btn = el('button', 'btn sm ghost next-example-btn', `Continue to Level ${nxt.level} (${levelWord(nxt.level)}) →`);
-            btn.onclick = () => { btn.remove(); renderExampleAt(i + 1); };
-            exBox.appendChild(btn);
-          }
-        }
-        renderExampleAt(0);
+        exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
+          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProse(ex.text)}`,
+          preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
+          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`
+        })), { mode: 'sequential' });
 
         // section-jump stepper
         $$('.concept-stepper [data-jump]', d).forEach((btn) => {
@@ -810,7 +877,7 @@
           const wrap = el('div');
           wrap.style.margin = '10px 0';
           const lv = chk.level || 1;
-          wrap.innerHTML = `<p style="margin-bottom:6px"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
+          wrap.innerHTML = `<p class="mb-2"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
             const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
             b.onclick = () => {
@@ -819,8 +886,7 @@
                 if (xi === chk.a) x.classList.add('right');
               });
               if (oi !== chk.a) b.classList.add('wrong');
-              const why = el('div', 'reveal prose-block', `<span class="eyebrow">${oi === chk.a ? 'Correct' : 'Not quite'}</span>${renderProse(chk.why)}`);
-              wrap.appendChild(why);
+              wrap.insertAdjacentHTML('beforeend', renderReadingBlock(oi === chk.a ? 'Correct' : 'Not quite', chk.why, 'prose-block'));
               S.recordAttempt({
                 qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
                 topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
@@ -875,12 +941,12 @@
       </select></label>
       <label class="field"><span>Subtopic</span><select id="d-sub"></select></label>
       <div class="eyebrow">Difficulty</div>
-      <div class="chips" id="d-diff" style="margin:6px 0 12px">
+      <div class="chips mt-2 mb-3" id="d-diff">
         ${[1, 2, 3, 4, 5].map((d) => `<button class="chip ${drillState.diffs.includes(d) ? 'on' : ''}" data-d="${d}">Level ${d}</button>`).join('')}
       </div>
       <label class="field"><span>Number of questions</span>
         <select id="d-count">${[5, 10, 15, 20, 30].map((c) => `<option ${c === drillState.count ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
-      <div class="chips" style="margin-bottom:12px">
+      <div class="chips mb-3">
         <button class="chip ${drillState.timed ? 'on' : ''}" id="d-timed">Timed to target</button>
         <button class="chip ${drillState.calc ? 'on' : ''}" id="d-calc">Calculator allowed</button>
       </div>`;
@@ -926,7 +992,7 @@
     };
 
     const info = el('div', 'panel small muted');
-    info.innerHTML = `<span class="eyebrow">Bank</span><p style="margin-top:8px">
+    info.innerHTML = `<span class="eyebrow">Bank</span><p class="mt-2">
       ${S.allGenerators().length} parameterised generators · ${S.curated().length} curated hard questions ·
       ${S.topics().length} topics. Generated questions are built from controlled parameters, so every answer is exact.</p>`;
     root.appendChild(info);
@@ -972,12 +1038,12 @@
     const p = el('div', 'panel');
     p.innerHTML = `<div class="flex between"><span class="eyebrow">Classify — item ${r.idx + 1}/${r.items.length}</span>
         <span id="pr-timer" class="timer"></span></div>
-      <div class="progress" style="margin-top:8px"><i style="width:${(r.idx / r.items.length * 100).toFixed(1)}%"></i></div>
-      <div class="qprompt" style="margin-top:10px">${/^\s*</.test(q.prompt) ? q.prompt : '<p>' + esc(q.prompt) + '</p>'}</div>`;
+      <div class="progress mt-2"><i style="width:${(r.idx / r.items.length * 100).toFixed(1)}%"></i></div>
+      <div class="qprompt mt-2">${/^\s*</.test(q.prompt) ? q.prompt : '<p>' + esc(q.prompt) + '</p>'}</div>`;
     root.appendChild(p);
 
     const box = el('div', 'panel');
-    box.innerHTML = '<span class="eyebrow">Primary approach</span><div class="chips" style="margin-top:8px"></div>';
+    box.innerHTML = '<span class="eyebrow">Primary approach</span><div class="chips mt-2"></div>';
     const chips = $('.chips', box);
     S.TECHNIQUES.forEach((t) => {
       const c = el('button', 'chip', t);
@@ -1064,7 +1130,7 @@
 
     const cm = S.confidenceMatrix();
     const q = el('div', 'panel');
-    q.innerHTML = '<span class="eyebrow">Confidence calibration</span><div style="margin-top:8px">' +
+    q.innerHTML = '<span class="eyebrow">Confidence calibration</span><div class="mt-2">' +
       bars(cm.rows.filter((r) => r.n)) + `</div>
       <div class="hr"></div>
       <div class="grid c2">
@@ -1246,7 +1312,7 @@
         <div class="stat"><span class="label">Pace</span><span class="value">${perMin.toFixed(2)}</span><span class="sub">q / minute</span></div>
         <div class="stat"><span class="label">Internal rating</span><span class="value">${r.rating === null || r.rating === undefined ? '—' : r.rating}</span><span class="sub">vs your own history</span></div>
       </div>
-      <p class="small dim" style="margin-top:10px">The internal rating compares this attempt only with your own previous mocks of the same type. It is not a prediction of any employer's score.</p>`;
+      <p class="small dim mt-2">The internal rating compares this attempt only with your own previous mocks of the same type. It is not a prediction of any employer's score.</p>`;
     root.appendChild(head);
 
     if (r.rating === 100) {
@@ -1262,7 +1328,7 @@
     }
 
     const br = el('div', 'panel');
-    br.innerHTML = '<span class="eyebrow">Topic breakdown</span><div style="margin-top:8px">' + bars(topicRows) + '</div>' +
+    br.innerHTML = '<span class="eyebrow">Topic breakdown</span><div class="mt-2">' + bars(topicRows) + '</div>' +
       (slow.length ? `<div class="hr"></div><span class="eyebrow">Inefficient method — well over target time</span>
         <ul class="list">${slow.map((x) => `<li>${esc(x.q.topic)} — ${fmtTime(x.timeSec)} vs ${fmtTime(x.q.targetTime)}
           <span class="dim mono-sm" style="float:right">${esc(x.q.recognitionTechnique || '')}</span></li>`).join('')}</ul>` : '');
@@ -1275,7 +1341,7 @@
         <div class="verdict ${x.correct ? 'ok' : 'no'}">Q${i + 1} — ${x.correct ? 'correct' : 'incorrect'}
           · your answer ${x.given === null ? '—' : esc(String(x.given))} · correct ${esc(String(x.q.correctAnswer))}</div>
         <div class="qprompt small">${/^\s*</.test(x.q.prompt) ? x.q.prompt : '<p>' + esc(x.q.prompt) + '</p>'}</div>
-        <div class="reveal prose-block"><span class="eyebrow">Solution</span>${renderProse(x.q.solution)}</div>
+        ${renderReadingBlock('Solution', x.q.solution, 'prose-block')}
         <div class="reveal"><span class="eyebrow">Technique</span>${esc(x.q.recognitionTechnique || '')} — ${esc(x.q.approach || '')}</div>`;
       root.appendChild(p);
     });
@@ -1323,7 +1389,7 @@
     if (wrong.length) {
       const wp = el('div', 'panel');
       wp.innerHTML = '<span class="eyebrow">Missed this session</span><ul class="list">' +
-        wrong.map((x) => `<li>${esc(x.q.topic)} <span class="dim mono-sm" style="margin-left:6px">${esc(x.q.subtopic || '')}</span>
+        wrong.map((x) => `<li>${esc(x.q.topic)} <span class="dim mono-sm ml-2">${esc(x.q.subtopic || '')}</span>
           <span class="neg mono-sm right" style="float:right">L${x.q.difficulty}</span></li>`).join('') + '</ul>';
       root.appendChild(wp);
     }
@@ -1348,7 +1414,7 @@
     const eb = S.errorBreakdown();
 
     const p = el('div', 'panel');
-    p.innerHTML = '<span class="eyebrow">Error types</span><div style="margin-top:8px">' +
+    p.innerHTML = '<span class="eyebrow">Error types</span><div class="mt-2">' +
       bars(eb, { field: 'n', max: Math.max(1, Math.max.apply(null, eb.map((e) => e.n))), plain: true, fmt: (r) => r.n }) + '</div>';
     const redo = el('button', 'btn primary full', 'Redo mistakes (spaced repetition)');
     redo.style.marginTop = '10px';
@@ -1388,7 +1454,7 @@
 
   function viewSheet(root) {
     const note = el('div', 'panel small muted');
-    note.innerHTML = '<span class="eyebrow">Preparation only</span><p style="margin-top:8px">This sheet is a study aid. Do not use it during any real assessment.</p>';
+    note.innerHTML = '<span class="eyebrow">Preparation only</span><p class="mt-2">This sheet is a study aid. Do not use it during any real assessment.</p>';
     root.appendChild(note);
     global.QTL_FORMULAS.forEach((g) => {
       const p = el('div', 'panel');
@@ -1436,29 +1502,29 @@
 
     const c = el('div', 'grid c2');
     const p5 = el('div', 'panel');
-    p5.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div style="margin-top:8px">' + bars(S.byKey('topic')) + '</div>';
+    p5.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div class="mt-2">' + bars(S.byKey('topic')) + '</div>';
     const p6 = el('div', 'panel');
-    p6.innerHTML = '<span class="eyebrow">Average time by topic (s)</span><div style="margin-top:8px">' +
+    p6.innerHTML = '<span class="eyebrow">Average time by topic (s)</span><div class="mt-2">' +
       bars(S.byKey('topic'), { field: 'avgTime', max: Math.max(30, Math.max.apply(null, S.byKey('topic').map((r) => r.avgTime) || [30])), plain: true, fmt: (r) => r.avgTime + 's' }) + '</div>';
     c.appendChild(p5); c.appendChild(p6);
     root.appendChild(c);
 
     const d = el('div', 'panel');
     d.innerHTML = `<span class="eyebrow">Recognition vs calculation</span>
-      <div class="grid c2" style="margin-top:8px">
+      <div class="grid c2 mt-2">
         <div class="stat"><span class="label">Recognition</span><span class="value">${rec.accuracy}%</span><span class="sub">${rec.n} items</span></div>
         <div class="stat"><span class="label">Calculation</span><span class="value">${S.summary().accuracy}%</span><span class="sub">${S.summary().total} attempts</span></div>
       </div>
       <div class="hr"></div>
-      <span class="eyebrow">Confidence calibration</span><div style="margin-top:8px">${bars(cm.rows.filter((r) => r.n))}</div>
-      <p class="small muted" style="margin-top:8px">Confident errors: <strong class="neg">${cm.confidentErrors}</strong> ·
+      <span class="eyebrow">Confidence calibration</span><div class="mt-2">${bars(cm.rows.filter((r) => r.n))}</div>
+      <p class="small muted mt-2">Confident errors: <strong class="neg">${cm.confidentErrors}</strong> ·
         low-confidence correct: <strong>${cm.luckyCorrect}</strong></p>`;
     root.appendChild(d);
 
     const e = el('div', 'panel');
     e.innerHTML = `<span class="eyebrow">Readiness scores</span>
-      <p class="small muted" style="margin-top:6px">Internal progress metrics only. They do not predict employer test outcomes.</p>
-      <div class="grid c3" style="margin-top:8px">
+      <p class="small muted mt-2">Internal progress metrics only. They do not predict employer test outcomes.</p>
+      <div class="grid c3 mt-2">
         <div class="stat accent"><span class="label">Wincent</span><span class="value">${rd.wincent}</span></div>
         <div class="stat accent"><span class="label">SIG</span><span class="value">${rd.sig}</span></div>
         <div class="stat accent"><span class="label">IMC</span><span class="value">${rd.imc}</span></div>
@@ -1469,7 +1535,7 @@
     root.appendChild(e);
 
     const f = el('div', 'panel');
-    f.innerHTML = '<span class="eyebrow">Error types</span><div style="margin-top:8px">' +
+    f.innerHTML = '<span class="eyebrow">Error types</span><div class="mt-2">' +
       bars(S.errorBreakdown(), { field: 'n', max: Math.max(1, Math.max.apply(null, S.errorBreakdown().map((x) => x.n).concat([1]))), plain: true, fmt: (r) => r.n }) + '</div>';
     root.appendChild(f);
   }
@@ -1489,10 +1555,10 @@
 
     const w = el('div', 'panel');
     w.innerHTML = `<span class="eyebrow">Readiness weights</span>
-      <p class="small muted" style="margin-top:6px">Weights are relative; they are normalised automatically.</p>`;
+      <p class="small muted mt-2">Weights are relative; they are normalised automatically.</p>`;
     Object.keys(set.weights).forEach((test) => {
       const grp = el('div');
-      grp.innerHTML = `<div class="eyebrow" style="margin:12px 0 6px">${test.toUpperCase()}</div>`;
+      grp.innerHTML = `<div class="eyebrow mt-3 mb-2">${test.toUpperCase()}</div>`;
       Object.keys(set.weights[test]).forEach((k) => {
         const lab = el('label', 'field');
         lab.innerHTML = `<span>${k}</span><input type="number" min="0" max="100" value="${set.weights[test][k]}">`;
@@ -1505,7 +1571,7 @@
 
     const i = el('div', 'panel');
     i.innerHTML = `<span class="eyebrow">IMC mock configuration</span>
-      <p class="small muted" style="margin-top:6px">Edit the JSON below and save once you know the real structure. Topics must match topic names used by the bank.</p>
+      <p class="small muted mt-2">Edit the JSON below and save once you know the real structure. Topics must match topic names used by the bank.</p>
       <textarea id="imc-json">${esc(JSON.stringify(set.imc, null, 2))}</textarea>`;
     const ib = el('button', 'btn full', 'Save IMC configuration');
     ib.onclick = () => {
@@ -1564,7 +1630,7 @@
 
     const about = el('div', 'panel small muted');
     about.innerHTML = `<span class="eyebrow">About</span>
-      <p style="margin-top:8px">Quant Test Lab runs entirely in your browser. All progress is stored in localStorage on this device,
+      <p class="mt-2">Quant Test Lab runs entirely in your browser. All progress is stored in localStorage on this device,
       so exporting the JSON periodically is the only backup. No network requests are made after the first load.</p>
       <p>${S.allGenerators().length} generators · ${S.curated().length} curated questions · ${S.state.attempts.length} attempts recorded.</p>`;
     root.appendChild(about);
@@ -1646,7 +1712,7 @@
     const groups = {};
     items.forEach((v) => { (groups[v.navgroup] = groups[v.navgroup] || []).push(v); });
     const body = Object.keys(groups).map((g) => `
-      <div class="eyebrow" style="margin:${g === Object.keys(groups)[0] ? '0' : '14px'} 0 8px">${esc(g)}</div>
+      <div class="eyebrow mb-2 ${g === Object.keys(groups)[0] ? '' : 'mt-3'}">${esc(g)}</div>
       <div class="sheet-grid">${groups[g].map((v) => `
         <button class="sheet-item ${v.id === current ? 'active' : ''}" data-nav-sheet="${v.id}">
           ${icon(v.id, 'navicon')}<span>${esc(v.title)}</span>
@@ -1752,7 +1818,7 @@
       </button>`;
     }).join('') + '</div>';
     const sh = mountSheet('track-sheet', 'track-sheet',
-      '<div class="eyebrow" style="margin-bottom:10px">Choose a track</div>' + body);
+      '<div class="eyebrow mb-2">Choose a track</div>' + body);
     sh.querySelectorAll('[data-track]').forEach((b) => {
       b.onclick = () => {
         const id = b.dataset.track;
@@ -1778,12 +1844,40 @@
     $('#track-pill-btn').onclick = () => { buildTrackSheet(); openSheet('track-sheet'); };
   }
 
+  /* Single delegated listener for every expand-group accordion in the app (Mejora A) —
+     attached once here rather than re-wired at each of its call sites, so it keeps working
+     for accordions rendered later inside any view, including ones nested inside dynamically
+     inserted content (Learn concepts, mock reports, mistake reviews, ...). */
+  function handleExpandToggleClick(e) {
+    const btn = e.target.closest('[data-expand-toggle]');
+    if (!btn) return;
+    const card = btn.closest('.expand-card');
+    if (!card || card.classList.contains('locked')) return;
+    const group = card.closest('.expand-group');
+    const mode = group && group.dataset.mode;
+    if (mode !== 'sequential' && !CUMULATIVE_EXPAND && group) {
+      Array.from(group.querySelectorAll('.expand-card.open')).forEach((c) => {
+        if (c !== card) c.classList.replace('open', 'collapsed');
+      });
+    }
+    card.classList.remove('collapsed');
+    card.classList.add('open');
+    if (mode === 'sequential') {
+      const next = card.nextElementSibling;
+      if (next && next.classList.contains('locked')) {
+        next.classList.remove('locked');
+        next.querySelector('[data-expand-toggle]').tabIndex = 0;
+      }
+    }
+  }
+
   function init() {
     document.documentElement.setAttribute('data-theme', S.state.settings.theme || 'dark');
     buildNav();
     buildTrackPill();
     $('#theme-btn').onclick = toggleTheme;
     document.addEventListener('keydown', keys);
+    document.body.addEventListener('click', handleExpandToggleClick);
     window.addEventListener('beforeunload', () => S.save());
     go(S.getLastView(S.activeTrack()));
   }
