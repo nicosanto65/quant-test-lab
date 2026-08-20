@@ -88,12 +88,40 @@
     const paras = splitIntoDigestibleParagraphs(text);
     return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
   }
-  function renderProse(text) {
+  /* Editorial lead-in: wraps the first SENTENCE of a paragraph's raw text in a larger
+     serif span, with that sentence's own first WORD carrying extra weight inside it — a
+     quiet visual entry point into a reading block, the way a considered publication opens
+     a piece. Reconstructs the exact source string: leadWhitespace + firstWord + afterWord
+     is exactly the raw first sentence (splitIntoSentences includes any leading whitespace
+     it inherited from the previous split), and first + rest is exactly rawText — nothing
+     is trimmed, added, or reordered, only re-wrapped in spans. */
+  function renderLeadInParagraph(rawText, shift) {
+    const sentences = splitIntoSentences(rawText);
+    const cls = `prose-p${shift ? ' topic-shift' : ''}`;
+    if (!sentences.length) return `<p class="${cls}">${esc(rawText)}</p>`;
+    const first = sentences[0];
+    const rest = rawText.slice(first.length);
+    const trimmedFirst = first.replace(/^\s+/, '');
+    const leadWhitespace = first.slice(0, first.length - trimmedFirst.length);
+    const wordMatch = trimmedFirst.match(/^\S+/);
+    const firstWord = wordMatch ? wordMatch[0] : '';
+    const afterWord = trimmedFirst.slice(firstWord.length);
+    const leadHtml = `${esc(leadWhitespace)}<span class="lead-in"><span class="lead-word">${esc(firstWord)}</span>${esc(afterWord)}</span>`;
+    return `<p class="${cls}">${leadHtml}${esc(rest)}</p>`;
+  }
+  function renderProse(text, options) {
+    options = options || {};
     text = text || '';
-    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    if (text.length < 260) {
+      return options.leadIn ? renderLeadInParagraph(text, false) : `<p>${esc(text)}</p>`;
+    }
     const paras = splitIntoDigestibleParagraphs(text);
-    if (paras.length <= 1) return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
-    return renderExpandableBlocks(paras, { mode: 'toggle' });
+    if (paras.length <= 1) {
+      return paras.map((p) => options.leadIn
+        ? renderLeadInParagraph(p.text, p.shift)
+        : `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+    }
+    return renderExpandableBlocks(paras, { mode: 'toggle', leadIn: options.leadIn });
   }
 
   /* ---------------------- expandable block accordion (Mejora A) -------------------- */
@@ -135,7 +163,9 @@
       // preview + toggle) so the reader can see what's coming; only blocks further out
       // are fully locked away until their turn
       const locked = mode === 'sequential' && i > 1;
-      const body = b.bodyHtml !== undefined ? b.bodyHtml : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
+      const body = b.bodyHtml !== undefined ? b.bodyHtml
+        : (i === 0 && options.leadIn) ? renderLeadInParagraph(b.text, b.shift)
+        : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
       const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
       const expandLabel = b.ctaLabel || 'Continue reading';
       const collapseLabel = b.collapseLabel || '− Collapse';
@@ -163,13 +193,14 @@
      one or two sentences). Long text drops that shared box in favour of the independent
      cards above; the box would otherwise just nest a second frame around content that
      already frames itself, so it's dropped in exactly this case, not removed everywhere. */
-  function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr) {
+  function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr, options) {
     text = text || '';
     const cls = extraClass ? ' ' + extraClass : '';
     const idStr = idAttr ? ` id="${esc(idAttr)}"` : '';
     const eyebrow = eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '';
-    if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
-    return `<div class="reading-block${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
+    const prose = renderProse(text, options);
+    if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${prose}</div>`;
+    return `<div class="reading-block${cls}"${idStr}>${eyebrow}${prose}</div>`;
   }
 
   /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
@@ -842,7 +873,7 @@
         const flatIdx = flat.findIndex((x) => x.c.id === c.id);
         const posInUnit = unit.concepts.findIndex((x) => x.id === c.id) + 1;
 
-        d.innerHTML = `<summary>${esc(c.name)}<span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
+        d.innerHTML = `<summary><span class="concept-title">${esc(c.name)}</span><span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
             <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
             <div class="concept-stepper">
@@ -851,7 +882,7 @@
               <button data-jump="examples">Examples</button><i></i>
               <button data-jump="practice">Practice</button>
             </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context') : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
@@ -861,7 +892,7 @@
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            ${renderReadingBlock('Common trap', c.trap)}
+            ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
             <div class="concept-nav-footer"></div>

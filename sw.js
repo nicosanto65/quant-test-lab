@@ -1,11 +1,12 @@
 /* Quant Test Lab — offline cache.
    Network-first so edits to the question bank appear immediately,
    with a cache fallback so the app still opens with no connection. */
-const CACHE = 'qtl-v1';
+const CACHE = 'qtl-v2';
 const ASSETS = [
   './', './index.html', './css/styles.css',
   './js/util.js', './js/gen-prob.js', './js/gen-applied.js', './js/bank.js',
-  './js/lessons.js', './js/formulas.js', './js/store.js', './js/app.js'
+  './js/lessons.js', './js/formulas.js', './js/store.js', './js/app.js',
+  './fonts/inter-variable.woff2', './fonts/source-serif-4-variable.woff2'
 ];
 
 self.addEventListener('install', (e) => {
