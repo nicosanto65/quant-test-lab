@@ -88,12 +88,61 @@
     const paras = splitIntoDigestibleParagraphs(text);
     return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
   }
-  function renderProse(text) {
+  /* Editorial lead-in: wraps the first SENTENCE of a paragraph's raw text in a larger
+     serif span, with that sentence's own first WORD carrying extra weight inside it — a
+     quiet visual entry point into a reading block, the way a considered publication opens
+     a piece. Reconstructs the exact source string: leadWhitespace + firstWord + afterWord
+     is exactly the raw first sentence (splitIntoSentences includes any leading whitespace
+     it inherited from the previous split), and first + rest is exactly rawText — nothing
+     is trimmed, added, or reordered, only re-wrapped in spans. */
+  /* Wraps "quoted phrases" in a colored .key-term span — this dataset already uses double
+     quotes as its own convention for marking a term right as it's being defined (Mejora C:
+     "detectando el patrón de comillas dobles... que ya usa el contenido para marcar
+     definiciones"). Pure rendering: every character of the source, including the quote
+     marks themselves, passes through esc() untouched — only wrapped in a span, nothing
+     added, removed, or reordered, so this never affects the exact-text-reconstruction
+     guarantee the paragraph splitter already relies on. */
+  const QUOTED_TERM_RE = /"[^"]{2,40}"/g;
+  function highlightKeyTerms(rawText) {
+    let out = '', last = 0, m;
+    QUOTED_TERM_RE.lastIndex = 0;
+    while ((m = QUOTED_TERM_RE.exec(rawText))) {
+      out += esc(rawText.slice(last, m.index));
+      out += `<span class="key-term">${esc(m[0])}</span>`;
+      last = m.index + m[0].length;
+    }
+    out += esc(rawText.slice(last));
+    return out;
+  }
+  function renderLeadInParagraph(rawText, shift, highlight) {
+    const escRest = highlight ? highlightKeyTerms : esc;
+    const sentences = splitIntoSentences(rawText);
+    const cls = `prose-p${shift ? ' topic-shift' : ''}`;
+    if (!sentences.length) return `<p class="${cls}">${escRest(rawText)}</p>`;
+    const first = sentences[0];
+    const rest = rawText.slice(first.length);
+    const trimmedFirst = first.replace(/^\s+/, '');
+    const leadWhitespace = first.slice(0, first.length - trimmedFirst.length);
+    const wordMatch = trimmedFirst.match(/^\S+/);
+    const firstWord = wordMatch ? wordMatch[0] : '';
+    const afterWord = trimmedFirst.slice(firstWord.length);
+    const leadHtml = `${esc(leadWhitespace)}<span class="lead-in"><span class="lead-word">${esc(firstWord)}</span>${escRest(afterWord)}</span>`;
+    return `<p class="${cls}">${leadHtml}${escRest(rest)}</p>`;
+  }
+  function renderProse(text, options) {
+    options = options || {};
     text = text || '';
-    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    const escFn = options.highlightTerms ? highlightKeyTerms : esc;
+    if (text.length < 260) {
+      return options.leadIn ? renderLeadInParagraph(text, false, options.highlightTerms) : `<p>${escFn(text)}</p>`;
+    }
     const paras = splitIntoDigestibleParagraphs(text);
-    if (paras.length <= 1) return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
-    return renderExpandableBlocks(paras, { mode: 'toggle' });
+    if (paras.length <= 1) {
+      return paras.map((p) => options.leadIn
+        ? renderLeadInParagraph(p.text, p.shift, options.highlightTerms)
+        : `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${escFn(p.text)}</p>`).join('');
+    }
+    return renderExpandableBlocks(paras, { mode: 'toggle', leadIn: options.leadIn, highlightTerms: options.highlightTerms });
   }
 
   /* ---------------------- expandable block accordion (Mejora A) -------------------- */
@@ -113,48 +162,368 @@
     if (words.length <= n) return words.join(' ');
     return words.slice(0, n).join(' ') + '…';
   }
-  /* blocks: array of { text, shift?, bodyHtml?, preview?, ctaLabel? }. bodyHtml/preview let
-     a caller (worked examples) supply already-rendered markup and a hand-picked preview
-     instead of plain escaped paragraph text; otherwise the body is one <p class="prose-p">
-     and the preview is auto-derived from the block's own first words.
+  /* blocks: array of { text, shift?, bodyHtml?, preview?, ctaLabel?, collapseLabel? }.
+     bodyHtml/preview let a caller (worked examples) supply already-rendered markup and a
+     hand-picked preview instead of plain escaped paragraph text; otherwise the body is one
+     <p class="prose-p"> and the preview is auto-derived from the block's own first words.
      options.mode: 'toggle' (default) — every collapsed card opens independently, in any
      order. 'sequential' — a card stays locked (no preview, not interactive) until the one
-     before it has been opened, for content that only makes sense read in order. */
+     before it has been opened, for content that only makes sense read in order.
+     Every card's single toggle button works both directions: click to open, click again
+     (its label swaps to "− Collapse") to close it, in any order, regardless of what else
+     in the group is open — the delegated handler below (handleExpandGroupClick) owns that
+     behaviour so nothing here needs live DOM references. A 2+ block group also gets an
+     "Expand all / Collapse all" control for skimming vs. reading everything at once. */
   function renderExpandableBlocks(blocks, options) {
     options = options || {};
     const mode = options.mode || 'toggle';
     const groupId = 'eg' + (++expandGroupSeq);
-    return `<div class="expand-group" data-eg="${groupId}" data-mode="${esc(mode)}">` +
-      blocks.map((b, i) => {
-        const open = i === 0;
-        // in sequential mode the very next block stays visible (collapsed, with its own
-        // preview + toggle) so the reader can see what's coming; only blocks further out
-        // are fully locked away until their turn
-        const locked = mode === 'sequential' && i > 1;
-        const body = b.bodyHtml !== undefined ? b.bodyHtml : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
-        const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
-        const cta = b.ctaLabel || 'Continue reading';
-        const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
-        return `<div class="${cls}" data-idx="${i}">
-          <button class="expand-toggle" type="button" data-expand-toggle tabindex="${locked ? '-1' : '0'}">
+    const cardsHtml = blocks.map((b, i) => {
+      const open = i === 0;
+      // in sequential mode the very next block stays visible (collapsed, with its own
+      // preview + toggle) so the reader can see what's coming; only blocks further out
+      // are fully locked away until their turn
+      const locked = mode === 'sequential' && i > 1;
+      const body = b.bodyHtml !== undefined ? b.bodyHtml
+        : (i === 0 && options.leadIn) ? renderLeadInParagraph(b.text, b.shift, options.highlightTerms)
+        : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${(options.highlightTerms ? highlightKeyTerms : esc)(b.text)}</p>`;
+      const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
+      const expandLabel = b.ctaLabel || 'Continue reading';
+      const collapseLabel = b.collapseLabel || '− Collapse';
+      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
+      return `<div class="${cls}" data-idx="${i}">
+          <button class="expand-toggle" type="button" data-expand-toggle
+            data-expand-label="${esc(expandLabel)}" data-collapse-label="${esc(collapseLabel)}"
+            aria-expanded="${open}" tabindex="${locked ? '-1' : '0'}">
             <span class="expand-preview-text">${esc(preview)}</span>
-            <span class="expand-cta">${esc(cta)}</span>
+            <span class="expand-cta">${esc(open ? collapseLabel : expandLabel)}</span>
           </button>
           <div class="expand-body">${body}</div>
         </div>`;
-      }).join('') + `</div>`;
+    }).join('');
+    const allControls = blocks.length > 1
+      ? `<div class="expand-all-controls">
+          <button type="button" class="expand-all-btn" data-expand-all>Expand all</button>
+          <span class="expand-all-sep">·</span>
+          <button type="button" class="expand-all-btn" data-collapse-all>Collapse all</button>
+        </div>`
+      : '';
+    return `<div class="expand-group" data-eg="${groupId}" data-mode="${esc(mode)}">${cardsHtml}${allControls}</div>`;
   }
   /* Short text gets the old single "callout" box (a colored, left-bordered card — fine for
      one or two sentences). Long text drops that shared box in favour of the independent
      cards above; the box would otherwise just nest a second frame around content that
      already frames itself, so it's dropped in exactly this case, not removed everywhere. */
-  function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr) {
+  function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr, options) {
     text = text || '';
     const cls = extraClass ? ' ' + extraClass : '';
     const idStr = idAttr ? ` id="${esc(idAttr)}"` : '';
     const eyebrow = eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '';
-    if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
-    return `<div class="reading-block${cls}"${idStr}>${eyebrow}${renderProse(text)}</div>`;
+    const prose = renderProse(text, options);
+    if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${prose}</div>`;
+    return `<div class="reading-block${cls}"${idStr}>${eyebrow}${prose}</div>`;
+  }
+
+  /* ============================= formula rendering (Mejora D) ============================
+     A conservative text->LaTeX heuristic converter for the "formulas" field, rendered with
+     KaTeX. This NEVER touches source content — every formula string from lessons*.js is
+     read exactly as written; only how it is drawn to the screen changes. The conversion is
+     deliberately cautious: every clause is independently gated on "does this look like
+     clean, self-contained math" before conversion is even attempted, and the finished LaTeX
+     is checked once more (isLatexSafe) and actually run through katex.renderToString before
+     being trusted — any clause that fails either check, or that KaTeX itself rejects, falls
+     back to the original plain monospace rendering for that clause specifically. A single
+     formula string can end up as a mix of both: some clauses rendered as real typeset math,
+     others as clean text, exactly matching the brief's "simple formula shown well beats a
+     complex one converted wrong." See FORMULA_RENDER_AUDIT.md for the full corpus this was
+     tested against (491 formulas from every track's lessons*.js plus formulas.js). */
+
+  // ---- "is this clean math" gate ----
+  const ALLOWED_WORDS = new Set([
+    'a', 'an', 'the', 'of', 'in', 'on', 'to', 'for', 'if', 'is', 'are', 'at', 'by', 'or', 'and',
+    'when', 'where', 'all', 'any', 'no', 'not', 'per', 'with', 'from', 'as', 'provided', 'always',
+    'never', 'matches', 'same', 'other', 'out', 'each'
+  ]);
+  function wordIsProse(w) {
+    const lower = w.toLowerCase();
+    if (ALLOWED_WORDS.has(lower)) return false;
+    return /^[a-zA-Z]{3,}$/.test(w);
+  }
+
+  // ---- named-quantity operands ("Operating margin = operating income / revenue") ----
+  // Finance/applied formulas in this dataset routinely use full English phrases as variable
+  // names instead of single letters — legitimate, well-formed math notation (textbooks do
+  // the same with \text{} in LaTeX). STOP_WORDS is a blacklist of grammar words that only
+  // show up in real sentences, never in a named quantity like "operating income" — any
+  // phrase containing one aborts the WHOLE segment rather than risk wrapping a sentence
+  // fragment in \text{}.
+  const STOP_WORDS = new Set([
+    'is', 'are', 'was', 'were', 'be', 'been', 'being', 'the', 'this', 'that', 'these', 'those',
+    'always', 'never', 'since', 'while', 'whenever', 'when', 'where', 'which', 'who', 'whom',
+    'because', 'so', 'than', 'then', 'thus', 'hence', 'therefore', 'however', 'although', 'though',
+    'if', 'unless', 'until', 'before', 'after', 'during', 'between', 'within', 'without', 'about',
+    'above', 'below', 'under', 'over', 'through', 'across', 'against', 'toward', 'towards',
+    'upon', 'onto', 'into', 'not', 'no', 'none', 'any', 'all', 'each', 'every', 'some', 'much',
+    'many', 'more', 'most', 'less', 'least', 'very', 'quite', 'rather', 'just', 'only', 'also',
+    'too', 'as', 'such', 'you', 'your', 'it', 'its', 'they', 'their', 'we', 'our', 'i', 'he', 'she',
+    'can', 'could', 'should', 'would', 'will', 'shall', 'must', 'may', 'might', 'do', 'does', 'did',
+    'have', 'has', 'had', 'and', 'or', 'but', 'yet', 'nor'
+  ]);
+  // NOTE: plain ASCII '-' is deliberately excluded from the boundary class below (unlike the
+  // unicode minus '−', which this dataset uses for actual subtraction) — this dataset uses
+  // ASCII hyphens inside compound terms ("10-year", "next-12-months", "risk-free"), and
+  // treating '-' as an operator boundary here would fracture those mid-word.
+  const PHRASE_RE = /(?:^|[=/×÷·+−(])\s*([A-Za-z][A-Za-z0-9'-]*(?:\s+[A-Za-z][A-Za-z0-9'-]*){0,5})\s*(?=[=/×÷·+−)]|$)/g;
+  // A lone single-letter/short token ("n", "x", "Rf", "Rm") is almost always a math variable
+  // or a 2-3-char abbreviation and must stay bare, italic — only a lone word that's actually
+  // spelled out (4+ letters, and not ALL-CAPS the way a ticker/acronym like GDP or YTM is)
+  // gets wrapped on its own.
+  function isWrappableSingleWord(w) {
+    return w.length >= 4 && /[a-z]/.test(w);
+  }
+  function wrapNamedOperands(s) {
+    let aborted = false;
+    const out = s.replace(PHRASE_RE, (m, phrase) => {
+      if (aborted || !phrase) return m;
+      const words = phrase.trim().split(/\s+/);
+      if (words.length === 1 && !isWrappableSingleWord(words[0])) return m;
+      const hasStopWord = words.some((w) => STOP_WORDS.has(w.toLowerCase()));
+      if (hasStopWord || words.length > 6) { aborted = true; return m; }
+      const lead = m.slice(0, m.indexOf(phrase));
+      return `${lead}\\text{${phrase.trim()}}`;
+    });
+    return aborted ? null : out;
+  }
+  // prose-word gate, but blind to anything already wrapped in \text{...} — those are
+  // intentional named operands, not stray sentence prose
+  function countProseWordsOutsideText(s) {
+    const withoutTextSpans = s.replace(/\\text\{[^}]*\}/g, ' ');
+    const words = withoutTextSpans.match(/[a-zA-Z]{3,}/g) || [];
+    return words.filter(wordIsProse).length;
+  }
+
+  // ---- unicode -> LaTeX token conversion ----
+  const SUPERSCRIPT_MAP = {
+    '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+    'ⁿ': 'n', 'ⁱ': 'i', 'ᵏ': 'k', 'ᵗ': 't', 'ᶜ': 'c', 'ʳ': 'r', 'ᴺ': 'N', '⁺': '+', '⁻': '-',
+    'ᵞ': '\\gamma '
+  };
+  const SUBSCRIPT_MAP = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ᵢ': 'i', 'ⱼ': 'j', 'ₖ': 'k', 'ₙ': 'n', 'ₓ': 'x', 'ₜ': 't', 'ₐ': 'a' };
+  const GREEK_MAP = {
+    'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta', 'ε': '\\epsilon', 'ζ': '\\zeta',
+    'η': '\\eta', 'θ': '\\theta', 'ι': '\\iota', 'κ': '\\kappa', 'λ': '\\lambda', 'μ': '\\mu', 'ν': '\\nu',
+    'ξ': '\\xi', 'ο': 'o', 'π': '\\pi', 'ρ': '\\rho', 'ς': '\\varsigma', 'σ': '\\sigma', 'τ': '\\tau',
+    'υ': '\\upsilon', 'φ': '\\phi', 'χ': '\\chi', 'ψ': '\\psi', 'ω': '\\omega',
+    'Γ': '\\Gamma', 'Δ': '\\Delta', 'Θ': '\\Theta', 'Λ': '\\Lambda', 'Ξ': '\\Xi', 'Π': '\\Pi',
+    'Σ': '\\Sigma', 'Υ': '\\Upsilon', 'Φ': '\\Phi', 'Ψ': '\\Psi', 'Ω': '\\Omega'
+  };
+  const SYMBOL_MAP = {
+    '×': '\\times', '÷': '\\div', '±': '\\pm', '∓': '\\mp', '·': '\\cdot',
+    '≤': '\\leq', '≥': '\\geq', '≠': '\\neq', '≈': '\\approx', '≡': '\\equiv',
+    '∈': '\\in', '∉': '\\notin', '⊂': '\\subset', '⊆': '\\subseteq',
+    '∪': '\\cup', '∩': '\\cap', '∅': '\\emptyset',
+    '∞': '\\infty', '→': '\\to', '⇒': '\\Rightarrow', '⇔': '\\Leftrightarrow',
+    '∀': '\\forall', '∃': '\\exists', '∂': '\\partial', '∝': '\\propto',
+    '−': '-'
+  };
+  function convertRun(chars, map) {
+    return chars.split('').map((c) => map[c]).join('');
+  }
+  const SUPERSCRIPT_RUN_RE = new RegExp(`[${Object.keys(SUPERSCRIPT_MAP).join('')}]+`, 'g');
+  const SUBSCRIPT_RUN_RE = new RegExp(`[${Object.keys(SUBSCRIPT_MAP).join('')}]+`, 'g');
+  function convertSuperSubscripts(s) {
+    s = s.replace(SUPERSCRIPT_RUN_RE, (run) => `^{${convertRun(run, SUPERSCRIPT_MAP)}}`);
+    s = s.replace(SUBSCRIPT_RUN_RE, (run) => `_{${convertRun(run, SUBSCRIPT_MAP)}}`);
+    return s;
+  }
+  function convertGreek(s) {
+    return s.replace(/[α-ωΑ-Ω]/g, (c) => GREEK_MAP[c] !== undefined ? GREEK_MAP[c] + ' ' : c);
+  }
+  function convertSymbols(s) {
+    return s.replace(/[×÷±∓·≤≥≠≈≡∈∉⊂⊆∪∩∅∞→⇒⇔∀∃∂∝−]/g, (c) => SYMBOL_MAP[c] + ' ');
+  }
+  // Σ handling: bare "Σ" (optionally already turned into "Σ_{i}" by convertSuperSubscripts)
+  // -> \sum, run BEFORE convertGreek maps Σ to a bare non-operator \Sigma
+  function convertSigmaSum(s) {
+    return s.replace(/Σ(_\{[^}]*\})?/g, (m, sub) => `\\sum${sub || ''} `);
+  }
+  function convertSqrt(s) {
+    s = s.replace(/√\(([^()]*)\)/g, (m, inner) => `\\sqrt{${inner}}`);
+    // √Var(X) — a function name immediately followed by its own paren group; the whole
+    // call belongs inside the radical, not just the bare name before the "("
+    s = s.replace(/√([A-Za-z0-9]+\([^()]*\))/g, (m, inner) => `\\sqrt{${inner}}`);
+    s = s.replace(/√([A-Za-z0-9]+)/g, (m, inner) => `\\sqrt{${inner}}`);
+    return s;
+  }
+  // a/b -> \frac{a}{b}: only for a clearly-delimited numerator/denominator. Each side must
+  // be EITHER a single balanced-parens group OR a bare identifier/number with no parens at
+  // all, and may not border '(' or ')' directly — a fraction operand is never half-inside a
+  // call like P(...), which is what let an earlier version mis-match "P(A)/P(Aᶜ)" as
+  // "A)/P". A trailing lookahead also blocks matching when the right side is immediately
+  // followed by a superscript/subscript group (e.g. "(1+yield)ⁿ") — that exponent belongs
+  // to the whole right-hand group, and this converter can't safely pull it inside the
+  // fraction, so it leaves the '/' as a literal slash rather than scope it wrong.
+  function convertFractions(s) {
+    const SIDE = '(?:\\([^()]*\\)|\\\\text\\{[^}]*\\}|[A-Za-z0-9]+(?:[_^]\\{[^}]*\\})*)';
+    const re = new RegExp(`(?<![(A-Za-z0-9)])(${SIDE})\\s*/\\s*(${SIDE})(?![A-Za-z0-9(])(?!\\^|_)`, 'g');
+    let prev;
+    do {
+      prev = s;
+      s = s.replace(re, (m, a, b) => {
+        const na = a.trim().replace(/^\(([^()]*)\)$/, '$1');
+        const nb = b.trim().replace(/^\(([^()]*)\)$/, '$1');
+        if (!na || !nb) return m;
+        return `\\frac{${na}}{${nb}}`;
+      });
+    } while (s !== prev && s.includes('/'));
+    return s;
+  }
+  function convertConditionalBar(s) {
+    // P(A|B) — a single '|' inside one balanced-paren group is a conditioning bar, not an
+    // absolute-value delimiter; must run before convertAbsBars, which would otherwise pair
+    // it with an unrelated '|' in a second, separate P(...) later in the string.
+    return s.replace(/\(([^()|]*)\|([^()|]*)\)/g, (m, a, b) => `(${a}\\mid ${b})`);
+  }
+  function convertAbsBars(s) {
+    return s.replace(/\|([^|]{1,40})\|/g, (m, inner) => `\\left|${inner}\\right|`);
+  }
+  const RELATION_OP_LATEX = { '=': '=', '≈': '\\approx', '≤': '\\leq', '≥': '\\geq', '≠': '\\neq' };
+  function convertFragment(s) {
+    s = convertSigmaSum(s);
+    s = convertSqrt(s);
+    s = convertConditionalBar(s);
+    s = convertAbsBars(s);
+    s = convertSuperSubscripts(s);
+    s = convertSymbols(s);
+    s = convertGreek(s);
+    return s;
+  }
+  /* Splits on the FIRST relation operator and converts each side separately, applying
+     fraction conversion only to the right-hand side. A left-hand side in this dataset is a
+     NAME ("Forward P/E", "Gold/silver ratio"), never a literal division; the right-hand
+     side is the actual formula, where a/b really does mean division. A further '=' inside
+     the right side (a chained equality like "coupon rate = current yield = YTM") is left as
+     a literal '=', already valid direct KaTeX input. */
+  function formulaToLatex(segment) {
+    const relIdx = segment.search(/[=≈≤≥≠]/);
+    if (relIdx === -1) return convertFragment(segment).replace(/\s+/g, ' ').trim();
+    const lhs = convertFragment(segment.slice(0, relIdx));
+    const op = RELATION_OP_LATEX[segment[relIdx]] || segment[relIdx];
+    const rhs = convertFractions(convertFragment(segment.slice(relIdx + 1)));
+    return `${lhs} ${op} ${rhs}`.replace(/\s+/g, ' ').trim();
+  }
+
+  // ---- structural stripping: separate a segment's "math core" from label/aside wrapper
+  // text that isn't itself math, so the gate evaluates only the part that should become
+  // KaTeX. Anything stripped off is kept as plain text around the rendered formula.
+  const TRAILING_CONNECTORS = [
+    ' where ', ' when ', ' given ', ' provided ', ' for every ', ' with equality when ',
+    ' matches ', ' valid for '
+  ];
+  function stripTrailingClause(s) {
+    let bestIdx = -1;
+    TRAILING_CONNECTORS.forEach((marker) => {
+      const idx = s.indexOf(marker);
+      if (idx >= 0 && (bestIdx === -1 || idx < bestIdx)) bestIdx = idx;
+    });
+    if (bestIdx === -1) return { core: s, trail: '' };
+    return { core: s.slice(0, bestIdx), trail: s.slice(bestIdx) };
+  }
+  const LEADING_LABEL_RE = /^([A-Za-z][A-Za-z0-9' ,-]{1,40}):\s+/;
+  function stripLeadingLabel(s) {
+    const m = s.match(LEADING_LABEL_RE);
+    if (!m) return { label: '', core: s };
+    return { label: m[0], core: s.slice(m[0].length) };
+  }
+  // requires actual whitespace before the '(' — "max(" (a function call) has none and is
+  // never touched here, only a genuinely separate "... clause) (aside)" is a candidate
+  const TRAILING_PAREN_RE = /^(.*?)\s+\(([^()]{4,80})\)\s*$/;
+  function stripTrailingAside(s) {
+    const m = s.match(TRAILING_PAREN_RE);
+    if (!m) return { core: s, aside: '' };
+    const [, prefix, inner] = m;
+    // even with a space before it, a trailing "(...)" can still be a required OPERAND, not
+    // a detachable aside — a fraction's denominator or a multiplicand always leaves the
+    // preceding operator dangling with nothing after it if stripped, truncating the actual
+    // formula rather than removing genuine explanatory text.
+    if (/[/×÷+\-−]\s*$/.test(prefix)) return { core: s, aside: '' };
+    const innerWords = (inner.match(/[a-zA-Z]{3,}/g) || []).filter(wordIsProse);
+    if (innerWords.length < 2) return { core: s, aside: '' };
+    return { core: prefix, aside: ` (${inner})` };
+  }
+
+  // Final safety net, run on the FINISHED latex string: strip every \text{...} span
+  // (deliberate named operands), every \command, and every recognized bare function name,
+  // then check what's left. Anything else non-ASCII, or any lowercase-letter word of 3+
+  // characters, means some piece of the source text slipped through unconverted — reject
+  // the whole segment rather than emit a partially-garbled result. All-caps runs (GDP, YTM,
+  // WACC...) are allowed through: those are acronyms used directly as symbols, not prose.
+  const KNOWN_FUNC_NAMES_RE = /\b(Var|Cov|Cor|Corr|min|max|log|ln|exp|sin|cos|tan|lim|sup|inf|mean|mode|median|Pr)\b/g;
+  function isLatexSafe(latex) {
+    let s = latex.replace(/\\text\{[^}]*\}/g, ' ');
+    s = s.replace(/\\[a-zA-Z]+/g, ' ');
+    s = s.replace(KNOWN_FUNC_NAMES_RE, ' ');
+    if (/[^\x00-\x7F]/.test(s)) return false;
+    const words = s.match(/[A-Za-z]{3,}/g) || [];
+    return !words.some((w) => /[a-z]/.test(w));
+  }
+
+  /* Full pipeline for one clause: strip a leading "Label: " prefix and a trailing
+     "(explanatory aside)" or " where/when/given ..." clause, gate-check what's left, and
+     only if that passes, convert and KaTeX-render it. Returns null (never throws) if
+     nothing in the segment is confidently convertible or if KaTeX itself rejects the
+     result — the caller then renders the ENTIRE original segment as plain text. */
+  function parseFormulaSegment(rawSegment) {
+    const { label, core: afterLabel } = stripLeadingLabel(rawSegment);
+    const { core: afterAside, aside } = stripTrailingAside(afterLabel);
+    const { core, trail } = stripTrailingClause(afterAside);
+    const mathCore = core.trim();
+    if (!/[=≈≤≥≠]/.test(mathCore)) return null;
+    if (mathCore.length > 160) return null;
+    const wrapped = wrapNamedOperands(mathCore);
+    if (wrapped === null) return null;
+    if (countProseWordsOutsideText(wrapped) >= 2) return null;
+    const latex = formulaToLatex(wrapped);
+    if (!isLatexSafe(latex)) return null;
+    let html;
+    try {
+      html = global.katex.renderToString(latex, { throwOnError: true, strict: 'ignore' });
+    } catch (e) {
+      return null; // KaTeX itself refused it — safe fallback to plain text, never a visible error
+    }
+    return { label, html, trail: trail + aside };
+  }
+
+  // splits a formula string into independent clauses: a trailing " — note" is split off
+  // first (an em-dash explanation applies to the whole formula, not just its last clause),
+  // then the remaining core is split on ". " / "; " into a list of separate formulas —
+  // this dataset often packs several related ones into one string ("DSO = ...; DIO = ...").
+  function splitFormulaClauses(text) {
+    const emdashIdx = text.indexOf(' — ');
+    const core = emdashIdx >= 0 ? text.slice(0, emdashIdx) : text;
+    const note = emdashIdx >= 0 ? text.slice(emdashIdx) : '';
+    const parts = core.split(/(?:\.\s+|;\s+)/).filter((p) => p.trim());
+    return { parts, note };
+  }
+
+  /* Renders one "formulas" array entry: each clause independently becomes either a
+     KaTeX-rendered block (its own larger, centered, distinctly-backed presentation — see
+     .formula-katex in styles.css) or, whenever the parser isn't confident, the original
+     clean monospace text (.formula) exactly as before this feature existed. Never partially
+     mangles a clause: a given clause is either fully typeset or fully plain text. */
+  function renderFormula(text) {
+    text = String(text || '');
+    if (typeof global.katex === 'undefined') return `<span class="formula">${esc(text)}</span>`;
+    const { parts, note } = splitFormulaClauses(text);
+    const rendered = parts.map((part) => {
+      const parsed = parseFormulaSegment(part);
+      if (!parsed) return `<span class="formula">${esc(part.trim())}</span>`;
+      const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
+      const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
+      return `<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>`;
+    }).join(' ');
+    const noteHtml = note ? `<span class="formula-note">${esc(note)}</span>` : '';
+    return rendered + noteHtml;
   }
 
   /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
@@ -827,26 +1196,26 @@
         const flatIdx = flat.findIndex((x) => x.c.id === c.id);
         const posInUnit = unit.concepts.findIndex((x) => x.id === c.id) + 1;
 
-        d.innerHTML = `<summary>${esc(c.name)}<span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
+        d.innerHTML = `<summary><span class="concept-title">${esc(c.name)}</span><span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
             <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
-            <div class="concept-stepper">
+            <div class="concept-stepper${studied ? ' stepper-done' : ''}">
               <button data-jump="context">Context</button><i></i>
               <button data-jump="core">Core</button><i></i>
               <button data-jump="examples">Examples</button><i></i>
               <button data-jump="practice">Practice</button>
             </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context') : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
               <div class="flow-item"><span class="micro-label">Key formulas</span>
-                <ul class="formula-list">${c.formulas.map((f) => `<li><span class="formula">${esc(f)}</span></li>`).join('')}</ul></div>
+                <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            ${renderReadingBlock('Common trap', c.trap)}
+            ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
             <div class="concept-nav-footer"></div>
@@ -860,7 +1229,8 @@
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
           bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProse(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
-          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`
+          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
+          collapseLabel: `− Collapse Level ${ex.level}`
         })), { mode: 'sequential' });
 
         // section-jump stepper
@@ -894,6 +1264,8 @@
               });
               const dot = $('.studied-dot', d);
               if (dot) dot.classList.add('done');
+              const stepper = $('.concept-stepper', d);
+              if (stepper) stepper.classList.add('stepper-done');
             };
             wrap.appendChild(b);
           });
@@ -1844,29 +2216,60 @@
     $('#track-pill-btn').onclick = () => { buildTrackSheet(); openSheet('track-sheet'); };
   }
 
-  /* Single delegated listener for every expand-group accordion in the app (Mejora A) —
+  /* Single delegated listener for every expand-group accordion in the app (Mejora A/B) —
      attached once here rather than re-wired at each of its call sites, so it keeps working
      for accordions rendered later inside any view, including ones nested inside dynamically
      inserted content (Learn concepts, mock reports, mistake reviews, ...). */
-  function handleExpandToggleClick(e) {
-    const btn = e.target.closest('[data-expand-toggle]');
+  function setExpandCardOpen(card, opening) {
+    card.classList.toggle('open', opening);
+    card.classList.toggle('collapsed', !opening);
+    const btn = card.querySelector('[data-expand-toggle]');
     if (!btn) return;
-    const card = btn.closest('.expand-card');
-    if (!card || card.classList.contains('locked')) return;
-    const group = card.closest('.expand-group');
-    const mode = group && group.dataset.mode;
-    if (mode !== 'sequential' && !CUMULATIVE_EXPAND && group) {
-      Array.from(group.querySelectorAll('.expand-card.open')).forEach((c) => {
-        if (c !== card) c.classList.replace('open', 'collapsed');
-      });
+    btn.setAttribute('aria-expanded', String(opening));
+    const cta = btn.querySelector('.expand-cta');
+    if (cta) cta.textContent = opening ? btn.dataset.collapseLabel : btn.dataset.expandLabel;
+  }
+  function unlockExpandCard(card) {
+    card.classList.remove('locked');
+    const btn = card.querySelector('[data-expand-toggle]');
+    if (btn) btn.tabIndex = 0;
+  }
+  function handleExpandGroupClick(e) {
+    const toggleBtn = e.target.closest('[data-expand-toggle]');
+    if (toggleBtn) {
+      const card = toggleBtn.closest('.expand-card');
+      if (!card || card.classList.contains('locked')) return;
+      const group = card.closest('.expand-group');
+      const mode = group && group.dataset.mode;
+      const opening = !card.classList.contains('open');
+      if (opening && mode !== 'sequential' && !CUMULATIVE_EXPAND && group) {
+        Array.from(group.querySelectorAll('.expand-card.open')).forEach((c) => {
+          if (c !== card) setExpandCardOpen(c, false);
+        });
+      }
+      setExpandCardOpen(card, opening);
+      if (opening && mode === 'sequential') {
+        const next = card.nextElementSibling;
+        if (next && next.classList.contains('expand-card') && next.classList.contains('locked')) unlockExpandCard(next);
+      }
+      return;
     }
-    card.classList.remove('collapsed');
-    card.classList.add('open');
-    if (mode === 'sequential') {
-      const next = card.nextElementSibling;
-      if (next && next.classList.contains('locked')) {
-        next.classList.remove('locked');
-        next.querySelector('[data-expand-toggle]').tabIndex = 0;
+    const allBtn = e.target.closest('[data-expand-all], [data-collapse-all]');
+    if (allBtn) {
+      const group = allBtn.closest('.expand-group');
+      if (!group) return;
+      const cards = Array.from(group.children).filter((c) => c.classList.contains('expand-card'));
+      if (allBtn.hasAttribute('data-expand-all')) {
+        cards.forEach((c) => { unlockExpandCard(c); setExpandCardOpen(c, true); });
+      } else {
+        // "collapse all" returns the group to its just-rendered state: first card open,
+        // the rest collapsed, and (for a sequential group) re-locked beyond the first two
+        cards.forEach((c, i) => { setExpandCardOpen(c, i === 0); });
+        if (group.dataset.mode === 'sequential') {
+          cards.forEach((c, i) => {
+            if (i > 1) { c.classList.add('locked'); const b = c.querySelector('[data-expand-toggle]'); if (b) b.tabIndex = -1; }
+          });
+        }
       }
     }
   }
@@ -1877,11 +2280,11 @@
     buildTrackPill();
     $('#theme-btn').onclick = toggleTheme;
     document.addEventListener('keydown', keys);
-    document.body.addEventListener('click', handleExpandToggleClick);
+    document.body.addEventListener('click', handleExpandGroupClick);
     window.addEventListener('beforeunload', () => S.save());
     go(S.getLastView(S.activeTrack()));
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession };
+  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment };
 })(window);

@@ -31,16 +31,24 @@
   --ease: cubic-bezier(.2, .7, .3, 1);
   --dur: 180ms;
 
-  /* ---- typography: curated system stacks, no external font request ----
-     Deliberately not a webfont (Google Fonts etc.) — this keeps the app's
-     offline-first guarantee simple (no extra sw.js cache entry, no network
-     dependency, no flash-of-fallback to design around) while still reading
-     as intentional: each platform's own high-quality system face (San
-     Francisco / Segoe UI / Roboto) rather than a single generic default,
-     ordered so the best available one wins. --font-display reuses the body
-     family — hierarchy comes from weight/size/tracking, not a second
-     typeface, per the "one considered family" design intent below. */
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ---- typography ----
+     A previous pass used only a system-font stack (-apple-system/Segoe UI/
+     Roboto) to avoid a webfont dependency. Measured in a real Linux/Chromium
+     render (getComputedStyle + document.fonts), none of those names resolve
+     on that platform — it silently falls through to the browser's generic
+     "sans-serif" default (Liberation/DejaVu Sans, the exact metric-compatible
+     Arial substitute Word/LibreOffice use), which is precisely the "looks
+     like an exported Word doc" complaint. A system stack only looks
+     considered on the OS it was tuned for; it isn't a guarantee everywhere.
+     Fix: self-host two real webfonts as .woff2 files under /fonts (Inter for
+     UI/body text, Source Serif 4 for concept titles and primer lead-ins —
+     see the @font-face rules below and the .lead-in/.acc>summary rules
+     further down). Self-hosted rather than a live Google Fonts <link>: zero
+     network dependency even on first load, not just after caching, and one
+     variable-font file per family covers the whole 400-700 weight range.
+     Both files are cached by sw.js for offline use after the first visit. */
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", "IBM Plex Mono", "Roboto Mono", Menlo, Consolas, monospace;
   --font-display: var(--font-body);
   --tracking-label: 0.11em;
@@ -69,6 +77,8 @@
   --brand-ink: #0D1620;
   --brand-soft: rgba(127, 166, 201, 0.14);
   --brand-line: rgba(127, 166, 201, 0.38);
+  --formula-bg: var(--brand-soft);
+  --formula-line: var(--brand-line);
 
   /* warm gold accent — CTAs, correct feedback, progress/achievement ONLY */
   --accent: #D2B370;
@@ -97,6 +107,13 @@
   --neg: #D08886;
   --neg-soft: rgba(208, 136, 134, 0.14);
   --info: var(--brand);
+
+  /* third accent — teal, coherent with navy+gold, reserved for "worked examples" content
+     so a reader recognises that section by colour, the way tracks already have colours */
+  --teal: #4FAFA8;
+  --teal-2: #6FC4BD;
+  --teal-soft: rgba(79, 175, 168, 0.14);
+  --teal-line: rgba(79, 175, 168, 0.4);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
@@ -127,6 +144,8 @@ html[data-theme="light"] {
   --brand-ink: #FFFFFF;
   --brand-soft: #E8EEF4;
   --brand-line: #B9CBDC;
+  --formula-bg: var(--brand-soft);
+  --formula-line: var(--brand-line);
 
   --accent: #A9822E;
   --accent-2: #8E6D22;
@@ -152,6 +171,11 @@ html[data-theme="light"] {
   --neg-soft: #F5E7E6;
   --info: var(--brand);
 
+  --teal: #2B8A82;
+  --teal-2: #1F6F68;
+  --teal-soft: #E3F2F0;
+  --teal-line: #A9D8D3;
+
   --shadow-sm: 0 1px 2px rgba(30, 40, 50, 0.06);
   --shadow: 0 8px 24px rgba(30, 40, 50, 0.08);
   --heat-0: var(--panel-2);
@@ -159,6 +183,26 @@ html[data-theme="light"] {
   --heat-2: #E3CB8C;
   --heat-3: #CBA758;
   --heat-4: var(--accent);
+}
+
+/* Self-hosted, variable-weight webfonts — one .woff2 file per family covers
+   400-700 via font-weight, no separate file per weight. font-display: swap
+   avoids invisible text while loading; the --font-body/--font-serif stacks
+   above already list solid system fallbacks for the (rare, offline-first-
+   violating) case a file fails to load. */
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-variable.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("../fonts/source-serif-4-variable.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -509,17 +553,22 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .reveal .eyebrow { margin-bottom: 4px; display: block; }
 
 /* long-form reading blocks (primer, and any solution/why long enough to be split into
-   several paragraphs by renderProse) — wider line-height and a capped measure so lines
-   stay easy to track visually across a long read. .reading-block is the wrapper used once
-   that content becomes an expand-group accordion (see below): unlike .reveal it carries no
-   box of its own, since the individual cards inside already frame themselves — wrapping
-   them in a second box would just nest one frame inside another. */
+   several paragraphs by renderProse) — a genuinely larger reading type size (not the
+   15px UI body size), generous line-height, and a measure capped in ch (character
+   units, so it tracks the actual reading font-size) at the ~65-75 characters per line
+   editorial typesetting convention — the biggest single difference between "a document"
+   and "a designed reading column." Text is always left-aligned, never justified: ragged
+   right edges avoid the uneven word-spacing justify produces at this column width.
+   .reading-block is the wrapper used once content becomes an expand-group accordion (see
+   below): unlike .reveal it carries no box of its own, since the individual cards inside
+   already frame themselves — wrapping them in a second box would just nest one frame
+   inside another. */
 .reveal.primer, .reveal.prose-block, .reading-block {
-  line-height: 1.75; max-width: 720px;
+  font-size: 17.5px; line-height: 1.8; max-width: 70ch; text-align: left;
 }
 .reading-block { margin: var(--sp-3) 0; }
 .reading-block > .eyebrow { display: block; margin-bottom: var(--sp-2); }
-.prose-p { margin: 0 0 var(--sp-4); }
+.prose-p { margin: 0 0 var(--sp-4); text-align: left; }
 .prose-p:last-child { margin-bottom: 0; }
 /* a quiet, non-textual marker on paragraphs that open a genuinely new sub-topic —
    a thin accent rule, not a boxed-off section, so the read stays continuous */
@@ -528,21 +577,37 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   content: ""; position: absolute; left: 0; top: 0.3em; bottom: 0.3em;
   width: 2px; background: var(--brand-line); border-radius: 1px;
 }
+/* editorial lead-in on the very first sentence of a primer's opening paragraph: serif,
+   larger, with its own first word carrying extra weight — a quiet visual entry point
+   into the reading column, the way a considered publication opens a piece, purely a
+   rendering treatment (see wrapLeadIn in app.js) that never touches the source text. */
+.lead-in {
+  font-family: var(--font-serif); font-size: 1.22em; line-height: 1.5;
+  color: var(--text);
+}
+.lead-word { font-weight: 700; }
+/* Mejora C: a term the content is already marking with double quotes as "being defined
+   right here" gets a soft blue highlight — the same brand blue as navigation, softened for
+   the reading area, never the vivid nav tone itself. */
+.key-term { color: var(--brand-2); background: var(--brand-soft); border-radius: 3px; padding: 0 3px; }
 
-/* -------------------- expandable block accordion (Mejora A) -------------------- */
+/* -------------------- expandable block accordion (Mejora A/B) -------------------- */
 /* Each block of a long reading field (primer paragraphs, worked-example levels) renders as
    its OWN independent card — its own background, padding and margin — rather than every
    paragraph sharing one continuous box. The first card starts open; the rest collapse
-   behind a short preview of their own text, so a reader expands them at their own pace. */
+   behind a short preview of their own text, so a reader expands them at their own pace.
+   Every card keeps its toggle button visible whether open or collapsed — collapsed, it's
+   a full-width "preview + Continue reading" row; open, it shrinks to a quiet top-right
+   "− Collapse" affordance — so a reader can put any block back exactly as they found it,
+   in any order, without losing the ones they've already opened. */
 .expand-group { margin: var(--sp-2) 0; }
 .expand-card {
   background: var(--panel-2); border-radius: var(--radius-sm);
   margin-bottom: var(--sp-4); overflow: hidden;
 }
 .expand-card:last-child { margin-bottom: 0; }
-.expand-card.open { padding: var(--sp-3) var(--sp-4); animation: fadeInUp 220ms var(--ease); }
-.expand-card.open .expand-toggle { display: none; }
-.expand-card.open .expand-body { display: block; }
+.expand-card.open { animation: fadeInUp 220ms var(--ease); }
+.expand-card.open .expand-body { display: block; padding: 2px var(--sp-4) var(--sp-3); }
 .expand-card.collapsed .expand-body { display: none; }
 .expand-card.locked { display: none; }
 .expand-toggle {
@@ -553,6 +618,10 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   transition: background var(--dur) var(--ease);
 }
 .expand-toggle:hover, .expand-toggle:focus-visible { background: var(--panel-3); }
+.expand-card.open .expand-toggle {
+  min-height: 0; justify-content: flex-end; padding: 9px var(--sp-4) 3px;
+}
+.expand-card.open .expand-preview-text { display: none; }
 .expand-preview-text {
   color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; min-width: 0;
 }
@@ -561,6 +630,18 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   white-space: nowrap;
 }
 .expand-body .prose-p:last-child { margin-bottom: 0; }
+
+.expand-all-controls {
+  display: flex; justify-content: flex-end; align-items: center; gap: 7px;
+  margin: var(--sp-1) 2px var(--sp-2);
+}
+.expand-all-btn {
+  background: none; border: 0; cursor: pointer; padding: 4px 2px; min-height: 32px;
+  color: var(--muted); font-family: var(--font-mono); font-size: var(--fs-xs);
+  transition: color var(--dur) var(--ease);
+}
+.expand-all-btn:hover, .expand-all-btn:focus-visible { color: var(--brand); }
+.expand-all-sep { color: var(--dim); font-size: var(--fs-xs); }
 .verdict {
   font-family: var(--font-mono); font-size: var(--fs-sm); padding: 10px 13px; border-radius: var(--radius-sm);
   margin-bottom: var(--sp-3); animation: fadeInUp 220ms var(--ease);
@@ -614,6 +695,11 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .acc > summary .studied-dot.done { background: var(--accent); }
 .acc .acc-body { padding: var(--sp-3); font-size: var(--fs-base); border-top: 1px solid var(--line); }
+/* Learn concept titles specifically (not every <summary> — the mistakes-log accordion
+   reuses .acc too, and stays in the UI sans font) get the serif treatment: this is the
+   one place in the whole app the brief asked for it, a considered accent rather than a
+   wholesale font swap. */
+.concept-title { font-family: var(--font-serif); font-size: 1.08em; font-weight: 600; }
 .acc .trigger { color: var(--muted); font-size: var(--fs-sm); font-style: italic; }
 
 /* Learn: sticky concept index */
@@ -658,11 +744,19 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .concept-stepper button:hover { color: var(--brand); border-color: var(--brand-line); }
 .concept-stepper i { flex: 1 1 12px; max-width: 24px; height: 1px; background: var(--line); }
+/* progress breadcrumb: once a concept is fully studied, its stepper picks up the same
+   achievement gold used everywhere else completion is marked (studied-dot, correct answers) */
+.concept-stepper.stepper-done button { color: var(--accent-2); border-color: var(--accent-line); }
+.concept-stepper.stepper-done i { background: var(--accent-line); }
 
-/* the merged Core/When/Formulas/Intuition card — one continuous surface, no isolated boxes */
+/* the merged Core/When/Formulas/Intuition card — one continuous surface, no isolated boxes.
+   Mejora C: a colour-coded left border gives each stage of a concept its own identity at a
+   glance — brand blue here (foundational material), teal for worked examples, gold for
+   practice below — the same "recognise the section without reading the label" idea the
+   track picker already uses colour for. */
 .concept-flow {
   background: var(--panel-2); border-radius: var(--radius-sm); padding: var(--sp-4);
-  margin: var(--sp-3) 0;
+  margin: var(--sp-3) 0; border-left: 3px solid var(--brand-line);
 }
 .flow-item { padding: var(--sp-2) 0; }
 .flow-item + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
@@ -679,6 +773,17 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .concept-transition .micro-label { margin: 0; white-space: nowrap; }
 .concept-transition::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+
+/* Mejora C: teal identifies worked examples specifically — every example card picks up a
+   teal left border and its "Level N" eyebrow recolors, so scrolling past this zone reads as
+   "now in examples" before the label is even read. */
+.examples-flow .expand-card { border-left: 3px solid var(--teal-line); }
+.examples-flow .eyebrow { color: var(--teal-2); }
+
+/* Mejora C: gold identifies the practice zone — same accent already used for correct
+   answers and the studied-dot, so "you're now in the part that counts toward mastery"
+   reads consistently with the rest of the app. */
+.checks { border-left: 3px solid var(--accent-line); padding-left: var(--sp-3); }
 
 .concept-nav-footer {
   display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap;
@@ -724,6 +829,27 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula { font-family: var(--font-mono); font-size: var(--fs-sm); background: var(--panel-2); border-radius: 6px; padding: 3px 7px; display: inline-block; margin: 2px 0; }
 .formula-list { list-style: none; padding: 0; margin: 6px 0; }
 .formula-list li { margin-bottom: 5px; }
+
+/* KaTeX-rendered formulas (Mejora D) — given real visual weight, unlike the plain-text
+   .formula fallback right above: a distinct background (not the same panel-2 gray every
+   other card uses), generous padding, centered, and noticeably larger than body text —
+   this is meant to read as "the one official formula for this idea," not just more text. */
+.formula-katex-wrap { display: block; margin: var(--sp-2) 0; }
+.formula-katex {
+  display: block; text-align: center; overflow-x: auto; overflow-y: hidden;
+  background: var(--formula-bg); border: 1px solid var(--formula-line);
+  border-radius: var(--radius-sm); padding: var(--sp-3) var(--sp-4);
+  font-size: 1.35em; color: var(--text);
+}
+.formula-katex .katex { font-size: 1em; }
+.formula-label {
+  display: block; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--dim);
+  margin-bottom: 3px; text-align: center;
+}
+.formula-note {
+  display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
+  margin-top: 3px;
+}
 
 /* ------------------------------ skeleton loaders --------------------------- */
 .skel { background: var(--panel-2); border-radius: var(--radius-sm); position: relative; overflow: hidden; }
