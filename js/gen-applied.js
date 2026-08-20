@@ -362,19 +362,37 @@
     id: 'mm_spread', topic: 'Market Making', subtopic: 'Fair value and edge', difficulty: 3, targetTime: 90,
     build(r) {
       const s = r.pick([6, 8, 10, 12]);
-      const fair = (s + 1) / 2 * r.pick([1, 2]);
-      const dice = fair / ((s + 1) / 2);
-      const bidOff = r.pick([0.5, 1, 1.5]);
-      const bid = round(fair - bidOff, 2), ask = round(fair + bidOff, 2);
+      const dice = r.pick([1, 2]);
+      const fair = round(dice * (s + 1) / 2, 2);
+      const edgeSize = r.pick([0.5, 1, 1.5]);
+      const spreadPad = r.pick([0.5, 1, 1.5]);
+      const scenario = r.pick(['buy', 'sell', 'none']);
+      let bid, ask, correctAnswer, edgeText;
+      if (scenario === 'buy') {
+        ask = round(fair - edgeSize, 2);
+        bid = round(ask - spreadPad, 2);
+        correctAnswer = 'Buy at the offer';
+        edgeText = `the offer (${ask}) sits below fair value, so buying at ${ask} captures ${fair} − ${ask} = ${edgeSize} of expected edge per contract; selling into the bid (${bid}) would be even further below fair value, a losing trade`;
+      } else if (scenario === 'sell') {
+        bid = round(fair + edgeSize, 2);
+        ask = round(bid + spreadPad, 2);
+        correctAnswer = 'Sell at the bid';
+        edgeText = `the bid (${bid}) sits above fair value, so selling into it captures ${bid} − ${fair} = ${edgeSize} of expected edge per contract; buying at the offer (${ask}) would be even further above fair value, a losing trade`;
+      } else {
+        bid = round(fair - edgeSize, 2);
+        ask = round(fair + edgeSize, 2);
+        correctAnswer = 'No trade — the market is fair';
+        edgeText = `buying at the offer (${ask}) would cost ${edgeSize} more than fair value, and selling into the bid (${bid}) would receive ${edgeSize} less than fair value — neither side offers positive edge here, so the correct action is not to trade`;
+      }
       return {
-        prompt: `A contract settles at the sum of ${dice} fair ${s}-sided dice. You are shown a market of ${bid} bid / ${ask} offered. Which side do you take, and what is your expected profit per contract?`,
+        prompt: `A contract settles at the sum of ${dice} fair ${s}-sided dice. You are shown a market of ${bid} bid / ${ask} offered. Which side (if any) offers positive expected value?`,
         answerType: 'mc',
-        options: [`Buy at ${ask}; edge ${bidOff}`, `Sell at ${bid}; edge ${bidOff}`, `Sell at ${ask}; edge ${bidOff}`, 'No trade — the market is fair'],
-        correctAnswer: `Sell at ${ask}; edge ${bidOff}`,
-        hint: 'Compute fair value first, then ask which side of it you are being offered.',
-        approach: 'Fair value by linearity of expectation, then take the side with positive edge.',
-        solution: `Fair value = ${dice} × ${(s + 1) / 2} = ${fair}. The offer at ${ask} is above fair, so you sell (hit the offer as a seller) and capture ${bidOff} per contract in expectation.`,
-        recognitionTechnique: 'Direct calculation', commonTrap: 'Buying because the number looks high — always locate fair value first.',
+        options: ['Buy at the offer', 'Sell at the bid', 'No trade — the market is fair', 'Both sides offer positive edge'],
+        correctAnswer,
+        hint: 'Compute fair value first (linearity of expectation), then compare it against both the bid and the offer — remember you can only BUY at the offer and SELL at the bid, never the reverse.',
+        approach: 'Fair value by linearity of expectation, then compare against both sides of the market; only one side (or neither) can ever have genuine positive edge.',
+        solution: `Fair value = ${dice} × ${(s + 1) / 2} = ${fair}. In a "X bid / Y offered" market you can only sell into the bid (X) or buy at the offer (Y), never the reverse. Here ${edgeText}.`,
+        recognitionTechnique: 'Direct calculation', commonTrap: 'Assuming a quoted market always has a trade available — often the market brackets fair value symmetrically with no edge on either side; also, mixing up which side you buy versus sell on (you buy at the offer, sell at the bid, never the reverse).',
         tags: ['market making']
       };
     }

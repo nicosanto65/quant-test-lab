@@ -3,18 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0d11">
-<meta name="description" content="Quant Test Lab — offline practice environment for quantitative trading and consulting assessments.">
+<meta name="theme-color" content="#0A0E13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
+<meta name="description" content="Quant Test Lab — a private, offline practice environment across six career tracks: quant trading, reasoning speed, investment banking, asset management, wealth management and consulting.">
+<meta property="og:title" content="Quant Test Lab">
+<meta property="og:description" content="Practice quant trading, reasoning speed, IB, AM, WM and consulting assessments — offline, no account, your progress stays on your device.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Quant Test Lab">
+<meta name="twitter:description" content="Offline practice across six career tracks. No account, your data stays on your device.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Quant Test Lab">
 <title>Quant Test Lab</title>
 <link rel="stylesheet" href="css/styles.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0d11'/><text x='16' y='23' font-size='20' font-family='monospace' fill='%23e0a44a' text-anchor='middle'>Q</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232E4A66'/><path d='M7 21 13 12 17 16 25 7' stroke='%23D2B370' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232E4A66'/><path d='M7 21 13 12 17 16 25 7' stroke='%23D2B370' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 </head>
 <body>
 
 <header class="topbar">
-  <span class="brand">Quant Test <span>Lab</span></span>
+  <span class="brand"><span class="mark">Q</span>Quant Test <span class="sub">Lab</span></span>
   <span class="spacer"></span>
-  <select class="topbar-btn" id="track-select" title="Active track"></select>
+  <span id="track-pill-host"></span>
   <button class="topbar-btn" id="theme-btn" title="Toggle theme (T)">theme</button>
 </header>
 
