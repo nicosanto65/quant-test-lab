@@ -16,6 +16,73 @@
     return m + ':' + String(s).padStart(2, '0');
   };
 
+  /* ------------------------- digestible-paragraph rendering ------------------------ */
+  /* Splits a long, dense block of prose into shorter <p> paragraphs at natural sentence
+     boundaries, purely for rendering — the underlying string is never modified, only how
+     it is chunked into DOM nodes. Two rules, applied in order per sentence:
+       1. Start a new paragraph when the sentence begins with a recognisable topic-shift
+          connector ("Now," "Finally," "Here's the trick," etc.) — this is the same
+          convention writers already lean on in this content, so it needs no invented
+          vocabulary, only detection.
+       2. Otherwise (a primer with long unbroken run-on sentences and no such connector),
+          fall back to breaking every ~3 sentences or ~480 characters, whichever comes
+          first, so no paragraph runs unreasonably long. */
+  const SENTENCE_SPLIT_RE = /[.!?]+['")\]]?(?=\s+[A-Z(])/g;
+  const ABBREV_TAIL_RE = /\b(e\.g|i\.e|etc|vs|approx|fig|eqs?|resp|cf|no|dr|mr|mrs|ms|st|vol|ch|pp|op|art|ref)\.$/i;
+  function splitIntoSentences(text) {
+    if (!text) return [];
+    const parts = [];
+    let start = 0, m;
+    SENTENCE_SPLIT_RE.lastIndex = 0;
+    while ((m = SENTENCE_SPLIT_RE.exec(text))) {
+      const endIdx = m.index + m[0].length;
+      const window = text.slice(Math.max(0, m.index - 8), endIdx);
+      if (ABBREV_TAIL_RE.test(window)) continue; // false boundary, e.g. "e.g. Two flips..."
+      parts.push(text.slice(start, endIdx));
+      start = endIdx;
+    }
+    if (start < text.length) parts.push(text.slice(start));
+    return parts;
+  }
+  const TOPIC_SHIFT_RE = /^\s*(Now|Finally|Here'?s?|Next,?|However,?|So,?|This means|In other words|For example|Notice|Crucially|Importantly|The key|Once you|As a result|In practice|Putting (it|this) together|To see why|Consider|Recall|Contrast this|A useful|The single|Rather than|Because of this|Given this|In short|The upshot)\b/;
+  /* Each paragraph keeps its EXACT raw slice of the source string (including whatever
+     whitespace sat between sentences) — trimming only happens later, purely for display.
+     That means paras.map(p => p.text).join('') always reconstructs the original text
+     character-for-character; nothing is ever dropped or invented, only re-chunked. */
+  function splitIntoDigestibleParagraphs(text) {
+    if (!text) return [];
+    const sentences = splitIntoSentences(text);
+    if (sentences.length <= 1) return sentences.length ? [{ text: sentences[0], shift: false }] : [];
+    const paras = [];
+    let cur = '', curLen = 0, curCount = 0, curShift = false;
+    sentences.forEach((raw) => {
+      const trimmed = raw.replace(/^\s+/, '');
+      const isShift = TOPIC_SHIFT_RE.test(trimmed);
+      const shouldBreak = cur && (isShift || curCount >= 3 || curLen >= 480);
+      if (shouldBreak) {
+        paras.push({ text: cur, shift: curShift });
+        cur = ''; curLen = 0; curCount = 0; curShift = false;
+      }
+      if (!cur && isShift) curShift = true;
+      cur += raw; curLen += raw.length; curCount++;
+    });
+    if (cur) paras.push({ text: cur, shift: curShift });
+    return paras;
+  }
+  /* Renders long prose as digestible paragraphs; short text (a single check's "why",
+     a brief hint) just gets one plain <p> so nothing is over-engineered for a one-liner.
+     Deliberately NOT trimmed: any boundary whitespace a paragraph inherits from the
+     original sentence split is left in the text node. A browser collapses leading
+     whitespace at the start of a block box for display (so it's visually invisible),
+     while textContent (and this app's own concatenation check) still sees the exact,
+     unmodified source characters — no word or space is ever added or dropped. */
+  function renderProse(text) {
+    text = text || '';
+    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    const paras = splitIntoDigestibleParagraphs(text);
+    return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+  }
+
   /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
      one per track, kept intentionally simple so the same set reads cleanly at 14-22px in
      both themes with no raster assets to cache. */
@@ -413,7 +480,7 @@
           <div class="stat"><span class="label">Correct answer</span><span class="value" style="font-size:18px">${esc(String(q.correctAnswer))}</span></div>
           <div class="stat"><span class="label">Your answer</span><span class="value" style="font-size:18px">${rec.given === null ? '—' : esc(String(rec.given))}</span></div>
         </div>
-        <div class="reveal"><span class="eyebrow">Best solution</span>${esc(q.solution || '')}</div>
+        <div class="reveal prose-block"><span class="eyebrow">Best solution</span>${renderProse(q.solution)}</div>
         ${alt}
         <div class="reveal"><span class="eyebrow">Main concept · recognition clue</span>
           <strong>${esc(q.recognitionTechnique || '—')}</strong> — ${esc(q.approach || '')}</div>
@@ -653,7 +720,7 @@
         const studied = studiedSet.has(c.id);
         d.innerHTML = `<summary>${esc(c.name)}<span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
-            ${c.primer ? `<div class="reveal"><span class="eyebrow">Start from zero</span>${esc(c.primer)}</div>` : ''}
+            ${c.primer ? `<div class="reveal primer"><span class="eyebrow">Start from zero</span>${renderProse(c.primer)}</div>` : ''}
             <p><strong>Core idea.</strong> ${esc(c.core)}</p>
             <p><strong>When to use it.</strong> ${esc(c.when)}</p>
             <div class="eyebrow">Key formulas</div>
@@ -679,7 +746,7 @@
                 if (xi === chk.a) x.classList.add('right');
               });
               if (oi !== chk.a) b.classList.add('wrong');
-              const why = el('div', 'reveal', `<span class="eyebrow">${oi === chk.a ? 'Correct' : 'Not quite'}</span>${esc(chk.why)}`);
+              const why = el('div', 'reveal prose-block', `<span class="eyebrow">${oi === chk.a ? 'Correct' : 'Not quite'}</span>${renderProse(chk.why)}`);
               wrap.appendChild(why);
               S.recordAttempt({
                 qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
@@ -1110,7 +1177,7 @@
         <div class="verdict ${x.correct ? 'ok' : 'no'}">Q${i + 1} — ${x.correct ? 'correct' : 'incorrect'}
           · your answer ${x.given === null ? '—' : esc(String(x.given))} · correct ${esc(String(x.q.correctAnswer))}</div>
         <div class="qprompt small">${/^\s*</.test(x.q.prompt) ? x.q.prompt : '<p>' + esc(x.q.prompt) + '</p>'}</div>
-        <div class="reveal"><span class="eyebrow">Solution</span>${esc(x.q.solution || '')}</div>
+        <div class="reveal prose-block"><span class="eyebrow">Solution</span>${renderProse(x.q.solution)}</div>
         <div class="reveal"><span class="eyebrow">Technique</span>${esc(x.q.recognitionTechnique || '')} — ${esc(x.q.approach || '')}</div>`;
       root.appendChild(p);
     });

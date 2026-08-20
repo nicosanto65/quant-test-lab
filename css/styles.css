@@ -484,6 +484,22 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   animation: fadeInUp 220ms var(--ease);
 }
 .reveal .eyebrow { margin-bottom: 4px; display: block; }
+
+/* long-form reading blocks (primer, and any solution/why long enough to be split into
+   several paragraphs by renderProse) — wider line-height and a capped measure so lines
+   stay easy to track visually across a long read. */
+.reveal.primer, .reveal.prose-block {
+  line-height: 1.75; max-width: 720px;
+}
+.prose-p { margin: 0 0 var(--sp-4); }
+.prose-p:last-child { margin-bottom: 0; }
+/* a quiet, non-textual marker on paragraphs that open a genuinely new sub-topic —
+   a thin accent rule, not a boxed-off section, so the read stays continuous */
+.prose-p.topic-shift { position: relative; padding-left: 14px; }
+.prose-p.topic-shift::before {
+  content: ""; position: absolute; left: 0; top: 0.3em; bottom: 0.3em;
+  width: 2px; background: var(--brand-line); border-radius: 1px;
+}
 .verdict {
   font-family: var(--mono); font-size: var(--fs-sm); padding: 10px 13px; border-radius: var(--radius-sm);
   margin-bottom: var(--sp-3); animation: fadeInUp 220ms var(--ease);
