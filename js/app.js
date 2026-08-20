@@ -491,6 +491,25 @@
     const rec = S.recommendation();
     const streak = S.dayStreak();
 
+    /* ---- first-run onboarding (global, not per-track — disappears the moment the
+       user has done ANYTHING anywhere, never blocks the primary action below it) ---- */
+    if (!S.state.attempts.length && !S.state.sessions.length) {
+      const ob = el('div', 'panel');
+      ob.style.borderColor = 'var(--brand-line)';
+      ob.innerHTML = `<span class="eyebrow">Six tracks, one offline lab</span>
+        <p style="margin-top:8px">This runs entirely on your device — no account, no network calls after
+        the first load. Pick a track below (quant trading, reasoning speed, IB, AM, WM or consulting),
+        then use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong> for
+        practice. Your progress, streak and history are saved locally and never leave this browser.</p>
+        <div class="chips" style="margin-top:10px">
+          ${S.tracks().map((t) => `<span class="chip" data-ob-track="${esc(t.id)}">${esc(t.label)}</span>`).join('')}
+        </div>`;
+      ob.querySelectorAll('[data-ob-track]').forEach((c) => {
+        c.onclick = () => { S.setTrack(c.dataset.obTrack); render(); buildTrackPill(); };
+      });
+      root.appendChild(ob);
+    }
+
     /* ---- hero: one-tap continue + day streak ---- */
     const hero = el('div', 'hero-cta');
     const hasHistory = s.total > 0;
