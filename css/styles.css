@@ -529,20 +529,23 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   width: 2px; background: var(--brand-line); border-radius: 1px;
 }
 
-/* -------------------- expandable block accordion (Mejora A) -------------------- */
+/* -------------------- expandable block accordion (Mejora A/B) -------------------- */
 /* Each block of a long reading field (primer paragraphs, worked-example levels) renders as
    its OWN independent card — its own background, padding and margin — rather than every
    paragraph sharing one continuous box. The first card starts open; the rest collapse
-   behind a short preview of their own text, so a reader expands them at their own pace. */
+   behind a short preview of their own text, so a reader expands them at their own pace.
+   Every card keeps its toggle button visible whether open or collapsed — collapsed, it's
+   a full-width "preview + Continue reading" row; open, it shrinks to a quiet top-right
+   "− Collapse" affordance — so a reader can put any block back exactly as they found it,
+   in any order, without losing the ones they've already opened. */
 .expand-group { margin: var(--sp-2) 0; }
 .expand-card {
   background: var(--panel-2); border-radius: var(--radius-sm);
   margin-bottom: var(--sp-4); overflow: hidden;
 }
 .expand-card:last-child { margin-bottom: 0; }
-.expand-card.open { padding: var(--sp-3) var(--sp-4); animation: fadeInUp 220ms var(--ease); }
-.expand-card.open .expand-toggle { display: none; }
-.expand-card.open .expand-body { display: block; }
+.expand-card.open { animation: fadeInUp 220ms var(--ease); }
+.expand-card.open .expand-body { display: block; padding: 2px var(--sp-4) var(--sp-3); }
 .expand-card.collapsed .expand-body { display: none; }
 .expand-card.locked { display: none; }
 .expand-toggle {
@@ -553,6 +556,10 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   transition: background var(--dur) var(--ease);
 }
 .expand-toggle:hover, .expand-toggle:focus-visible { background: var(--panel-3); }
+.expand-card.open .expand-toggle {
+  min-height: 0; justify-content: flex-end; padding: 9px var(--sp-4) 3px;
+}
+.expand-card.open .expand-preview-text { display: none; }
 .expand-preview-text {
   color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; min-width: 0;
 }
@@ -561,6 +568,18 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   white-space: nowrap;
 }
 .expand-body .prose-p:last-child { margin-bottom: 0; }
+
+.expand-all-controls {
+  display: flex; justify-content: flex-end; align-items: center; gap: 7px;
+  margin: var(--sp-1) 2px var(--sp-2);
+}
+.expand-all-btn {
+  background: none; border: 0; cursor: pointer; padding: 4px 2px; min-height: 32px;
+  color: var(--muted); font-family: var(--font-mono); font-size: var(--fs-xs);
+  transition: color var(--dur) var(--ease);
+}
+.expand-all-btn:hover, .expand-all-btn:focus-visible { color: var(--brand); }
+.expand-all-sep { color: var(--dim); font-size: var(--fs-xs); }
 .verdict {
   font-family: var(--font-mono); font-size: var(--fs-sm); padding: 10px 13px; border-radius: var(--radius-sm);
   margin-bottom: var(--sp-3); animation: fadeInUp 220ms var(--ease);

@@ -113,36 +113,51 @@
     if (words.length <= n) return words.join(' ');
     return words.slice(0, n).join(' ') + '…';
   }
-  /* blocks: array of { text, shift?, bodyHtml?, preview?, ctaLabel? }. bodyHtml/preview let
-     a caller (worked examples) supply already-rendered markup and a hand-picked preview
-     instead of plain escaped paragraph text; otherwise the body is one <p class="prose-p">
-     and the preview is auto-derived from the block's own first words.
+  /* blocks: array of { text, shift?, bodyHtml?, preview?, ctaLabel?, collapseLabel? }.
+     bodyHtml/preview let a caller (worked examples) supply already-rendered markup and a
+     hand-picked preview instead of plain escaped paragraph text; otherwise the body is one
+     <p class="prose-p"> and the preview is auto-derived from the block's own first words.
      options.mode: 'toggle' (default) — every collapsed card opens independently, in any
      order. 'sequential' — a card stays locked (no preview, not interactive) until the one
-     before it has been opened, for content that only makes sense read in order. */
+     before it has been opened, for content that only makes sense read in order.
+     Every card's single toggle button works both directions: click to open, click again
+     (its label swaps to "− Collapse") to close it, in any order, regardless of what else
+     in the group is open — the delegated handler below (handleExpandGroupClick) owns that
+     behaviour so nothing here needs live DOM references. A 2+ block group also gets an
+     "Expand all / Collapse all" control for skimming vs. reading everything at once. */
   function renderExpandableBlocks(blocks, options) {
     options = options || {};
     const mode = options.mode || 'toggle';
     const groupId = 'eg' + (++expandGroupSeq);
-    return `<div class="expand-group" data-eg="${groupId}" data-mode="${esc(mode)}">` +
-      blocks.map((b, i) => {
-        const open = i === 0;
-        // in sequential mode the very next block stays visible (collapsed, with its own
-        // preview + toggle) so the reader can see what's coming; only blocks further out
-        // are fully locked away until their turn
-        const locked = mode === 'sequential' && i > 1;
-        const body = b.bodyHtml !== undefined ? b.bodyHtml : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
-        const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
-        const cta = b.ctaLabel || 'Continue reading';
-        const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
-        return `<div class="${cls}" data-idx="${i}">
-          <button class="expand-toggle" type="button" data-expand-toggle tabindex="${locked ? '-1' : '0'}">
+    const cardsHtml = blocks.map((b, i) => {
+      const open = i === 0;
+      // in sequential mode the very next block stays visible (collapsed, with its own
+      // preview + toggle) so the reader can see what's coming; only blocks further out
+      // are fully locked away until their turn
+      const locked = mode === 'sequential' && i > 1;
+      const body = b.bodyHtml !== undefined ? b.bodyHtml : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${esc(b.text)}</p>`;
+      const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
+      const expandLabel = b.ctaLabel || 'Continue reading';
+      const collapseLabel = b.collapseLabel || '− Collapse';
+      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
+      return `<div class="${cls}" data-idx="${i}">
+          <button class="expand-toggle" type="button" data-expand-toggle
+            data-expand-label="${esc(expandLabel)}" data-collapse-label="${esc(collapseLabel)}"
+            aria-expanded="${open}" tabindex="${locked ? '-1' : '0'}">
             <span class="expand-preview-text">${esc(preview)}</span>
-            <span class="expand-cta">${esc(cta)}</span>
+            <span class="expand-cta">${esc(open ? collapseLabel : expandLabel)}</span>
           </button>
           <div class="expand-body">${body}</div>
         </div>`;
-      }).join('') + `</div>`;
+    }).join('');
+    const allControls = blocks.length > 1
+      ? `<div class="expand-all-controls">
+          <button type="button" class="expand-all-btn" data-expand-all>Expand all</button>
+          <span class="expand-all-sep">·</span>
+          <button type="button" class="expand-all-btn" data-collapse-all>Collapse all</button>
+        </div>`
+      : '';
+    return `<div class="expand-group" data-eg="${groupId}" data-mode="${esc(mode)}">${cardsHtml}${allControls}</div>`;
   }
   /* Short text gets the old single "callout" box (a colored, left-bordered card — fine for
      one or two sentences). Long text drops that shared box in favour of the independent
@@ -860,7 +875,8 @@
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
           bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProse(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
-          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`
+          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
+          collapseLabel: `− Collapse Level ${ex.level}`
         })), { mode: 'sequential' });
 
         // section-jump stepper
@@ -1844,29 +1860,60 @@
     $('#track-pill-btn').onclick = () => { buildTrackSheet(); openSheet('track-sheet'); };
   }
 
-  /* Single delegated listener for every expand-group accordion in the app (Mejora A) —
+  /* Single delegated listener for every expand-group accordion in the app (Mejora A/B) —
      attached once here rather than re-wired at each of its call sites, so it keeps working
      for accordions rendered later inside any view, including ones nested inside dynamically
      inserted content (Learn concepts, mock reports, mistake reviews, ...). */
-  function handleExpandToggleClick(e) {
-    const btn = e.target.closest('[data-expand-toggle]');
+  function setExpandCardOpen(card, opening) {
+    card.classList.toggle('open', opening);
+    card.classList.toggle('collapsed', !opening);
+    const btn = card.querySelector('[data-expand-toggle]');
     if (!btn) return;
-    const card = btn.closest('.expand-card');
-    if (!card || card.classList.contains('locked')) return;
-    const group = card.closest('.expand-group');
-    const mode = group && group.dataset.mode;
-    if (mode !== 'sequential' && !CUMULATIVE_EXPAND && group) {
-      Array.from(group.querySelectorAll('.expand-card.open')).forEach((c) => {
-        if (c !== card) c.classList.replace('open', 'collapsed');
-      });
+    btn.setAttribute('aria-expanded', String(opening));
+    const cta = btn.querySelector('.expand-cta');
+    if (cta) cta.textContent = opening ? btn.dataset.collapseLabel : btn.dataset.expandLabel;
+  }
+  function unlockExpandCard(card) {
+    card.classList.remove('locked');
+    const btn = card.querySelector('[data-expand-toggle]');
+    if (btn) btn.tabIndex = 0;
+  }
+  function handleExpandGroupClick(e) {
+    const toggleBtn = e.target.closest('[data-expand-toggle]');
+    if (toggleBtn) {
+      const card = toggleBtn.closest('.expand-card');
+      if (!card || card.classList.contains('locked')) return;
+      const group = card.closest('.expand-group');
+      const mode = group && group.dataset.mode;
+      const opening = !card.classList.contains('open');
+      if (opening && mode !== 'sequential' && !CUMULATIVE_EXPAND && group) {
+        Array.from(group.querySelectorAll('.expand-card.open')).forEach((c) => {
+          if (c !== card) setExpandCardOpen(c, false);
+        });
+      }
+      setExpandCardOpen(card, opening);
+      if (opening && mode === 'sequential') {
+        const next = card.nextElementSibling;
+        if (next && next.classList.contains('expand-card') && next.classList.contains('locked')) unlockExpandCard(next);
+      }
+      return;
     }
-    card.classList.remove('collapsed');
-    card.classList.add('open');
-    if (mode === 'sequential') {
-      const next = card.nextElementSibling;
-      if (next && next.classList.contains('locked')) {
-        next.classList.remove('locked');
-        next.querySelector('[data-expand-toggle]').tabIndex = 0;
+    const allBtn = e.target.closest('[data-expand-all], [data-collapse-all]');
+    if (allBtn) {
+      const group = allBtn.closest('.expand-group');
+      if (!group) return;
+      const cards = Array.from(group.children).filter((c) => c.classList.contains('expand-card'));
+      if (allBtn.hasAttribute('data-expand-all')) {
+        cards.forEach((c) => { unlockExpandCard(c); setExpandCardOpen(c, true); });
+      } else {
+        // "collapse all" returns the group to its just-rendered state: first card open,
+        // the rest collapsed, and (for a sequential group) re-locked beyond the first two
+        cards.forEach((c, i) => { setExpandCardOpen(c, i === 0); });
+        if (group.dataset.mode === 'sequential') {
+          cards.forEach((c, i) => {
+            if (i > 1) { c.classList.add('locked'); const b = c.querySelector('[data-expand-toggle]'); if (b) b.tabIndex = -1; }
+          });
+        }
       }
     }
   }
@@ -1877,7 +1924,7 @@
     buildTrackPill();
     $('#theme-btn').onclick = toggleTheme;
     document.addEventListener('keydown', keys);
-    document.body.addEventListener('click', handleExpandToggleClick);
+    document.body.addEventListener('click', handleExpandGroupClick);
     window.addEventListener('beforeunload', () => S.save());
     go(S.getLastView(S.activeTrack()));
   }
