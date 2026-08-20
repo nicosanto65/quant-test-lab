@@ -60,6 +60,20 @@
   --accent-soft: rgba(210, 179, 112, 0.14);
   --accent-line: rgba(210, 179, 112, 0.4);
 
+  /* vivid navigation blue — EXCLUSIVE to chrome (topbar/sidenav/tabbar), never the
+     reading area. More saturated than --brand on purpose: it's a wayfinding signal
+     you glance at, not something you read for hours. Dark mode gets a richer, still
+     visibly-blue tone rather than the light mode's fully saturated one, so it reads
+     as "the vivid element in this screen" without turning into a light source. */
+  --nav-bg: #16386B;
+  --nav-bg-2: #1E4680;
+  --nav-text: rgba(255, 255, 255, 0.86);
+  --nav-text-dim: rgba(255, 255, 255, 0.52);
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-hover-bg: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: #FFFFFF;
+  --nav-active-text: #16386B;
+
   /* data semantics (distinct from the achievement accent) */
   --pos: #5FAE85;
   --pos-soft: rgba(95, 174, 133, 0.14);
@@ -99,6 +113,18 @@ html[data-theme="light"] {
   --accent-ink: #FFFCF5;
   --accent-soft: #F6EEDC;
   --accent-line: #D9C494;
+
+  /* vivid, saturated blue — navigation chrome only. Deliberately brighter than dark
+     mode's --nav-bg since a light-mode UI can carry a fully saturated brand blue
+     without it reading as glare the way it might on a dark background. */
+  --nav-bg: #2563EB;
+  --nav-bg-2: #1D4ED8;
+  --nav-text: rgba(255, 255, 255, 0.92);
+  --nav-text-dim: rgba(255, 255, 255, 0.62);
+  --nav-border: rgba(255, 255, 255, 0.16);
+  --nav-hover-bg: rgba(255, 255, 255, 0.12);
+  --nav-active-bg: #FFFFFF;
+  --nav-active-text: #2563EB;
 
   --pos: #2F7A54;
   --pos-soft: #E4F1EA;
@@ -141,45 +167,45 @@ code, .mono { font-family: var(--mono); }
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; gap: var(--sp-2);
   padding: var(--sp-3) var(--sp-4);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
 }
 .brand {
   display: flex; align-items: center; gap: 8px;
   font-family: var(--mono); font-size: var(--fs-sm); letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--brand); white-space: nowrap;
+  text-transform: uppercase; color: var(--nav-text); white-space: nowrap;
 }
 .brand .mark {
   width: 22px; height: 22px; border-radius: 6px;
-  background: var(--brand); color: var(--brand-ink);
+  background: var(--nav-active-bg); color: var(--nav-active-text);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0;
   flex: none;
 }
-.brand span.sub { color: var(--dim); text-transform: none; letter-spacing: 0; font-size: var(--fs-xs); }
+.brand span.sub { color: var(--nav-text-dim); text-transform: none; letter-spacing: 0; font-size: var(--fs-xs); }
 .topbar .spacer { flex: 1; }
 .topbar-btn {
-  background: none; border: 1px solid var(--line); color: var(--muted);
+  background: none; border: 1px solid var(--nav-border); color: var(--nav-text-dim);
   border-radius: var(--radius-sm); padding: 6px 10px; font-size: var(--fs-xs); font-family: var(--mono);
-  cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
   min-height: 34px;
 }
-.topbar-btn:hover { color: var(--text); border-color: var(--brand-line); }
+.topbar-btn:hover { color: var(--nav-text); background: var(--nav-hover-bg); border-color: var(--nav-border); }
 
-/* track pill in the topbar */
+/* track pill in the topbar — lives in the vivid nav chrome, styled to match */
 .track-pill {
   display: flex; align-items: center; gap: 7px;
-  background: var(--panel-2); border: 1px solid var(--line);
+  background: var(--nav-hover-bg); border: 1px solid var(--nav-border);
   border-radius: var(--radius-pill); padding: 5px 12px 5px 6px;
-  cursor: pointer; color: var(--text); font-size: var(--fs-sm); font-family: var(--sans);
+  cursor: pointer; color: var(--nav-text); font-size: var(--fs-sm); font-family: var(--sans);
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
   min-height: 34px;
 }
-.track-pill:hover { border-color: var(--brand-line); }
+.track-pill:hover { background: var(--nav-hover-bg); border-color: var(--nav-text-dim); }
 .track-pill .ic {
   width: 22px; height: 22px; border-radius: 50%; flex: none;
   display: flex; align-items: center; justify-content: center;
-  background: var(--brand-soft); color: var(--brand);
+  background: var(--nav-active-bg); color: var(--nav-active-text);
 }
 .track-pill .ic svg { width: 13px; height: 13px; }
 .track-pill .lbl { white-space: nowrap; }
@@ -187,48 +213,52 @@ code, .mono { font-family: var(--mono); }
 main { padding: var(--sp-4); max-width: 1180px; margin: 0 auto; }
 @media (min-width: 900px) {
   .layout { display: grid; grid-template-columns: 220px 1fr; gap: var(--sp-5); max-width: 1240px; margin: 0 auto; }
-  .sidenav { display: block !important; padding: var(--sp-4) 0 var(--sp-7) var(--sp-4); }
+  .sidenav {
+    display: block !important; padding: var(--sp-4) var(--sp-3) var(--sp-6);
+    border-radius: var(--radius-lg); margin: var(--sp-4) 0; height: fit-content;
+  }
   main { padding: var(--sp-4) var(--sp-4) 60px; }
 }
 
-/* side nav (desktop) */
-.sidenav { display: none; }
+/* side nav (desktop) — same vivid nav chrome as the topbar, distinct from content */
+.sidenav { display: none; background: var(--nav-bg); }
 .sidenav .navgroup-label {
   font-family: var(--mono); font-size: var(--fs-xs); letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--dim); padding: var(--sp-4) var(--sp-3) 6px;
+  text-transform: uppercase; color: var(--nav-text-dim); padding: var(--sp-4) var(--sp-3) 6px;
 }
-.sidenav .navgroup-label:first-child { padding-top: var(--sp-2); }
+.sidenav .navgroup-label:first-child { padding-top: var(--sp-3); }
 .sidenav button {
-  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  background: none; border: 0; border-left: 2px solid transparent;
-  color: var(--muted); padding: 9px var(--sp-3); font-size: var(--fs-base); cursor: pointer;
-  font-family: var(--sans); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  display: flex; align-items: center; gap: 10px; width: calc(100% - 12px); text-align: left;
+  background: none; border: 0; margin: 1px 6px;
+  color: var(--nav-text-dim); padding: 9px var(--sp-3); font-size: var(--fs-base); cursor: pointer;
+  font-family: var(--sans); border-radius: var(--radius-sm);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
-.sidenav button .navicon { width: 17px; height: 17px; flex: none; opacity: 0.85; }
+.sidenav button .navicon { width: 17px; height: 17px; flex: none; opacity: 0.9; }
 .sidenav button .k {
-  margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--dim);
-  border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; flex: none;
+  margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--nav-text-dim);
+  border: 1px solid var(--nav-border); border-radius: 4px; padding: 1px 5px; flex: none;
 }
-.sidenav button:hover { color: var(--text); background: var(--panel-2); }
-.sidenav button.active { color: var(--brand); border-left-color: var(--brand); background: var(--brand-soft); }
+.sidenav button:hover { color: var(--nav-text); background: var(--nav-hover-bg); }
+.sidenav button.active { color: var(--nav-active-text); background: var(--nav-active-bg); font-weight: 600; }
+.sidenav button.active .k { color: var(--nav-active-text); border-color: currentColor; opacity: 0.5; }
 
-/* bottom nav (mobile) */
+/* bottom nav (mobile) — vivid nav chrome */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
   display: flex; gap: 2px;
-  background: var(--panel); border-top: 1px solid var(--line);
+  background: var(--nav-bg); border-top: 1px solid var(--nav-border);
   padding: 6px 4px calc(4px + env(safe-area-inset-bottom));
 }
 .tabbar button {
   flex: 1 1 0; min-width: 0; background: none; border: 0;
-  color: var(--muted); font-size: 10px; font-family: var(--sans);
+  color: var(--nav-text-dim); font-size: 10px; font-family: var(--sans);
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 6px 2px; border-radius: var(--radius-sm); cursor: pointer;
   transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 .tabbar button .navicon { width: 19px; height: 19px; }
-.tabbar button.active { color: var(--brand); background: var(--brand-soft); }
+.tabbar button.active { color: var(--nav-active-text); background: var(--nav-active-bg); }
 @media (min-width: 900px) { .tabbar { display: none; } }
 
 /* "more" overflow sheet (mobile) */
