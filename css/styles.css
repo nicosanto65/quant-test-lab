@@ -206,7 +206,10 @@ main { padding: var(--sp-4); max-width: 1180px; margin: 0 auto; }
   transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 .sidenav button .navicon { width: 17px; height: 17px; flex: none; opacity: 0.85; }
-.sidenav button .k { display: none; }
+.sidenav button .k {
+  margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--dim);
+  border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; flex: none;
+}
 .sidenav button:hover { color: var(--text); background: var(--panel-2); }
 .sidenav button.active { color: var(--brand); border-left-color: var(--brand); background: var(--brand-soft); }
 
@@ -465,6 +468,7 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .verdict.ok .vmark { background: var(--accent); color: var(--accent-ink); }
 .verdict.no .vmark { background: var(--neg); color: var(--bg); }
+.verdict .vmark svg { width: 11px; height: 11px; stroke-width: 3; }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(4px); }

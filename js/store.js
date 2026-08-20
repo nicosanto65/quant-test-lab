@@ -18,6 +18,14 @@
     mocks: [],
     recognition: [],
     srs: {},
+    /* Per-session summaries (Drill/Mixed/Redo/Adaptive/Mock/Pattern), used only for the
+       session-completion screen's "personal best" / "vs your average" comparisons and the
+       usage-streak heatmap. Purely additive UI/analytics state — never read by grading or
+       content logic, and its absence (older saved states) degrades gracefully to "no history". */
+    sessions: [],
+    /* Per-track "which view was I on" memory, so switching tracks doesn't always bounce
+       back to the Dashboard. UI navigation state only. */
+    lastView: {},
     settings: {
       theme: 'dark',
       calculator: true,
@@ -241,26 +249,31 @@
     return { total: n, correct, accuracy: pct(correct, n), avgTime: Math.round(avgTime * 10) / 10, streak, bestStreak: best };
   }
 
-  function byKey(key) {
+  /* track: optional — when given, scopes to attempts tagged with that track (older,
+     untagged attempts count as 'quant', matching how the app behaved before tracks
+     existed). Omitting it preserves the original unscoped (all-tracks) behavior. */
+  function byKey(key, track) {
     const map = {};
-    state.attempts.forEach((a) => {
-      const k = a[key] === undefined ? 'Unknown' : a[key];
-      map[k] = map[k] || { n: 0, c: 0, t: 0 };
-      map[k].n++; if (a.correct) map[k].c++; map[k].t += a.timeSec || 0;
-    });
+    state.attempts
+      .filter((a) => !track || (a.track || 'quant') === track)
+      .forEach((a) => {
+        const k = a[key] === undefined ? 'Unknown' : a[key];
+        map[k] = map[k] || { n: 0, c: 0, t: 0 };
+        map[k].n++; if (a.correct) map[k].c++; map[k].t += a.timeSec || 0;
+      });
     return Object.keys(map).map((k) => ({
       key: k, n: map[k].n, correct: map[k].c,
       accuracy: pct(map[k].c, map[k].n), avgTime: Math.round(10 * map[k].t / map[k].n) / 10
     }));
   }
 
-  function weakestTopics(k, minN) {
+  function weakestTopics(k, minN, track) {
     minN = minN === undefined ? 3 : minN;
-    return byKey('topic').filter((r) => r.n >= minN).sort((a, b) => a.accuracy - b.accuracy).slice(0, k || 3);
+    return byKey('topic', track).filter((r) => r.n >= minN).sort((a, b) => a.accuracy - b.accuracy).slice(0, k || 3);
   }
-  function strongestTopics(k, minN) {
+  function strongestTopics(k, minN, track) {
     minN = minN === undefined ? 3 : minN;
-    return byKey('topic').filter((r) => r.n >= minN).sort((a, b) => b.accuracy - a.accuracy).slice(0, k || 3);
+    return byKey('topic', track).filter((r) => r.n >= minN).sort((a, b) => b.accuracy - a.accuracy).slice(0, k || 3);
   }
 
   function perDay() {
@@ -404,6 +417,99 @@
     return { text: 'Run "Train my weaknesses" for a 12-question adaptive set at level ' + adaptiveLevel() + '.', action: 'adaptive' };
   }
 
+  /* -------------------------- sessions / streak / best ----------------------- */
+
+  /* Records one completed session (any mode) for the retention-mechanics UI.
+     entry: {track, mode, topic, score, total, timeSec}. Purely additive — does not
+     touch state.attempts and is never consulted for grading or content selection. */
+  function recordSession(entry) {
+    entry.ts = Date.now();
+    entry.accuracy = pct(entry.score, entry.total);
+    state.sessions.push(entry);
+    if (state.sessions.length > 500) state.sessions.splice(0, state.sessions.length - 500);
+    save();
+  }
+
+  /* Same shape as summary(), scoped to one track via the attempts' own `track` tag.
+     Older attempts recorded before this field existed are treated as 'quant', which
+     matches how the app defaulted before tracks existed. */
+  function trackSummary(track) {
+    const at = state.attempts.filter((a) => (a.track || 'quant') === track);
+    const n = at.length;
+    const correct = at.filter((a) => a.correct).length;
+    const avgTime = n ? at.reduce((s, a) => s + (a.timeSec || 0), 0) / n : 0;
+    return { total: n, correct, accuracy: pct(correct, n), avgTime: Math.round(avgTime * 10) / 10 };
+  }
+
+  /* Calendar-day usage streak (distinct days with >=1 attempt or session), independent
+     of the existing "consecutive correct answers" stat in summary(). Counts back from
+     today (or yesterday, so a streak survives until the user's day actually lapses). */
+  function activeDaySet() {
+    const days = new Set();
+    state.attempts.forEach((a) => days.add(new Date(a.ts).toISOString().slice(0, 10)));
+    state.sessions.forEach((s) => days.add(new Date(s.ts).toISOString().slice(0, 10)));
+    return days;
+  }
+  function dayStreak() {
+    const days = activeDaySet();
+    if (!days.size) return { current: 0, best: 0 };
+    const toKey = (d) => d.toISOString().slice(0, 10);
+    let cur = 0;
+    const today = new Date();
+    let cursor = new Date(today);
+    if (!days.has(toKey(cursor))) cursor.setDate(cursor.getDate() - 1); // allow "not yet today"
+    while (days.has(toKey(cursor))) { cur++; cursor.setDate(cursor.getDate() - 1); }
+    const sorted = Array.from(days).sort();
+    let best = 0, run = 0, prev = null;
+    sorted.forEach((d) => {
+      if (prev) {
+        const gap = (new Date(d) - new Date(prev)) / 86400000;
+        run = gap === 1 ? run + 1 : 1;
+      } else run = 1;
+      best = Math.max(best, run);
+      prev = d;
+    });
+    return { current: cur, best: Math.max(best, cur) };
+  }
+
+  /* Last n calendar days (oldest first) with an attempt count each, for a GitHub-style
+     contribution heatmap. Always returns exactly n entries, zero-filled where quiet. */
+  function contributionDays(n) {
+    n = n || 84;
+    const counts = {};
+    state.attempts.forEach((a) => {
+      const d = new Date(a.ts).toISOString().slice(0, 10);
+      counts[d] = (counts[d] || 0) + 1;
+    });
+    const out = [];
+    const cursor = new Date();
+    cursor.setDate(cursor.getDate() - (n - 1));
+    for (let i = 0; i < n; i++) {
+      const key = cursor.toISOString().slice(0, 10);
+      out.push({ date: key, n: counts[key] || 0 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return out;
+  }
+
+  /* Compares the most recent session of a given mode (optionally scoped to one topic)
+     against this user's own prior sessions of the same kind — never against other users. */
+  function sessionComparison(mode, topic) {
+    const matches = state.sessions.filter((s) => s.mode === mode && (!topic || s.topic === topic));
+    if (matches.length < 2) return null;
+    const latest = matches[matches.length - 1];
+    const prior = matches.slice(0, -1);
+    const bestPrior = Math.max.apply(null, prior.map((s) => s.accuracy));
+    const avgPrior = Math.round(prior.reduce((s, x) => s + x.accuracy, 0) / prior.length);
+    return {
+      latest, isPersonalBest: latest.accuracy > bestPrior, bestPrior, avgPrior,
+      deltaVsAvg: Math.round(latest.accuracy - avgPrior)
+    };
+  }
+
+  function setLastView(track, view) { state.lastView[track] = view; }
+  function getLastView(track) { return state.lastView[track] || 'dashboard'; }
+
   /* ------------------------------ import / export --------------------------- */
 
   function exportJSON() { return JSON.stringify(state, null, 2); }
@@ -433,6 +539,8 @@
     summary, byKey, weakestTopics, strongestTopics, perDay, recognitionAccuracy,
     errorBreakdown, confidenceMatrix, recentMocks, readiness, internalRating,
     weaknessSession, adaptiveLevel, recommendation,
+    recordSession, trackSummary, dayStreak, contributionDays, sessionComparison,
+    setLastView, getLastView,
     exportJSON, importJSON, exportCSV
   };
 })(window);

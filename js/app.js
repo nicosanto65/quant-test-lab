@@ -16,17 +16,52 @@
     return m + ':' + String(s).padStart(2, '0');
   };
 
+  /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
+     one per track, kept intentionally simple so the same set reads cleanly at 14-22px in
+     both themes with no raster assets to cache. */
+  const ICONS = {
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+    learn: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/>',
+    drill: '<circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/>',
+    pattern: '<circle cx="9" cy="9" r="5.5"/><circle cx="15" cy="15" r="5.5"/>',
+    mixed: '<path d="M4 7h4.5l7 10H20"/><path d="M4 17h4.5l2-2.9"/><path d="M13.6 9.8 15.5 7H20"/><path d="M17.3 4.3 20 7l-2.7 2.7"/><path d="M17.3 19.7 20 17l-2.7-2.7"/>',
+    mocks: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',
+    mistakes: '<path d="M12 3 21 19.5H3z"/><path d="M12 9.5v4.2"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
+    sheet: '<rect x="4.5" y="3" width="15" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    stats: '<path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2.5 20h19"/>',
+    settings: '<circle cx="12" cy="12" r="3.1"/><path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M18.1 5.9l-1.7 1.7M7.6 16.5l-1.7 1.7M18.1 18.1l-1.7-1.7M7.6 7.6 5.9 5.9"/>',
+    more: '<circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
+    check: '<path d="M4 12.5 9.5 18 20 6"/>',
+    flame: '<path d="M12 2.5c1 2.6-.3 4-1.6 5.4C9 9.1 8 10.6 8 13a4 4 0 0 0 8 0c0-1-.3-1.8-.8-2.6.9.6 1.8 2 1.8 3.9a5 5 0 0 1-10 0c0-4.7 3-6.4 5-11.8z"/>'
+  };
+  const TRACK_ICONS = {
+    quant: '<path d="M3 17 9 9l4 4 8-9"/><path d="M15 3.5h4.5V8"/>',
+    reasoning: '<path d="M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5z"/>',
+    ib: '<path d="M4 10.5 12 4l8 6.5"/><path d="M5.5 10.5V20M9.5 10.5V20M14.5 10.5V20M18.5 10.5V20"/><path d="M3.5 20h17"/>',
+    am: '<circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 3.2"/>',
+    wm: '<path d="M12 3 4.5 6v6c0 5 3.2 7.8 7.5 9 4.3-1.2 7.5-4 7.5-9V6z"/>',
+    consulting: '<path d="M4 5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H10l-4.5 4V16H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" transform="translate(1 0)"/>'
+  };
+  function icon(name, cls) {
+    const d = ICONS[name] || ICONS.dashboard;
+    return `<svg class="${cls || 'navicon'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+  function trackIcon(id, cls) {
+    const d = TRACK_ICONS[id] || TRACK_ICONS.quant;
+    return `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+
   const VIEWS = [
-    { id: 'dashboard', label: 'Dash', title: 'Dashboard' },
-    { id: 'learn', label: 'Learn', title: 'Learn' },
-    { id: 'drill', label: 'Drill', title: 'Drill' },
-    { id: 'pattern', label: 'Pattern', title: 'Pattern recognition' },
-    { id: 'mixed', label: 'Mixed', title: 'Mixed practice' },
-    { id: 'mocks', label: 'Mocks', title: 'Mock tests' },
-    { id: 'mistakes', label: 'Errors', title: 'Mistakes and error log' },
-    { id: 'sheet', label: 'Sheet', title: 'Formula / technique sheet' },
-    { id: 'stats', label: 'Stats', title: 'Statistics' },
-    { id: 'settings', label: 'Set', title: 'Settings' }
+    { id: 'dashboard', label: 'Dash', title: 'Dashboard', group: 'primary', navgroup: 'Overview' },
+    { id: 'learn', label: 'Learn', title: 'Learn', group: 'primary', navgroup: 'Practice' },
+    { id: 'drill', label: 'Drill', title: 'Drill', group: 'primary', navgroup: 'Practice' },
+    { id: 'pattern', label: 'Pattern', title: 'Pattern recognition', group: 'secondary', navgroup: 'Practice' },
+    { id: 'mixed', label: 'Mixed', title: 'Mixed practice', group: 'secondary', navgroup: 'Practice' },
+    { id: 'mocks', label: 'Mocks', title: 'Mock tests', group: 'primary', navgroup: 'Practice' },
+    { id: 'mistakes', label: 'Errors', title: 'Mistakes and error log', group: 'secondary', navgroup: 'Review' },
+    { id: 'sheet', label: 'Sheet', title: 'Formula / technique sheet', group: 'secondary', navgroup: 'Review' },
+    { id: 'stats', label: 'Stats', title: 'Statistics', group: 'secondary', navgroup: 'Review' },
+    { id: 'settings', label: 'Set', title: 'Settings', group: 'secondary', navgroup: 'App' }
   ];
 
   let current = 'dashboard';
@@ -139,14 +174,19 @@
     go('runner');
   }
 
+  let lastSessionReport = null;
+
   function endSession(aborted) {
     const cfg = session.cfg;
     const recs = session.records;
     const elapsed = (Date.now() - session.startedAt) / 1000;
     session = null;
     stopTick();
-    if (cfg.onFinish) cfg.onFinish(recs, elapsed, aborted);
-    else go(cfg.returnTo || 'dashboard');
+    if (cfg.onFinish) return cfg.onFinish(recs, elapsed, aborted);
+    const done = recs.filter(Boolean);
+    if (!done.length) return go(cfg.returnTo || 'dashboard');
+    lastSessionReport = { cfg, recs: done, score: done.filter((r) => r.correct).length, total: done.length, elapsed };
+    go('sessionreport');
   }
 
   function stopTick() { if (tickHandle) { clearInterval(tickHandle); tickHandle = null; } }
@@ -193,6 +233,7 @@
   function finishAndRecord() {
     if (!session) return;
     const cfg = session.cfg;
+    const track = S.activeTrack();
     session.records.forEach((r) => {
       if (!r || r.recorded) return;
       r.recorded = true;
@@ -201,9 +242,21 @@
         topic: r.q.topic, subtopic: r.q.subtopic, difficulty: r.q.difficulty,
         correct: !!r.correct, timeSec: Math.round(r.timeSec), targetTime: r.q.targetTime,
         hintUsed: !!r.hintUsed, confidence: r.confidence || 'Medium',
-        errorType: r.errorType || null, given: r.given, expected: r.q.correctAnswer
+        errorType: r.errorType || null, given: r.given, expected: r.q.correctAnswer,
+        track
       });
     });
+    const done = session.records.filter(Boolean);
+    if (done.length) {
+      const topicCounts = {};
+      done.forEach((r) => { topicCounts[r.q.topic] = (topicCounts[r.q.topic] || 0) + 1; });
+      const topics = Object.keys(topicCounts);
+      S.recordSession({
+        track, mode: cfg.mode, topic: topics.length === 1 ? topics[0] : 'Mixed',
+        score: done.filter((r) => r.correct).length, total: done.length,
+        timeSec: Math.round((Date.now() - session.startedAt) / 1000)
+      });
+    }
     endSession(false);
   }
 
@@ -352,9 +405,10 @@
       const f = el('div', 'panel');
       const alt = q.altSolution ? `<div class="reveal"><span class="eyebrow">Faster alternative</span>${esc(q.altSolution)}</div>` : '';
       f.innerHTML = `
-        <div class="verdict ${rec.correct ? 'ok' : 'no'}">${rec.correct ? 'CORRECT' : rec.timedOut ? 'TIMED OUT' : 'INCORRECT'}
+        <div class="verdict ${rec.correct ? 'ok' : 'no'}"><span class="vmark">${rec.correct ? icon('check', '') : '!'}</span>
+          <span>${rec.correct ? 'Correct' : rec.timedOut ? 'Timed out' : 'Incorrect'}
           · ${fmtTime(rec.timeSec)} vs target ${fmtTime(q.targetTime || 90)}
-          · confidence ${esc(rec.confidence)}</div>
+          · confidence ${esc(rec.confidence)}</span></div>
         <div class="grid c2" style="margin-bottom:10px">
           <div class="stat"><span class="label">Correct answer</span><span class="value" style="font-size:18px">${esc(String(q.correctAnswer))}</span></div>
           <div class="stat"><span class="label">Your answer</span><span class="value" style="font-size:18px">${rec.given === null ? '—' : esc(String(rec.given))}</span></div>
@@ -419,35 +473,52 @@
 
   /* =============================== DASHBOARD =============================== */
 
+  function heatmap(days) {
+    const level = (n) => n === 0 ? 0 : n < 3 ? 1 : n < 6 ? 2 : n < 12 ? 3 : 4;
+    const cells = days.map((d) => `<i class="l${level(d.n)}" title="${d.date} · ${d.n} question${d.n === 1 ? '' : 's'}"></i>`).join('');
+    return `<div class="heatmap">${cells}</div>
+      <div class="heatmap-legend">Less
+        <i style="background:var(--heat-0)"></i><i style="background:var(--heat-1)"></i>
+        <i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i><i style="background:var(--heat-4)"></i>
+        More</div>`;
+  }
+
   function viewDashboard(root) {
-    const s = S.summary();
+    const track = S.activeTrack();
+    const trackLabel = (S.tracks().find((t) => t.id === track) || {}).label || track;
+    const s = S.trackSummary(track);
     const rd = S.readiness();
     const rec = S.recommendation();
+    const streak = S.dayStreak();
 
-    root.appendChild(el('div', 'grid c4', `
-      <div class="stat accent"><span class="label">Accuracy</span><span class="value">${s.accuracy}%</span><span class="sub">${s.correct}/${s.total}</span></div>
-      <div class="stat"><span class="label">Completed</span><span class="value">${s.total}</span><span class="sub">questions</span></div>
-      <div class="stat"><span class="label">Avg time</span><span class="value">${s.avgTime}s</span><span class="sub">per question</span></div>
-      <div class="stat"><span class="label">Streak</span><span class="value">${s.streak}</span><span class="sub">best ${s.bestStreak}</span></div>`));
-
-    const nx = el('div', 'panel');
-    nx.innerHTML = `<div class="panel-head"><span class="eyebrow">Recommended next session</span></div>
-      <p>${esc(rec.text)}</p>`;
-    const row = el('div', 'btn-row');
-    const b1 = el('button', 'btn primary', 'Train my weaknesses');
-    b1.onclick = () => startSession({
+    /* ---- hero: one-tap continue + day streak ---- */
+    const hero = el('div', 'hero-cta');
+    const hasHistory = s.total > 0;
+    hero.innerHTML = `
+      <span class="eyebrow">${hasHistory ? 'Continue in ' + esc(trackLabel) : 'Welcome to ' + esc(trackLabel)}</span>
+      <h2>${hasHistory ? esc(rec.text) : 'Start with a short guided session — no setup needed.'}</h2>
+      <p>${hasHistory ? 'One tap resumes an adaptive set built from your weakest topics right now.' : 'We’ll build a first set from the fundamentals and adjust as you go.'}</p>
+      <div class="btn-row"></div>`;
+    const heroRow = $('.btn-row', hero);
+    const heroBtn = el('button', 'btn primary lg', hasHistory ? 'Continue training' : 'Start first session');
+    heroBtn.onclick = () => startSession({
       items: S.weaknessSession(12), mode: 'Adaptive', testType: 'Adaptive',
       allowHelp: true, title: 'Adaptive — train my weaknesses', returnTo: 'dashboard'
     });
-    row.appendChild(b1);
-    const b2 = el('button', 'btn', 'Go to ' + (rec.action === 'learn' ? 'Learn' : rec.action === 'pattern' ? 'Pattern recognition' : rec.action === 'mock' ? 'Mocks' : 'Drill'));
-    b2.onclick = () => go(rec.action === 'learn' ? 'learn' : rec.action === 'pattern' ? 'pattern' : rec.action === 'mock' ? 'mocks' : 'drill');
-    row.appendChild(b2);
-    nx.appendChild(row);
+    heroRow.appendChild(heroBtn);
+    if (streak.current > 0) {
+      const flame = el('div', 'flex', `${icon('flame', 'navicon acc-c')}
+        <span><strong class="acc-c mono-sm">${streak.current}-day streak</strong>
+        <span class="dim mono-sm"> · best ${streak.best}</span></span>`);
+      flame.style.marginLeft = '4px';
+      heroRow.appendChild(flame);
+    }
+    root.appendChild(hero);
 
+    /* ---- quick-length sessions (still one tap once a length is picked) ---- */
     const quick = el('div', 'btn-row');
-    quick.style.marginTop = '8px';
-    [['Quick 5 min', 5], ['10 min', 10], ['20 min', 20], ['45 min', 45]].forEach(([label, min]) => {
+    quick.style.marginBottom = 'var(--sp-3)';
+    [['5 min', 5], ['10 min', 10], ['20 min', 20], ['45 min', 45]].forEach(([label, min]) => {
       const b = el('button', 'btn sm', label);
       b.onclick = () => startSession({
         items: S.weaknessSession(Math.max(4, Math.round(min * 60 / 75))),
@@ -456,26 +527,64 @@
       });
       quick.appendChild(b);
     });
-    nx.appendChild(quick);
-    root.appendChild(nx);
+    root.appendChild(quick);
 
-    root.appendChild(el('div', 'grid c3', `
-      <div class="stat"><span class="label">Wincent readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
-      <div class="stat"><span class="label">SIG readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
-      <div class="stat"><span class="label">IMC readiness</span><span class="value">${rd.imc}</span><span class="sub">internal metric</span></div>`));
+    /* ---- usage streak / contribution history ---- */
+    const hp = el('div', 'panel');
+    hp.innerHTML = `<span class="eyebrow">Consistency</span>
+      <div style="margin-top:10px">${heatmap(S.contributionDays(70))}</div>`;
+    root.appendChild(hp);
+
+    /* ---- track progress at a glance ---- */
+    const tp = el('div', 'panel');
+    tp.innerHTML = '<span class="eyebrow">Progress by track</span><div class="grid c3" style="margin-top:10px" id="track-progress-grid"></div>';
+    root.appendChild(tp);
+    const tgrid = $('#track-progress-grid', tp);
+    S.tracks().forEach((t) => {
+      const sum = S.trackSummary(t.id);
+      const started = sum.total > 0;
+      const card = el('button', 'track-card' + (t.id === track ? ' active' : ''));
+      card.style.cssText = 'flex-direction:column;align-items:flex-start;gap:8px;text-align:left';
+      card.innerHTML = `<span class="flex between" style="width:100%">
+          <span class="ic">${trackIcon(t.id)}</span>
+          ${started ? ring(sum.accuracy, { size: 30, stroke: 3, accent: t.id === track, showNum: false }) : ''}
+        </span>
+        <span class="name" style="font-size:var(--fs-sm)">${esc(t.label)}</span>
+        <span class="meta">${started ? sum.accuracy + '% · n=' + sum.total : 'Not started'}</span>`;
+      card.onclick = () => {
+        if (t.id !== track) { S.setTrack(t.id); current = S.getLastView(t.id); }
+        else go('dashboard');
+        render(); buildTrackPill();
+      };
+      tgrid.appendChild(card);
+    });
+
+    /* ---- core stat tiles (scoped to this track) ---- */
+    root.appendChild(el('div', 'grid c4', `
+      <div class="stat accent"><span class="label">Accuracy</span><span class="value">${s.accuracy}%</span><span class="sub">${s.correct}/${s.total}</span></div>
+      <div class="stat"><span class="label">Completed</span><span class="value">${s.total}</span><span class="sub">questions</span></div>
+      <div class="stat"><span class="label">Avg time</span><span class="value">${s.avgTime}s</span><span class="sub">per question</span></div>
+      <div class="stat brand"><span class="label">Best run</span><span class="value">${S.summary().bestStreak}</span><span class="sub">consecutive correct</span></div>`));
+
+    if (track === 'quant') {
+      root.appendChild(el('div', 'grid c3', `
+        <div class="stat"><span class="label">Wincent readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">SIG readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">IMC readiness</span><span class="value">${rd.imc}</span><span class="sub">internal metric</span></div>`));
+    }
 
     const cols = el('div', 'grid c2');
     const p1 = el('div', 'panel');
     p1.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div style="margin-top:8px">' +
-      bars(S.byKey('topic').sort((a, b) => b.n - a.n)) + '</div>';
+      bars(S.byKey('topic', track).sort((a, b) => b.n - a.n)) + '</div>';
     const p2 = el('div', 'panel');
     p2.innerHTML = '<span class="eyebrow">Accuracy by difficulty</span><div style="margin-top:8px">' +
-      bars(S.byKey('difficulty').sort((a, b) => a.key - b.key).map((r) => Object.assign({}, r, { key: 'Level ' + r.key }))) + '</div>';
+      bars(S.byKey('difficulty', track).sort((a, b) => a.key - b.key).map((r) => Object.assign({}, r, { key: 'Level ' + r.key }))) + '</div>';
     cols.appendChild(p1); cols.appendChild(p2);
     root.appendChild(cols);
 
     const cols2 = el('div', 'grid c2');
-    const w = S.weakestTopics(3), st = S.strongestTopics(3);
+    const w = S.weakestTopics(3, 3, track), st = S.strongestTopics(3, 3, track);
     const p3 = el('div', 'panel');
     p3.innerHTML = '<span class="eyebrow">Weakest 3 topics</span>' +
       (w.length ? '<ul class="list">' + w.map((r) => `<li>${esc(r.key)} <span class="neg mono-sm right" style="float:right">${r.accuracy}% · n=${r.n}</span></li>`).join('') + '</ul>'
@@ -499,13 +608,31 @@
   /* ================================= LEARN ================================= */
 
   function viewLearn(root) {
-    S.allLessonUnits().forEach((unit) => {
+    const units = S.allLessonUnits();
+    const studiedSet = new Set(S.state.attempts.filter((a) => a.mode === 'Learn').map((a) => String(a.qid).split(':')[1]));
+
+    const idx = el('div', 'learn-index');
+    units.forEach((unit) => {
+      const b = el('button', '', esc(unit.unit));
+      b.title = unit.title;
+      b.onclick = () => {
+        const target = $('#learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      idx.appendChild(b);
+    });
+    root.appendChild(idx);
+
+    units.forEach((unit) => {
       const p = el('div', 'panel');
-      p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)}</span><h2>${esc(unit.title)}</h2></div>`;
+      p.id = 'learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_');
+      const doneCount = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
+      p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)} · ${doneCount}/${unit.concepts.length} studied</span><h2>${esc(unit.title)}</h2></div>`;
       unit.concepts.forEach((c) => {
         const d = el('details', 'acc');
         const levelWord = (lv) => lv === 1 ? 'Basic' : lv === 2 ? 'Intermediate' : 'Advanced';
-        d.innerHTML = `<summary>${esc(c.name)}</summary>
+        const studied = studiedSet.has(c.id);
+        d.innerHTML = `<summary>${esc(c.name)}<span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
             ${c.primer ? `<div class="reveal"><span class="eyebrow">Start from zero</span>${esc(c.primer)}</div>` : ''}
             <p><strong>Core idea.</strong> ${esc(c.core)}</p>
@@ -538,7 +665,7 @@
               S.recordAttempt({
                 qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
                 topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
-                targetTime: 30, hintUsed: false, confidence: 'Medium'
+                targetTime: 30, hintUsed: false, confidence: 'Medium', track: S.activeTrack()
               });
             };
             wrap.appendChild(b);
@@ -678,7 +805,8 @@
     if (r.picked) {
       const ok = r.picked === q.recognitionTechnique;
       const f = el('div', 'panel');
-      f.innerHTML = `<div class="verdict ${ok ? 'ok' : 'no'}">${ok ? 'CORRECT' : 'INCORRECT'} — primary approach: ${esc(q.recognitionTechnique)}</div>
+      f.innerHTML = `<div class="verdict ${ok ? 'ok' : 'no'}"><span class="vmark">${ok ? icon('check', '') : '!'}</span>
+        <span>${ok ? 'Correct' : 'Incorrect'} — primary approach: ${esc(q.recognitionTechnique)}</span></div>
         <div class="reveal"><span class="eyebrow">Why</span>${esc(q.approach || '')}</div>
         <div class="reveal"><span class="eyebrow">Trap</span>${esc(q.commonTrap || '—')}</div>`;
       const b = el('button', 'btn primary full', r.idx >= r.items.length - 1 ? 'Finish set' : 'Next item <kbd>N</kbd>');
@@ -937,6 +1065,18 @@
       <p class="small dim" style="margin-top:10px">The internal rating compares this attempt only with your own previous mocks of the same type. It is not a prediction of any employer's score.</p>`;
     root.appendChild(head);
 
+    if (r.rating === 100) {
+      const ms = el('div', 'milestone');
+      ms.innerHTML = `<span class="mic">${icon('flame', 'navicon')}</span>
+        <span class="mtext">Your best <strong>${esc(r.type)}</strong> result yet — ahead of every previous attempt at this mock.</span>`;
+      root.insertBefore(ms, head);
+    } else if (r.rating === null || r.rating === undefined) {
+      const ms = el('div', 'milestone');
+      ms.innerHTML = `<span class="mic">${icon('check', 'navicon')}</span>
+        <span class="mtext">First <strong>${esc(r.type)}</strong> mock recorded — future attempts will be compared against this one.</span>`;
+      root.insertBefore(ms, head);
+    }
+
     const br = el('div', 'panel');
     br.innerHTML = '<span class="eyebrow">Topic breakdown</span><div style="margin-top:8px">' + bars(topicRows) + '</div>' +
       (slow.length ? `<div class="hr"></div><span class="eyebrow">Inefficient method — well over target time</span>
@@ -959,6 +1099,62 @@
     const b = el('button', 'btn primary full', 'Back to mocks');
     b.onclick = () => go('mocks');
     root.appendChild(b);
+  }
+
+  /* Generic, lightweight completion screen for non-mock sessions (Drill/Mixed/Adaptive/
+     Redo). Every session now ends here instead of silently bouncing back — the whole
+     point is to leave visible, comparative evidence of the session rather than a bare
+     stat dump. */
+  function viewSessionReport(root) {
+    const r = lastSessionReport;
+    if (!r) { go('dashboard'); return; }
+    const cfg = r.cfg;
+    const accuracy = Math.round(100 * r.score / r.total);
+    const topicCounts = {};
+    r.recs.forEach((x) => { topicCounts[x.q.topic] = (topicCounts[x.q.topic] || 0) + 1; });
+    const topics = Object.keys(topicCounts);
+    const topic = topics.length === 1 ? topics[0] : 'Mixed';
+    const cmp = S.sessionComparison(cfg.mode, topic);
+
+    if (cmp && cmp.isPersonalBest) {
+      const ms = el('div', 'milestone');
+      ms.innerHTML = `<span class="mic">${icon('flame', 'navicon')}</span>
+        <span class="mtext">New best for <strong>${esc(topic)}</strong> ${esc(cfg.mode)} sessions —
+        ${accuracy}% beats your previous best of ${cmp.bestPrior}%.</span>`;
+      root.appendChild(ms);
+    }
+
+    const head = el('div', 'panel');
+    head.innerHTML = `<div class="panel-head"><span class="eyebrow">${esc(cfg.title || cfg.mode)} — complete</span></div>
+      <div class="grid c3">
+        <div class="stat accent"><span class="label">Score</span><span class="value">${r.score}/${r.total}</span><span class="sub">${accuracy}%</span></div>
+        <div class="stat"><span class="label">Time</span><span class="value">${fmtTime(r.elapsed)}</span></div>
+        <div class="stat brand"><span class="label">${cmp ? 'vs your average' : 'Topic'}</span>
+          <span class="value" style="font-size:var(--fs-lg)">${cmp ? (cmp.deltaVsAvg >= 0 ? '+' : '') + cmp.deltaVsAvg + '%' : esc(topic)}</span>
+          <span class="sub">${cmp ? 'avg ' + cmp.avgPrior + '%' : ''}</span></div>
+      </div>`;
+    root.appendChild(head);
+
+    const wrong = r.recs.filter((x) => !x.correct);
+    if (wrong.length) {
+      const wp = el('div', 'panel');
+      wp.innerHTML = '<span class="eyebrow">Missed this session</span><ul class="list">' +
+        wrong.map((x) => `<li>${esc(x.q.topic)} <span class="dim mono-sm" style="margin-left:6px">${esc(x.q.subtopic || '')}</span>
+          <span class="neg mono-sm right" style="float:right">L${x.q.difficulty}</span></li>`).join('') + '</ul>';
+      root.appendChild(wp);
+    }
+
+    const row = el('div', 'btn-row');
+    const again = el('button', 'btn', 'Do another set');
+    again.onclick = () => startSession({
+      items: S.weaknessSession(Math.max(4, r.total)), mode: 'Adaptive', testType: 'Adaptive',
+      allowHelp: true, title: 'Adaptive — train my weaknesses', returnTo: cfg.returnTo
+    });
+    row.appendChild(again);
+    const cont = el('button', 'btn primary', 'Continue');
+    cont.onclick = () => go(cfg.returnTo || 'dashboard');
+    row.appendChild(cont);
+    root.appendChild(row);
   }
 
   /* ================================ MISTAKES =============================== */
@@ -1201,6 +1397,7 @@
   function go(view) {
     if (session && view !== 'runner') { session = null; stopTick(); }
     current = view;
+    if (VIEWS.some((v) => v.id === view)) S.setLastView(S.activeTrack(), view);
     render();
     window.scrollTo(0, 0);
   }
@@ -1223,23 +1420,83 @@
     ({
       runner: viewRunner, dashboard: viewDashboard, learn: viewLearn, drill: viewDrill,
       pattern: viewPattern, mixed: viewMixed, mocks: viewMocks, mockreport: viewMockReport,
+      sessionreport: viewSessionReport,
       mistakes: viewMistakes, sheet: viewSheet, stats: viewStats, settings: viewSettings
     }[view] || viewDashboard)(main);
 
     document.querySelectorAll('[data-nav]').forEach((b) => {
       b.classList.toggle('active', b.dataset.nav === current);
     });
+    const moreBtn = $('#more-tab');
+    if (moreBtn) moreBtn.classList.toggle('active', VIEWS.some((v) => v.id === current && v.group === 'secondary'));
     if (view !== 'runner' && view !== 'pattern') stopTick();
+  }
+
+  /* ------------------------------- bottom sheets ---------------------------- */
+
+  function openSheet(id) {
+    const bd = $('#' + id + '-backdrop'), sh = $('#' + id);
+    if (!bd || !sh) return;
+    bd.classList.add('show'); sh.classList.add('show');
+  }
+  function closeSheet(id) {
+    const bd = $('#' + id + '-backdrop'), sh = $('#' + id);
+    if (!bd || !sh) return;
+    bd.classList.remove('show'); sh.classList.remove('show');
+  }
+  function mountSheet(id, cls, innerHTML) {
+    let bd = $('#' + id + '-backdrop');
+    if (!bd) {
+      bd = el('div', 'more-sheet-backdrop'); bd.id = id + '-backdrop';
+      bd.onclick = () => closeSheet(id);
+      document.body.appendChild(bd);
+    }
+    let sh = $('#' + id);
+    if (!sh) { sh = el('div', 'more-sheet ' + cls); sh.id = id; document.body.appendChild(sh); }
+    sh.innerHTML = '<div class="sheet-grab"></div>' + innerHTML;
+    return sh;
+  }
+
+  function buildMoreSheet() {
+    const items = VIEWS.filter((v) => v.group === 'secondary');
+    const groups = {};
+    items.forEach((v) => { (groups[v.navgroup] = groups[v.navgroup] || []).push(v); });
+    const body = Object.keys(groups).map((g) => `
+      <div class="eyebrow" style="margin:${g === Object.keys(groups)[0] ? '0' : '14px'} 0 8px">${esc(g)}</div>
+      <div class="sheet-grid">${groups[g].map((v) => `
+        <button class="sheet-item ${v.id === current ? 'active' : ''}" data-nav-sheet="${v.id}">
+          ${icon(v.id, 'navicon')}<span>${esc(v.title)}</span>
+        </button>`).join('')}</div>`).join('');
+    const sh = mountSheet('more-sheet', '', body);
+    sh.querySelectorAll('[data-nav-sheet]').forEach((b) => {
+      b.onclick = () => { closeSheet('more-sheet'); go(b.dataset.navSheet); };
+    });
   }
 
   function buildNav() {
     const tab = $('#tabbar'), side = $('#sidenav');
-    VIEWS.forEach((v, i) => {
-      const a = el('button', '', v.label);
+    tab.innerHTML = ''; side.innerHTML = '';
+
+    VIEWS.filter((v) => v.group === 'primary').forEach((v) => {
+      const a = el('button', '', `${icon(v.id, 'navicon')}<span>${esc(v.label)}</span>`);
       a.dataset.nav = v.id;
       a.onclick = () => go(v.id);
       tab.appendChild(a);
-      const b = el('button', '', `<span class="k">${i + 1 === 10 ? '0' : i + 1}</span>${v.title}`);
+    });
+    const moreTab = el('button', '', `${icon('more', 'navicon')}<span>More</span>`);
+    moreTab.id = 'more-tab';
+    moreTab.onclick = () => { buildMoreSheet(); openSheet('more-sheet'); };
+    tab.appendChild(moreTab);
+
+    let lastGroup = null;
+    VIEWS.forEach((v, i) => {
+      const g = v.navgroup;
+      if (g !== lastGroup) {
+        const lbl = el('div', 'navgroup-label', esc(g));
+        side.appendChild(lbl);
+        lastGroup = g;
+      }
+      const b = el('button', '', `${icon(v.id, 'navicon')}<span>${esc(v.title)}</span><span class="k">${i + 1 === 10 ? '0' : i + 1}</span>`);
       b.dataset.nav = v.id;
       b.onclick = () => go(v.id);
       side.appendChild(b);
@@ -1279,27 +1536,72 @@
     if (k === 't') toggleTheme();
   }
 
-  function buildTrackSelect() {
-    const sel = $('#track-select');
-    if (!sel) return;
-    sel.innerHTML = S.tracks().map((t) => `<option value="${esc(t.id)}">${esc(t.label)}</option>`).join('');
-    sel.value = S.activeTrack();
-    sel.onchange = () => {
-      S.setTrack(sel.value);
-      drillState.topic = ''; drillState.subtopic = '';
-      go('dashboard');
-      toast('Track: ' + S.tracks().find((t) => t.id === sel.value).label);
-    };
+  function ring(pct, opts) {
+    opts = opts || {};
+    const size = opts.size || 40, sw = opts.stroke || 4;
+    const r = (size - sw) / 2, c = 2 * Math.PI * r;
+    const v = Math.max(0, Math.min(100, pct || 0));
+    const off = c * (1 - v / 100);
+    return `<span class="ring-label" style="width:${size}px;height:${size}px">
+      <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"/>
+        <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"
+          stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
+          transform="rotate(-90 ${size / 2} ${size / 2})"/>
+      </svg>
+      ${opts.showNum === false ? '' : `<span class="num" style="font-size:${Math.max(10, size * 0.28)}px">${Math.round(v)}</span>`}
+    </span>`;
+  }
+
+  function buildTrackSheet() {
+    const active = S.activeTrack();
+    const body = '<div class="sheet-grid">' + S.tracks().map((t) => {
+      const sum = S.trackSummary(t.id);
+      const started = sum.total > 0;
+      return `<button class="track-card ${t.id === active ? 'active' : ''}" data-track="${esc(t.id)}">
+        <span class="ic">${trackIcon(t.id)}</span>
+        <span class="body">
+          <span class="name">${esc(t.label)}</span>
+          <span class="meta">${started ? sum.total + ' answered · ' + sum.accuracy + '% accuracy' : 'Not started yet'}</span>
+        </span>
+        <span class="ring-wrap">${started ? ring(sum.accuracy, { size: 34, stroke: 3.5, accent: t.id === active }) : ''}</span>
+      </button>`;
+    }).join('') + '</div>';
+    const sh = mountSheet('track-sheet', 'track-sheet',
+      '<div class="eyebrow" style="margin-bottom:10px">Choose a track</div>' + body);
+    sh.querySelectorAll('[data-track]').forEach((b) => {
+      b.onclick = () => {
+        const id = b.dataset.track;
+        closeSheet('track-sheet');
+        if (id === active) return;
+        S.setTrack(id);
+        drillState.topic = ''; drillState.subtopic = '';
+        current = S.getLastView(id);
+        render();
+        buildTrackPill();
+        toast(S.tracks().find((t) => t.id === id).label + ' — welcome back.');
+      };
+    });
+  }
+
+  function buildTrackPill() {
+    const host = $('#track-pill-host');
+    if (!host) return;
+    const t = S.tracks().find((x) => x.id === S.activeTrack()) || S.tracks()[0];
+    host.innerHTML = `<button class="track-pill" id="track-pill-btn" title="Switch track">
+      <span class="ic">${trackIcon(t.id)}</span><span class="lbl">${esc(t.label)}</span>
+    </button>`;
+    $('#track-pill-btn').onclick = () => { buildTrackSheet(); openSheet('track-sheet'); };
   }
 
   function init() {
     document.documentElement.setAttribute('data-theme', S.state.settings.theme || 'dark');
     buildNav();
-    buildTrackSelect();
+    buildTrackPill();
     $('#theme-btn').onclick = toggleTheme;
     document.addEventListener('keydown', keys);
     window.addEventListener('beforeunload', () => S.save());
-    go('dashboard');
+    go(S.getLastView(S.activeTrack()));
   }
 
   document.addEventListener('DOMContentLoaded', init);
