@@ -203,6 +203,308 @@
     return `<div class="reading-block${cls}"${idStr}>${eyebrow}${prose}</div>`;
   }
 
+  /* ============================= formula rendering (Mejora D) ============================
+     A conservative text->LaTeX heuristic converter for the "formulas" field, rendered with
+     KaTeX. This NEVER touches source content — every formula string from lessons*.js is
+     read exactly as written; only how it is drawn to the screen changes. The conversion is
+     deliberately cautious: every clause is independently gated on "does this look like
+     clean, self-contained math" before conversion is even attempted, and the finished LaTeX
+     is checked once more (isLatexSafe) and actually run through katex.renderToString before
+     being trusted — any clause that fails either check, or that KaTeX itself rejects, falls
+     back to the original plain monospace rendering for that clause specifically. A single
+     formula string can end up as a mix of both: some clauses rendered as real typeset math,
+     others as clean text, exactly matching the brief's "simple formula shown well beats a
+     complex one converted wrong." See FORMULA_RENDER_AUDIT.md for the full corpus this was
+     tested against (491 formulas from every track's lessons*.js plus formulas.js). */
+
+  // ---- "is this clean math" gate ----
+  const ALLOWED_WORDS = new Set([
+    'a', 'an', 'the', 'of', 'in', 'on', 'to', 'for', 'if', 'is', 'are', 'at', 'by', 'or', 'and',
+    'when', 'where', 'all', 'any', 'no', 'not', 'per', 'with', 'from', 'as', 'provided', 'always',
+    'never', 'matches', 'same', 'other', 'out', 'each'
+  ]);
+  function wordIsProse(w) {
+    const lower = w.toLowerCase();
+    if (ALLOWED_WORDS.has(lower)) return false;
+    return /^[a-zA-Z]{3,}$/.test(w);
+  }
+
+  // ---- named-quantity operands ("Operating margin = operating income / revenue") ----
+  // Finance/applied formulas in this dataset routinely use full English phrases as variable
+  // names instead of single letters — legitimate, well-formed math notation (textbooks do
+  // the same with \text{} in LaTeX). STOP_WORDS is a blacklist of grammar words that only
+  // show up in real sentences, never in a named quantity like "operating income" — any
+  // phrase containing one aborts the WHOLE segment rather than risk wrapping a sentence
+  // fragment in \text{}.
+  const STOP_WORDS = new Set([
+    'is', 'are', 'was', 'were', 'be', 'been', 'being', 'the', 'this', 'that', 'these', 'those',
+    'always', 'never', 'since', 'while', 'whenever', 'when', 'where', 'which', 'who', 'whom',
+    'because', 'so', 'than', 'then', 'thus', 'hence', 'therefore', 'however', 'although', 'though',
+    'if', 'unless', 'until', 'before', 'after', 'during', 'between', 'within', 'without', 'about',
+    'above', 'below', 'under', 'over', 'through', 'across', 'against', 'toward', 'towards',
+    'upon', 'onto', 'into', 'not', 'no', 'none', 'any', 'all', 'each', 'every', 'some', 'much',
+    'many', 'more', 'most', 'less', 'least', 'very', 'quite', 'rather', 'just', 'only', 'also',
+    'too', 'as', 'such', 'you', 'your', 'it', 'its', 'they', 'their', 'we', 'our', 'i', 'he', 'she',
+    'can', 'could', 'should', 'would', 'will', 'shall', 'must', 'may', 'might', 'do', 'does', 'did',
+    'have', 'has', 'had', 'and', 'or', 'but', 'yet', 'nor'
+  ]);
+  // NOTE: plain ASCII '-' is deliberately excluded from the boundary class below (unlike the
+  // unicode minus '−', which this dataset uses for actual subtraction) — this dataset uses
+  // ASCII hyphens inside compound terms ("10-year", "next-12-months", "risk-free"), and
+  // treating '-' as an operator boundary here would fracture those mid-word.
+  const PHRASE_RE = /(?:^|[=/×÷·+−(])\s*([A-Za-z][A-Za-z0-9'-]*(?:\s+[A-Za-z][A-Za-z0-9'-]*){0,5})\s*(?=[=/×÷·+−)]|$)/g;
+  // A lone single-letter/short token ("n", "x", "Rf", "Rm") is almost always a math variable
+  // or a 2-3-char abbreviation and must stay bare, italic — only a lone word that's actually
+  // spelled out (4+ letters, and not ALL-CAPS the way a ticker/acronym like GDP or YTM is)
+  // gets wrapped on its own.
+  function isWrappableSingleWord(w) {
+    return w.length >= 4 && /[a-z]/.test(w);
+  }
+  function wrapNamedOperands(s) {
+    let aborted = false;
+    const out = s.replace(PHRASE_RE, (m, phrase) => {
+      if (aborted || !phrase) return m;
+      const words = phrase.trim().split(/\s+/);
+      if (words.length === 1 && !isWrappableSingleWord(words[0])) return m;
+      const hasStopWord = words.some((w) => STOP_WORDS.has(w.toLowerCase()));
+      if (hasStopWord || words.length > 6) { aborted = true; return m; }
+      const lead = m.slice(0, m.indexOf(phrase));
+      return `${lead}\\text{${phrase.trim()}}`;
+    });
+    return aborted ? null : out;
+  }
+  // prose-word gate, but blind to anything already wrapped in \text{...} — those are
+  // intentional named operands, not stray sentence prose
+  function countProseWordsOutsideText(s) {
+    const withoutTextSpans = s.replace(/\\text\{[^}]*\}/g, ' ');
+    const words = withoutTextSpans.match(/[a-zA-Z]{3,}/g) || [];
+    return words.filter(wordIsProse).length;
+  }
+
+  // ---- unicode -> LaTeX token conversion ----
+  const SUPERSCRIPT_MAP = {
+    '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+    'ⁿ': 'n', 'ⁱ': 'i', 'ᵏ': 'k', 'ᵗ': 't', 'ᶜ': 'c', 'ʳ': 'r', 'ᴺ': 'N', '⁺': '+', '⁻': '-',
+    'ᵞ': '\\gamma '
+  };
+  const SUBSCRIPT_MAP = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ᵢ': 'i', 'ⱼ': 'j', 'ₖ': 'k', 'ₙ': 'n', 'ₓ': 'x', 'ₜ': 't', 'ₐ': 'a' };
+  const GREEK_MAP = {
+    'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta', 'ε': '\\epsilon', 'ζ': '\\zeta',
+    'η': '\\eta', 'θ': '\\theta', 'ι': '\\iota', 'κ': '\\kappa', 'λ': '\\lambda', 'μ': '\\mu', 'ν': '\\nu',
+    'ξ': '\\xi', 'ο': 'o', 'π': '\\pi', 'ρ': '\\rho', 'ς': '\\varsigma', 'σ': '\\sigma', 'τ': '\\tau',
+    'υ': '\\upsilon', 'φ': '\\phi', 'χ': '\\chi', 'ψ': '\\psi', 'ω': '\\omega',
+    'Γ': '\\Gamma', 'Δ': '\\Delta', 'Θ': '\\Theta', 'Λ': '\\Lambda', 'Ξ': '\\Xi', 'Π': '\\Pi',
+    'Σ': '\\Sigma', 'Υ': '\\Upsilon', 'Φ': '\\Phi', 'Ψ': '\\Psi', 'Ω': '\\Omega'
+  };
+  const SYMBOL_MAP = {
+    '×': '\\times', '÷': '\\div', '±': '\\pm', '∓': '\\mp', '·': '\\cdot',
+    '≤': '\\leq', '≥': '\\geq', '≠': '\\neq', '≈': '\\approx', '≡': '\\equiv',
+    '∈': '\\in', '∉': '\\notin', '⊂': '\\subset', '⊆': '\\subseteq',
+    '∪': '\\cup', '∩': '\\cap', '∅': '\\emptyset',
+    '∞': '\\infty', '→': '\\to', '⇒': '\\Rightarrow', '⇔': '\\Leftrightarrow',
+    '∀': '\\forall', '∃': '\\exists', '∂': '\\partial', '∝': '\\propto',
+    '−': '-'
+  };
+  function convertRun(chars, map) {
+    return chars.split('').map((c) => map[c]).join('');
+  }
+  const SUPERSCRIPT_RUN_RE = new RegExp(`[${Object.keys(SUPERSCRIPT_MAP).join('')}]+`, 'g');
+  const SUBSCRIPT_RUN_RE = new RegExp(`[${Object.keys(SUBSCRIPT_MAP).join('')}]+`, 'g');
+  function convertSuperSubscripts(s) {
+    s = s.replace(SUPERSCRIPT_RUN_RE, (run) => `^{${convertRun(run, SUPERSCRIPT_MAP)}}`);
+    s = s.replace(SUBSCRIPT_RUN_RE, (run) => `_{${convertRun(run, SUBSCRIPT_MAP)}}`);
+    return s;
+  }
+  function convertGreek(s) {
+    return s.replace(/[α-ωΑ-Ω]/g, (c) => GREEK_MAP[c] !== undefined ? GREEK_MAP[c] + ' ' : c);
+  }
+  function convertSymbols(s) {
+    return s.replace(/[×÷±∓·≤≥≠≈≡∈∉⊂⊆∪∩∅∞→⇒⇔∀∃∂∝−]/g, (c) => SYMBOL_MAP[c] + ' ');
+  }
+  // Σ handling: bare "Σ" (optionally already turned into "Σ_{i}" by convertSuperSubscripts)
+  // -> \sum, run BEFORE convertGreek maps Σ to a bare non-operator \Sigma
+  function convertSigmaSum(s) {
+    return s.replace(/Σ(_\{[^}]*\})?/g, (m, sub) => `\\sum${sub || ''} `);
+  }
+  function convertSqrt(s) {
+    s = s.replace(/√\(([^()]*)\)/g, (m, inner) => `\\sqrt{${inner}}`);
+    // √Var(X) — a function name immediately followed by its own paren group; the whole
+    // call belongs inside the radical, not just the bare name before the "("
+    s = s.replace(/√([A-Za-z0-9]+\([^()]*\))/g, (m, inner) => `\\sqrt{${inner}}`);
+    s = s.replace(/√([A-Za-z0-9]+)/g, (m, inner) => `\\sqrt{${inner}}`);
+    return s;
+  }
+  // a/b -> \frac{a}{b}: only for a clearly-delimited numerator/denominator. Each side must
+  // be EITHER a single balanced-parens group OR a bare identifier/number with no parens at
+  // all, and may not border '(' or ')' directly — a fraction operand is never half-inside a
+  // call like P(...), which is what let an earlier version mis-match "P(A)/P(Aᶜ)" as
+  // "A)/P". A trailing lookahead also blocks matching when the right side is immediately
+  // followed by a superscript/subscript group (e.g. "(1+yield)ⁿ") — that exponent belongs
+  // to the whole right-hand group, and this converter can't safely pull it inside the
+  // fraction, so it leaves the '/' as a literal slash rather than scope it wrong.
+  function convertFractions(s) {
+    const SIDE = '(?:\\([^()]*\\)|\\\\text\\{[^}]*\\}|[A-Za-z0-9]+(?:[_^]\\{[^}]*\\})*)';
+    const re = new RegExp(`(?<![(A-Za-z0-9)])(${SIDE})\\s*/\\s*(${SIDE})(?![A-Za-z0-9(])(?!\\^|_)`, 'g');
+    let prev;
+    do {
+      prev = s;
+      s = s.replace(re, (m, a, b) => {
+        const na = a.trim().replace(/^\(([^()]*)\)$/, '$1');
+        const nb = b.trim().replace(/^\(([^()]*)\)$/, '$1');
+        if (!na || !nb) return m;
+        return `\\frac{${na}}{${nb}}`;
+      });
+    } while (s !== prev && s.includes('/'));
+    return s;
+  }
+  function convertConditionalBar(s) {
+    // P(A|B) — a single '|' inside one balanced-paren group is a conditioning bar, not an
+    // absolute-value delimiter; must run before convertAbsBars, which would otherwise pair
+    // it with an unrelated '|' in a second, separate P(...) later in the string.
+    return s.replace(/\(([^()|]*)\|([^()|]*)\)/g, (m, a, b) => `(${a}\\mid ${b})`);
+  }
+  function convertAbsBars(s) {
+    return s.replace(/\|([^|]{1,40})\|/g, (m, inner) => `\\left|${inner}\\right|`);
+  }
+  const RELATION_OP_LATEX = { '=': '=', '≈': '\\approx', '≤': '\\leq', '≥': '\\geq', '≠': '\\neq' };
+  function convertFragment(s) {
+    s = convertSigmaSum(s);
+    s = convertSqrt(s);
+    s = convertConditionalBar(s);
+    s = convertAbsBars(s);
+    s = convertSuperSubscripts(s);
+    s = convertSymbols(s);
+    s = convertGreek(s);
+    return s;
+  }
+  /* Splits on the FIRST relation operator and converts each side separately, applying
+     fraction conversion only to the right-hand side. A left-hand side in this dataset is a
+     NAME ("Forward P/E", "Gold/silver ratio"), never a literal division; the right-hand
+     side is the actual formula, where a/b really does mean division. A further '=' inside
+     the right side (a chained equality like "coupon rate = current yield = YTM") is left as
+     a literal '=', already valid direct KaTeX input. */
+  function formulaToLatex(segment) {
+    const relIdx = segment.search(/[=≈≤≥≠]/);
+    if (relIdx === -1) return convertFragment(segment).replace(/\s+/g, ' ').trim();
+    const lhs = convertFragment(segment.slice(0, relIdx));
+    const op = RELATION_OP_LATEX[segment[relIdx]] || segment[relIdx];
+    const rhs = convertFractions(convertFragment(segment.slice(relIdx + 1)));
+    return `${lhs} ${op} ${rhs}`.replace(/\s+/g, ' ').trim();
+  }
+
+  // ---- structural stripping: separate a segment's "math core" from label/aside wrapper
+  // text that isn't itself math, so the gate evaluates only the part that should become
+  // KaTeX. Anything stripped off is kept as plain text around the rendered formula.
+  const TRAILING_CONNECTORS = [
+    ' where ', ' when ', ' given ', ' provided ', ' for every ', ' with equality when ',
+    ' matches ', ' valid for '
+  ];
+  function stripTrailingClause(s) {
+    let bestIdx = -1;
+    TRAILING_CONNECTORS.forEach((marker) => {
+      const idx = s.indexOf(marker);
+      if (idx >= 0 && (bestIdx === -1 || idx < bestIdx)) bestIdx = idx;
+    });
+    if (bestIdx === -1) return { core: s, trail: '' };
+    return { core: s.slice(0, bestIdx), trail: s.slice(bestIdx) };
+  }
+  const LEADING_LABEL_RE = /^([A-Za-z][A-Za-z0-9' ,-]{1,40}):\s+/;
+  function stripLeadingLabel(s) {
+    const m = s.match(LEADING_LABEL_RE);
+    if (!m) return { label: '', core: s };
+    return { label: m[0], core: s.slice(m[0].length) };
+  }
+  // requires actual whitespace before the '(' — "max(" (a function call) has none and is
+  // never touched here, only a genuinely separate "... clause) (aside)" is a candidate
+  const TRAILING_PAREN_RE = /^(.*?)\s+\(([^()]{4,80})\)\s*$/;
+  function stripTrailingAside(s) {
+    const m = s.match(TRAILING_PAREN_RE);
+    if (!m) return { core: s, aside: '' };
+    const [, prefix, inner] = m;
+    // even with a space before it, a trailing "(...)" can still be a required OPERAND, not
+    // a detachable aside — a fraction's denominator or a multiplicand always leaves the
+    // preceding operator dangling with nothing after it if stripped, truncating the actual
+    // formula rather than removing genuine explanatory text.
+    if (/[/×÷+\-−]\s*$/.test(prefix)) return { core: s, aside: '' };
+    const innerWords = (inner.match(/[a-zA-Z]{3,}/g) || []).filter(wordIsProse);
+    if (innerWords.length < 2) return { core: s, aside: '' };
+    return { core: prefix, aside: ` (${inner})` };
+  }
+
+  // Final safety net, run on the FINISHED latex string: strip every \text{...} span
+  // (deliberate named operands), every \command, and every recognized bare function name,
+  // then check what's left. Anything else non-ASCII, or any lowercase-letter word of 3+
+  // characters, means some piece of the source text slipped through unconverted — reject
+  // the whole segment rather than emit a partially-garbled result. All-caps runs (GDP, YTM,
+  // WACC...) are allowed through: those are acronyms used directly as symbols, not prose.
+  const KNOWN_FUNC_NAMES_RE = /\b(Var|Cov|Cor|Corr|min|max|log|ln|exp|sin|cos|tan|lim|sup|inf|mean|mode|median|Pr)\b/g;
+  function isLatexSafe(latex) {
+    let s = latex.replace(/\\text\{[^}]*\}/g, ' ');
+    s = s.replace(/\\[a-zA-Z]+/g, ' ');
+    s = s.replace(KNOWN_FUNC_NAMES_RE, ' ');
+    if (/[^\x00-\x7F]/.test(s)) return false;
+    const words = s.match(/[A-Za-z]{3,}/g) || [];
+    return !words.some((w) => /[a-z]/.test(w));
+  }
+
+  /* Full pipeline for one clause: strip a leading "Label: " prefix and a trailing
+     "(explanatory aside)" or " where/when/given ..." clause, gate-check what's left, and
+     only if that passes, convert and KaTeX-render it. Returns null (never throws) if
+     nothing in the segment is confidently convertible or if KaTeX itself rejects the
+     result — the caller then renders the ENTIRE original segment as plain text. */
+  function parseFormulaSegment(rawSegment) {
+    const { label, core: afterLabel } = stripLeadingLabel(rawSegment);
+    const { core: afterAside, aside } = stripTrailingAside(afterLabel);
+    const { core, trail } = stripTrailingClause(afterAside);
+    const mathCore = core.trim();
+    if (!/[=≈≤≥≠]/.test(mathCore)) return null;
+    if (mathCore.length > 160) return null;
+    const wrapped = wrapNamedOperands(mathCore);
+    if (wrapped === null) return null;
+    if (countProseWordsOutsideText(wrapped) >= 2) return null;
+    const latex = formulaToLatex(wrapped);
+    if (!isLatexSafe(latex)) return null;
+    let html;
+    try {
+      html = global.katex.renderToString(latex, { throwOnError: true, strict: 'ignore' });
+    } catch (e) {
+      return null; // KaTeX itself refused it — safe fallback to plain text, never a visible error
+    }
+    return { label, html, trail: trail + aside };
+  }
+
+  // splits a formula string into independent clauses: a trailing " — note" is split off
+  // first (an em-dash explanation applies to the whole formula, not just its last clause),
+  // then the remaining core is split on ". " / "; " into a list of separate formulas —
+  // this dataset often packs several related ones into one string ("DSO = ...; DIO = ...").
+  function splitFormulaClauses(text) {
+    const emdashIdx = text.indexOf(' — ');
+    const core = emdashIdx >= 0 ? text.slice(0, emdashIdx) : text;
+    const note = emdashIdx >= 0 ? text.slice(emdashIdx) : '';
+    const parts = core.split(/(?:\.\s+|;\s+)/).filter((p) => p.trim());
+    return { parts, note };
+  }
+
+  /* Renders one "formulas" array entry: each clause independently becomes either a
+     KaTeX-rendered block (its own larger, centered, distinctly-backed presentation — see
+     .formula-katex in styles.css) or, whenever the parser isn't confident, the original
+     clean monospace text (.formula) exactly as before this feature existed. Never partially
+     mangles a clause: a given clause is either fully typeset or fully plain text. */
+  function renderFormula(text) {
+    text = String(text || '');
+    if (typeof global.katex === 'undefined') return `<span class="formula">${esc(text)}</span>`;
+    const { parts, note } = splitFormulaClauses(text);
+    const rendered = parts.map((part) => {
+      const parsed = parseFormulaSegment(part);
+      if (!parsed) return `<span class="formula">${esc(part.trim())}</span>`;
+      const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
+      const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
+      return `<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>`;
+    }).join(' ');
+    const noteHtml = note ? `<span class="formula-note">${esc(note)}</span>` : '';
+    return rendered + noteHtml;
+  }
+
   /* Minimal monoline icon set (24x24, stroke=currentColor) — one glyph per nav view and
      one per track, kept intentionally simple so the same set reads cleanly at 14-22px in
      both themes with no raster assets to cache. */
@@ -887,7 +1189,7 @@
               <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
               <div class="flow-item"><span class="micro-label">Key formulas</span>
-                <ul class="formula-list">${c.formulas.map((f) => `<li><span class="formula">${esc(f)}</span></li>`).join('')}</ul></div>
+                <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
@@ -1961,5 +2263,5 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession };
+  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment };
 })(window);

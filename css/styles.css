@@ -77,6 +77,8 @@
   --brand-ink: #0D1620;
   --brand-soft: rgba(127, 166, 201, 0.14);
   --brand-line: rgba(127, 166, 201, 0.38);
+  --formula-bg: var(--brand-soft);
+  --formula-line: var(--brand-line);
 
   /* warm gold accent — CTAs, correct feedback, progress/achievement ONLY */
   --accent: #D2B370;
@@ -135,6 +137,8 @@ html[data-theme="light"] {
   --brand-ink: #FFFFFF;
   --brand-soft: #E8EEF4;
   --brand-line: #B9CBDC;
+  --formula-bg: var(--brand-soft);
+  --formula-line: var(--brand-line);
 
   --accent: #A9822E;
   --accent-2: #8E6D22;
@@ -790,6 +794,27 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula { font-family: var(--font-mono); font-size: var(--fs-sm); background: var(--panel-2); border-radius: 6px; padding: 3px 7px; display: inline-block; margin: 2px 0; }
 .formula-list { list-style: none; padding: 0; margin: 6px 0; }
 .formula-list li { margin-bottom: 5px; }
+
+/* KaTeX-rendered formulas (Mejora D) — given real visual weight, unlike the plain-text
+   .formula fallback right above: a distinct background (not the same panel-2 gray every
+   other card uses), generous padding, centered, and noticeably larger than body text —
+   this is meant to read as "the one official formula for this idea," not just more text. */
+.formula-katex-wrap { display: block; margin: var(--sp-2) 0; }
+.formula-katex {
+  display: block; text-align: center; overflow-x: auto; overflow-y: hidden;
+  background: var(--formula-bg); border: 1px solid var(--formula-line);
+  border-radius: var(--radius-sm); padding: var(--sp-3) var(--sp-4);
+  font-size: 1.35em; color: var(--text);
+}
+.formula-katex .katex { font-size: 1em; }
+.formula-label {
+  display: block; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--dim);
+  margin-bottom: 3px; text-align: center;
+}
+.formula-note {
+  display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
+  margin-top: 3px;
+}
 
 /* ------------------------------ skeleton loaders --------------------------- */
 .skel { background: var(--panel-2); border-radius: var(--radius-sm); position: relative; overflow: hidden; }
