@@ -10,6 +10,7 @@
     return n;
   };
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const smoothScrollTo = (node) => { if (node && typeof node.scrollIntoView === 'function') node.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const fmtTime = (sec) => {
     sec = Math.max(0, Math.round(sec));
     const m = Math.floor(sec / 60), s = sec % 60;
@@ -696,6 +697,25 @@
   function viewLearn(root) {
     const units = S.allLessonUnits();
     const studiedSet = new Set(S.state.attempts.filter((a) => a.mode === 'Learn').map((a) => String(a.qid).split(':')[1]));
+    const levelWord = (lv) => lv === 1 ? 'Basic' : lv === 2 ? 'Intermediate' : 'Advanced';
+    const cid = (id) => 'concept-' + id.replace(/[^a-zA-Z0-9]/g, '_');
+
+    // flat, ordered list of every concept across every unit — backs prev/next navigation
+    const flat = [];
+    units.forEach((unit) => unit.concepts.forEach((c) => flat.push({ unit, c })));
+    const conceptEls = {}; // c.id -> <details> element, populated as concepts render below
+
+    let activeUnitId = null;
+
+    function openConcept(id) {
+      const entry = flat.find((x) => x.c.id === id);
+      const target = conceptEls[id];
+      if (!entry || !target) return;
+      Object.values(conceptEls).forEach((d) => { if (d !== target) d.removeAttribute('open'); });
+      target.setAttribute('open', '');
+      smoothScrollTo(target);
+      updateSubIndex(entry.unit, id);
+    }
 
     const idx = el('div', 'learn-index');
     units.forEach((unit) => {
@@ -703,11 +723,23 @@
       b.title = unit.title;
       b.onclick = () => {
         const target = $('#learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (target) smoothScrollTo(target);
+        updateSubIndex(unit, null);
       };
       idx.appendChild(b);
     });
     root.appendChild(idx);
+
+    // secondary row: which CONCEPT within the current unit is active — not just the unit
+    const subIdx = el('div', 'learn-subindex');
+    root.appendChild(subIdx);
+    function updateSubIndex(unit, activeConceptId) {
+      activeUnitId = unit.unit;
+      subIdx.innerHTML = `<span class="sub-label">Unit ${esc(unit.unit)}:</span>` + unit.concepts.map((cc, i) =>
+        `<button class="sub-dot ${cc.id === activeConceptId ? 'active' : ''}" data-cid="${esc(cc.id)}" title="${esc(cc.name)}">${i + 1}</button>`).join('');
+      $$('[data-cid]', subIdx).forEach((btn) => { btn.onclick = () => openConcept(btn.dataset.cid); });
+    }
+    function $$(sel, root2) { return Array.from((root2 || document).querySelectorAll(sel)); }
 
     units.forEach((unit) => {
       const p = el('div', 'panel');
@@ -716,22 +748,63 @@
       p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)} · ${doneCount}/${unit.concepts.length} studied</span><h2>${esc(unit.title)}</h2></div>`;
       unit.concepts.forEach((c) => {
         const d = el('details', 'acc');
-        const levelWord = (lv) => lv === 1 ? 'Basic' : lv === 2 ? 'Intermediate' : 'Advanced';
+        d.id = cid(c.id);
+        conceptEls[c.id] = d;
         const studied = studiedSet.has(c.id);
+        const flatIdx = flat.findIndex((x) => x.c.id === c.id);
+        const posInUnit = unit.concepts.findIndex((x) => x.id === c.id) + 1;
+
         d.innerHTML = `<summary>${esc(c.name)}<span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
           <div class="acc-body">
-            ${c.primer ? `<div class="reveal primer"><span class="eyebrow">Start from zero</span>${renderProse(c.primer)}</div>` : ''}
-            <p><strong>Core idea.</strong> ${esc(c.core)}</p>
-            <p><strong>When to use it.</strong> ${esc(c.when)}</p>
-            <div class="eyebrow">Key formulas</div>
-            <ul class="formula-list">${c.formulas.map((f) => `<li><span class="formula">${esc(f)}</span></li>`).join('')}</ul>
-            <p><strong>Intuition.</strong> ${esc(c.intuition)}</p>
-            <div class="eyebrow" style="margin-top:10px">Worked examples</div>
-            ${(c.examples || []).map((ex) => `<div class="reveal"><span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${esc(ex.text)}</div>`).join('')}
-            <div class="reveal"><span class="eyebrow">Common trap</span>${esc(c.trap)}</div>
-            <div class="eyebrow" style="margin-top:12px">Practice — ${c.checks.length} questions, increasing difficulty</div>
-            <div class="checks"></div>
+            <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
+            <div class="concept-stepper">
+              <button data-jump="context">Context</button><i></i>
+              <button data-jump="core">Core</button><i></i>
+              <button data-jump="examples">Examples</button><i></i>
+              <button data-jump="practice">Practice</button>
+            </div>
+            ${c.primer ? `<div class="reveal primer" id="${cid(c.id)}-context"><span class="eyebrow">Start from zero</span>${renderProse(c.primer)}</div>` : ''}
+            <div class="concept-flow" id="${cid(c.id)}-core">
+              <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+              <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
+              <div class="flow-item"><span class="micro-label">Key formulas</span>
+                <ul class="formula-list">${c.formulas.map((f) => `<li><span class="formula">${esc(f)}</span></li>`).join('')}</ul></div>
+              <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
+            </div>
+            <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
+            <div class="examples-flow" id="${cid(c.id)}-examples"></div>
+            <div class="reveal"><span class="eyebrow">Common trap</span>${renderProse(c.trap)}</div>
+            <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
+            <div class="checks" id="${cid(c.id)}-practice"></div>
+            <div class="concept-nav-footer"></div>
           </div>`;
+
+        // progressive worked-example reveal: level 1 shown, later levels unlocked one at a time
+        const exBox = $('.examples-flow', d);
+        const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
+        function renderExampleAt(i) {
+          if (i >= sortedEx.length) return;
+          const ex = sortedEx[i];
+          const block = el('div', 'reveal', `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderProse(ex.text)}`);
+          exBox.appendChild(block);
+          if (i < sortedEx.length - 1) {
+            const nxt = sortedEx[i + 1];
+            const btn = el('button', 'btn sm ghost next-example-btn', `Continue to Level ${nxt.level} (${levelWord(nxt.level)}) →`);
+            btn.onclick = () => { btn.remove(); renderExampleAt(i + 1); };
+            exBox.appendChild(btn);
+          }
+        }
+        renderExampleAt(0);
+
+        // section-jump stepper
+        $$('.concept-stepper [data-jump]', d).forEach((btn) => {
+          btn.onclick = () => {
+            const target = $('#' + cid(c.id) + '-' + btn.dataset.jump, d);
+            if (target) smoothScrollTo(target);
+          };
+        });
+
+        // practice checks (unchanged mechanics, just re-targeted into #...-practice)
         const box = $('.checks', d);
         c.checks.forEach((chk, ci) => {
           const wrap = el('div');
@@ -753,11 +826,36 @@
                 topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
                 targetTime: 30, hintUsed: false, confidence: 'Medium', track: S.activeTrack()
               });
+              const dot = $('.studied-dot', d);
+              if (dot) dot.classList.add('done');
             };
             wrap.appendChild(b);
           });
           box.appendChild(wrap);
         });
+
+        // prev/next concept navigation — read from the shared flat list + conceptEls map,
+        // both fully populated by the time any of these are actually clicked
+        const navFooter = $('.concept-nav-footer', d);
+        const prevEntry = flat[flatIdx - 1], nextEntry = flat[flatIdx + 1];
+        if (prevEntry) {
+          const pb = el('button', 'btn sm ghost concept-nav-btn', `← Previous: ${esc(prevEntry.c.name)}`);
+          pb.onclick = () => openConcept(prevEntry.c.id);
+          navFooter.appendChild(pb);
+        } else { navFooter.appendChild(el('span')); }
+        if (nextEntry) {
+          const nb = el('button', 'btn sm ghost concept-nav-btn', `Next: ${esc(nextEntry.c.name)} →`);
+          nb.onclick = () => openConcept(nextEntry.c.id);
+          navFooter.appendChild(nb);
+        }
+
+        d.addEventListener('toggle', () => {
+          if (d.open) {
+            Object.values(conceptEls).forEach((other) => { if (other !== d) other.removeAttribute('open'); });
+            updateSubIndex(unit, c.id);
+          }
+        });
+
         p.appendChild(d);
       });
       root.appendChild(p);

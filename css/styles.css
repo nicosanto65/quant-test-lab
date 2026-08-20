@@ -570,6 +570,66 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .learn-index button.on { color: var(--brand); border-color: var(--brand-line); background: var(--brand-soft); }
 @media (min-width: 900px) { .learn-index { top: 0; } }
 
+/* secondary index row: which CONCEPT within the current unit is open, not just the unit */
+.learn-subindex {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  margin: -6px 0 var(--sp-3); min-height: 22px;
+}
+.learn-subindex:empty { display: none; }
+.learn-subindex .sub-label { font-family: var(--mono); font-size: var(--fs-xs); color: var(--dim); margin-right: 2px; }
+.learn-subindex .sub-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--panel-2); color: var(--dim); font-family: var(--mono); font-size: 10px;
+  cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.learn-subindex .sub-dot.active { color: var(--brand); border-color: var(--brand-line); background: var(--brand-soft); font-weight: 700; }
+
+/* -------------------------- concept flow (Mejora 3) -------------------------- */
+.concept-meta { font-family: var(--mono); font-size: var(--fs-xs); color: var(--dim); margin-bottom: var(--sp-3); }
+
+.concept-stepper {
+  display: flex; align-items: center; gap: 6px; margin-bottom: var(--sp-4); overflow-x: auto;
+}
+.concept-stepper button {
+  flex: none; background: none; border: 0; color: var(--muted); font-size: var(--fs-xs);
+  font-family: var(--sans); cursor: pointer; padding: 3px 2px; border-bottom: 2px solid transparent;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.concept-stepper button:hover { color: var(--brand); border-color: var(--brand-line); }
+.concept-stepper i { flex: 1 1 12px; max-width: 24px; height: 1px; background: var(--line); }
+
+/* the merged Core/When/Formulas/Intuition card — one continuous surface, no isolated boxes */
+.concept-flow {
+  background: var(--panel-2); border-radius: var(--radius-sm); padding: var(--sp-4);
+  margin: var(--sp-3) 0;
+}
+.flow-item { padding: var(--sp-2) 0; }
+.flow-item + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
+.flow-item p { margin: 0; }
+.flow-item .formula-list { margin: 4px 0 0; }
+.micro-label {
+  display: block; font-size: var(--fs-xs); color: var(--dim); font-style: italic;
+  margin-bottom: 3px; font-family: var(--sans);
+}
+
+/* a quiet connector between sections — a short label and a hairline, not a boxed header */
+.concept-transition {
+  display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-4) 0 var(--sp-3);
+}
+.concept-transition .micro-label { margin: 0; white-space: nowrap; }
+.concept-transition::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+
+.examples-flow .reveal { margin-bottom: var(--sp-2); }
+.next-example-btn { display: block; margin: 0 auto var(--sp-3); }
+
+.concept-nav-footer {
+  display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap;
+  margin-top: var(--sp-4); padding-top: var(--sp-3); border-top: 1px solid var(--line-soft);
+}
+.concept-nav-btn { max-width: 48%; text-align: left; white-space: normal; }
+.concept-nav-btn:last-child { text-align: right; margin-left: auto; }
+@media (max-width: 520px) { .concept-nav-btn { max-width: 100%; text-align: left !important; } }
+
 /* misc */
 .muted { color: var(--muted); }
 .dim { color: var(--dim); }
