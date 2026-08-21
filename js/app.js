@@ -259,9 +259,16 @@
      already frames itself, so it's dropped in exactly this case, not removed everywhere. */
   function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr, options) {
     text = text || '';
+    options = options || {};
     const cls = extraClass ? ' ' + extraClass : '';
     const idStr = idAttr ? ` id="${esc(idAttr)}"` : '';
-    const eyebrow = eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '';
+    // Report 5, point C: a block type with an assigned identity colour (Context=blue) gets a
+    // real header — icon-box + kicker — instead of a plain caption; blocks without one (the
+    // secondary "Common trap") keep the quieter existing eyebrow, so identity is reserved for
+    // the four block types the brief actually named, not applied indiscriminately everywhere.
+    const eyebrow = options.blockIcon
+      ? `<div class="block-header">${iconBox(options.blockIcon.colorVar, options.blockIcon.iconSvg, 'sm')}${kicker(eyebrowLabel)}</div>`
+      : (eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '');
     const prose = renderProse(text, options);
     if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${prose}</div>`;
     return `<div class="reading-block${cls}"${idStr}>${eyebrow}${prose}</div>`;
@@ -615,6 +622,92 @@
     const d = STEP_ICONS[name];
     return d ? `<svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>` : '';
   }
+  /* Report 5, point F: concentric rings + scattered points behind the Dashboard's welcome
+     card only — real depth for the one screen a reader sees once per session, not applied
+     anywhere a reader spends long stretches (that stays clean, per the brief's own caution
+     about visual fatigue in long study sessions). */
+  const HERO_DECO_SVG = `<svg class="hero-deco" viewBox="0 0 400 200" preserveAspectRatio="xMaxYMin slice" aria-hidden="true">
+      <circle cx="340" cy="30" r="26" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+      <circle cx="340" cy="30" r="50" fill="none" stroke="currentColor" stroke-width="1" opacity="0.18"/>
+      <circle cx="340" cy="30" r="76" fill="none" stroke="currentColor" stroke-width="1" opacity="0.1"/>
+      <circle cx="340" cy="30" r="104" fill="none" stroke="currentColor" stroke-width="1" opacity="0.06"/>
+      <circle cx="270" cy="70" r="1.6" fill="currentColor" opacity="0.4"/>
+      <circle cx="305" cy="115" r="1.6" fill="currentColor" opacity="0.3"/>
+      <circle cx="240" cy="30" r="1.6" fill="currentColor" opacity="0.35"/>
+      <circle cx="365" cy="95" r="1.6" fill="currentColor" opacity="0.3"/>
+      <circle cx="200" cy="10" r="1.6" fill="currentColor" opacity="0.22"/>
+      <circle cx="385" cy="150" r="1.6" fill="currentColor" opacity="0.28"/>
+      <circle cx="255" cy="140" r="1.6" fill="currentColor" opacity="0.2"/>
+    </svg>`;
+
+  /* ===================== Report 5: "alive" card component helpers =====================
+     Thin wrappers around the .icon-box / .pill-badge CSS (styles.css) — every colour that
+     flows through them is one of the app's existing brand/accent/pos/teal/neg tokens, or one
+     of the two new per-track hues (wm/consulting) added specifically because 6 tracks need 6
+     distinguishable identities and the existing 4-hue set runs out. Nothing here introduces a
+     colour without an established, single, consistent meaning. */
+
+  // quant/reasoning/ib/am reuse the hue that section already carries elsewhere in the app
+  // (brand=foundational, pos=growth/verbal, accent=achievement/finance-flagship,
+  // teal=worked-examples' third accent, reused here as a fourth distinct track hue since
+  // it never overlaps with a track picker on screen at the same time as a worked example).
+  const TRACK_COLOR_VAR = { quant: 'brand', reasoning: 'pos', ib: 'accent', am: 'teal', wm: 'track-wm', consulting: 'track-consulting' };
+  // one-line UI captions for the track picker cards — presentation chrome describing what
+  // each track covers, not scored quiz/lesson content, and not sourced from any content file
+  const TRACK_TAGLINE = {
+    quant: 'Probability, EV, and market-making intuition',
+    reasoning: 'Verbal, abstract, and logical speed drills',
+    ib: 'Valuation, M&A, and technical interview prep',
+    am: 'Portfolio construction and market fundamentals',
+    wm: 'Client planning, wealth strategy, and fixed income',
+    consulting: 'Case frameworks, mental math, and industry knowledge'
+  };
+
+  function iconBox(colorVar, iconSvg, sizeCls) {
+    const cls = ['icon-box', sizeCls || ''].filter(Boolean).join(' ');
+    return `<span class="${cls}" style="--ib-bg:var(--${colorVar});--ib-fg:var(--${colorVar}-ink)">${iconSvg}</span>`;
+  }
+  function pillBadge(colorVar, iconSvg, text) {
+    return `<span class="pill-badge" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
+  }
+  const TAG_ICON = '<path d="M12.5 2.5h6a2 2 0 0 1 2 2v6L11 20 2.5 11.5 12.5 2.5z"/><circle cx="16.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/>';
+  // topic/subtopic have no assigned colour anywhere in the app (unlike difficulty) — a
+  // neutral icon+pill keeps the same STRUCTURE (icon, translucent fill, full pill) the
+  // reference established, without inventing a colour meaning that doesn't exist.
+  function topicPill(text) {
+    return `<span class="pill-badge neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TAG_ICON}</svg><span>${esc(text)}</span></span>`;
+  }
+  function kicker(text, colorVar) {
+    const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
+    return `<span class="kicker"${style}>${esc(text)}</span>`;
+  }
+  /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
+     grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
+     icon adds a second, redundant signal on top of a colour meaning that already exists
+     rather than inventing a new one. */
+  const DIFF_TIER_ICON = {
+    easy: '<path d="M6 20c9 0 12-6 12-14-8 0-12 5-12 14z"/><path d="M6 20c2-4 5-8 12-14"/>',
+    mid: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+    hard: ICONS.flame
+  };
+  function diffTier(level) { return level <= 1 ? 'easy' : level <= 3 ? 'mid' : 'hard'; }
+  function diffColorVar(level) { return level <= 1 ? 'pos' : level <= 3 ? 'brand' : 'neg'; }
+  function diffIcon(level, cls) {
+    const d = DIFF_TIER_ICON[diffTier(level)];
+    return `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+  function diffPill(level, label) {
+    return pillBadge(diffColorVar(level), diffIcon(level), label || ('L' + level));
+  }
+  /* worked-example levels use their own 3-tier green/blue/gold scheme (Problem 3a of the
+     previous pass), distinct from the 5-level d1-d5 Drill scale diffColorVar/diffIcon above
+     map to — a Level 2 example is "blue," not lumped into the same mid-tier bucket as
+     Level 3 the way d2/d3 are for Drill's finer 5-point scale. */
+  const EXAMPLE_LEVEL_COLOR = { 1: 'pos', 2: 'brand', 3: 'accent' };
+  function exampleLevelIcon(level) {
+    const d = level <= 1 ? DIFF_TIER_ICON.easy : level === 2 ? DIFF_TIER_ICON.mid : DIFF_TIER_ICON.hard;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
 
   const VIEWS = [
     { id: 'dashboard', label: 'Dash', title: 'Dashboard', group: 'primary', navgroup: 'Overview' },
@@ -895,8 +988,8 @@
     const card = el('div', 'panel');
     card.innerHTML = `
       <div class="qmeta">
-        <span class="tag d${q.difficulty}">L${q.difficulty}</span>
-        ${cfg.hideTopic ? '' : `<span class="tag">${esc(q.topic)}</span>`}
+        ${diffPill(q.difficulty)}
+        ${cfg.hideTopic ? '' : topicPill(q.topic)}
         ${q.targetTime ? `<span>target ${q.targetTime}s</span>` : ''}
         ${q.source === 'curated' ? '<span>curated</span>' : ''}
       </div>
@@ -1079,6 +1172,7 @@
     const hero = el('div', 'hero-cta');
     const hasHistory = s.total > 0;
     hero.innerHTML = `
+      ${HERO_DECO_SVG}
       <span class="eyebrow">${hasHistory ? 'Continue in ' + esc(trackLabel) : 'Welcome to ' + esc(trackLabel)}</span>
       <h2>${hasHistory ? esc(rec.text) : 'Start with a short guided session — no setup needed.'}</h2>
       <p>${hasHistory ? 'One tap resumes an adaptive set built from your weakest topics right now.' : 'We’ll build a first set from the fundamentals and adjust as you go.'}</p>
@@ -1127,14 +1221,18 @@
     S.tracks().forEach((t) => {
       const sum = S.trackSummary(t.id);
       const started = sum.total > 0;
-      const card = el('button', 'track-card' + (t.id === track ? ' active' : ''));
-      card.style.cssText = 'flex-direction:column;align-items:flex-start;gap:8px;text-align:left';
-      card.innerHTML = `<span class="flex between" style="width:100%">
-          <span class="ic">${trackIcon(t.id)}</span>
-          ${started ? ring(sum.accuracy, { size: 30, stroke: 3, accent: t.id === track, showNum: false }) : ''}
+      const active = t.id === track;
+      const colorVar = TRACK_COLOR_VAR[t.id];
+      const card = el('button', 'track-card gradient-card' + (active ? ' active' : ''));
+      card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+      card.innerHTML = `
+        <span class="track-card-top">
+          ${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
         </span>
-        <span class="name" style="font-size:var(--fs-sm)">${esc(t.label)}</span>
-        <span class="meta">${started ? sum.accuracy + '% · n=' + sum.total : 'Not started'}</span>`;
+        <span class="track-card-title">${esc(t.label)}</span>
+        <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
+        ${pillBadge(colorVar, icon(started ? 'check' : 'learn'), started ? sum.accuracy + '% · ' + sum.total + ' done' : 'Not started')}`;
       card.onclick = () => {
         if (t.id !== track) { S.setTrack(t.id); current = S.getLastView(t.id); }
         else go('dashboard');
@@ -1242,7 +1340,10 @@
       const p = el('div', 'panel');
       p.id = 'learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_');
       const doneCount = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
-      p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)} · ${doneCount}/${unit.concepts.length} studied</span><h2>${esc(unit.title)}</h2></div>`;
+      p.innerHTML = `<div class="panel-head unit-head">
+          <div>${kicker('Unit ' + unit.unit)}<h2>${esc(unit.title)}</h2></div>
+          ${pillBadge('brand', icon('check'), doneCount + '/' + unit.concepts.length + ' studied')}
+        </div>`;
       unit.concepts.forEach((c) => {
         const d = el('details', 'acc');
         d.id = cid(c.id);
@@ -1260,10 +1361,13 @@
               <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
               <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
             </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true, blockIcon: { colorVar: 'brand', iconSvg: stepIcon('context') } }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="core-formula-grid">
-                <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+                <div class="flow-item flow-item-core">
+                  <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
+                  <p>${esc(c.core)}</p>
+                </div>
                 <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
                   <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               </div>
@@ -1274,6 +1378,7 @@
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
             ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
+            <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
             <div class="concept-nav-footer"></div>
           </div>`;
@@ -1284,7 +1389,7 @@
         const exBox = $('.examples-flow', d);
         const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
-          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
+          bodyHtml: `<div class="block-header">${iconBox(EXAMPLE_LEVEL_COLOR[ex.level] || 'teal', exampleLevelIcon(ex.level), 'sm')}${kicker('Level ' + ex.level + ' — ' + levelWord(ex.level), EXAMPLE_LEVEL_COLOR[ex.level] || 'teal')}</div>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
           collapseLabel: `Collapse Level ${ex.level}`,
@@ -1304,7 +1409,7 @@
         c.checks.forEach((chk, ci) => {
           const wrap = el('div', 'check-card');
           const lv = chk.level || 1;
-          wrap.innerHTML = `<p class="mb-2"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
+          wrap.innerHTML = `<p class="mb-2">${diffPill(lv, 'L' + lv + ' ' + levelWord(lv))} ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
             const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
             b.onclick = () => {
@@ -1530,6 +1635,11 @@
 
   /* ============================= MIXED PRACTICE ============================ */
 
+  // Report 5, point E: each Mixed practice mode gets its own identity colour (Easy/Medium/
+  // Hard reuse the standard pos/brand/neg difficulty grouping; the two named-firm presets
+  // get a distinct colour each so they read as "special," not just another difficulty tier).
+  const MODE_COLOR = { Easy: 'pos', Medium: 'brand', Hard: 'neg', 'Wincent level': 'accent', 'SIG speed level': 'teal', 'Fully mixed': 'brand' };
+  const MODE_ICON = { Easy: 'easy', Medium: 'mid', Hard: 'hard', 'Wincent level': 'hard', 'SIG speed level': 'mid', 'Fully mixed': null };
   function viewMixed(root) {
     const modes = [
       { k: 'Easy', d: [1, 2], n: 12, help: true },
@@ -1541,10 +1651,21 @@
     ];
     const p = el('div', 'panel');
     p.innerHTML = '<div class="panel-head"><span class="eyebrow">Mixed practice</span></div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>';
-    const row = el('div', 'btn-row');
+    const grid = el('div', 'grid c2');
     modes.forEach((m) => {
-      const b = el('button', 'btn', m.k);
-      b.onclick = () => {
+      const colorVar = MODE_COLOR[m.k] || 'brand';
+      const tier = MODE_ICON[m.k];
+      const iconD = tier ? DIFF_TIER_ICON[tier] : ICONS.mixed;
+      const iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconD}</svg>`;
+      const diffLabel = m.d.length >= 5 ? 'All levels' : 'L' + m.d[0] + '–' + m.d[m.d.length - 1];
+      const card = el('button', 'mode-card gradient-card');
+      card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+      card.innerHTML = `
+        ${iconBox(colorVar, iconSvg, 'sm')}
+        <span class="mode-card-title">${esc(m.k)}</span>
+        <span class="mode-card-desc">${m.n} questions${m.per ? ' · ' + m.per + 's each' : ''}${m.help ? '' : ' · no hints'}</span>
+        ${diffPill(Math.max.apply(null, m.d), diffLabel)}`;
+      card.onclick = () => {
         const items = S.buildSession({ count: m.n, difficulties: m.d, topics: m.topics || null });
         startSession({
           items, mode: 'Mixed', testType: 'Mixed — ' + m.k, allowHelp: m.help,
@@ -1552,9 +1673,9 @@
           title: 'Mixed — ' + m.k, returnTo: 'mixed'
         });
       };
-      row.appendChild(b);
+      grid.appendChild(card);
     });
-    p.appendChild(row);
+    p.appendChild(grid);
     root.appendChild(p);
 
     const cm = S.confidenceMatrix();
@@ -1765,8 +1886,8 @@
 
     r.recs.forEach((x, i) => {
       const p = el('div', 'panel');
-      p.innerHTML = `<div class="qmeta"><span class="tag d${x.q.difficulty}">L${x.q.difficulty}</span>
-          <span class="tag">${esc(x.q.topic)}</span><span>${fmtTime(x.timeSec)}</span></div>
+      p.innerHTML = `<div class="qmeta">${diffPill(x.q.difficulty)}
+          ${topicPill(x.q.topic)}<span>${fmtTime(x.timeSec)}</span></div>
         <div class="verdict ${x.correct ? 'ok' : 'no'}">Q${i + 1} — ${x.correct ? 'correct' : 'incorrect'}
           · your answer ${x.given === null ? '—' : esc(String(x.given))} · correct ${esc(String(x.q.correctAnswer))}</div>
         <div class="qprompt small">${/^\s*</.test(x.q.prompt) ? x.q.prompt : '<p>' + esc(x.q.prompt) + '</p>'}</div>
@@ -2220,12 +2341,15 @@
     const r = (size - sw) / 2, c = 2 * Math.PI * r;
     const v = Math.max(0, Math.min(100, pct || 0));
     const off = c * (1 - v / 100);
+    // colorVar: an explicit "--<name>" CSS var to stroke the value arc with (e.g. a track's
+    // own identity colour) — overrides the .accent class-based colour when supplied.
+    const strokeStyle = opts.colorVar ? ` style="stroke:var(--${opts.colorVar})"` : '';
     return `<span class="ring-label" style="width:${size}px;height:${size}px">
       <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
         <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"/>
         <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"
           stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
-          transform="rotate(-90 ${size / 2} ${size / 2})"/>
+          transform="rotate(-90 ${size / 2} ${size / 2})"${strokeStyle}/>
       </svg>
       ${opts.showNum === false ? '' : `<span class="num" style="font-size:${Math.max(10, size * 0.28)}px">${Math.round(v)}</span>`}
     </span>`;
@@ -2236,13 +2360,16 @@
     const body = '<div class="sheet-grid">' + S.tracks().map((t) => {
       const sum = S.trackSummary(t.id);
       const started = sum.total > 0;
-      return `<button class="track-card ${t.id === active ? 'active' : ''}" data-track="${esc(t.id)}">
-        <span class="ic">${trackIcon(t.id)}</span>
-        <span class="body">
-          <span class="name">${esc(t.label)}</span>
-          <span class="meta">${started ? sum.total + ' answered · ' + sum.accuracy + '% accuracy' : 'Not started yet'}</span>
+      const colorVar = TRACK_COLOR_VAR[t.id];
+      return `<button class="track-card gradient-card ${t.id === active ? 'active' : ''}" data-track="${esc(t.id)}"
+          style="--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)">
+        <span class="track-card-top">
+          ${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
         </span>
-        <span class="ring-wrap">${started ? ring(sum.accuracy, { size: 34, stroke: 3.5, accent: t.id === active }) : ''}</span>
+        <span class="track-card-title">${esc(t.label)}</span>
+        <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
+        ${pillBadge(colorVar, icon(started ? 'check' : 'learn'), started ? sum.total + ' answered · ' + sum.accuracy + '%' : 'Not started yet')}
       </button>`;
     }).join('') + '</div>';
     const sh = mountSheet('track-sheet', 'track-sheet',
