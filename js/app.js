@@ -622,6 +622,23 @@
     const d = STEP_ICONS[name];
     return d ? `<svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>` : '';
   }
+  /* Report 5, point F: concentric rings + scattered points behind the Dashboard's welcome
+     card only — real depth for the one screen a reader sees once per session, not applied
+     anywhere a reader spends long stretches (that stays clean, per the brief's own caution
+     about visual fatigue in long study sessions). */
+  const HERO_DECO_SVG = `<svg class="hero-deco" viewBox="0 0 400 200" preserveAspectRatio="xMaxYMin slice" aria-hidden="true">
+      <circle cx="340" cy="30" r="26" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+      <circle cx="340" cy="30" r="50" fill="none" stroke="currentColor" stroke-width="1" opacity="0.18"/>
+      <circle cx="340" cy="30" r="76" fill="none" stroke="currentColor" stroke-width="1" opacity="0.1"/>
+      <circle cx="340" cy="30" r="104" fill="none" stroke="currentColor" stroke-width="1" opacity="0.06"/>
+      <circle cx="270" cy="70" r="1.6" fill="currentColor" opacity="0.4"/>
+      <circle cx="305" cy="115" r="1.6" fill="currentColor" opacity="0.3"/>
+      <circle cx="240" cy="30" r="1.6" fill="currentColor" opacity="0.35"/>
+      <circle cx="365" cy="95" r="1.6" fill="currentColor" opacity="0.3"/>
+      <circle cx="200" cy="10" r="1.6" fill="currentColor" opacity="0.22"/>
+      <circle cx="385" cy="150" r="1.6" fill="currentColor" opacity="0.28"/>
+      <circle cx="255" cy="140" r="1.6" fill="currentColor" opacity="0.2"/>
+    </svg>`;
 
   /* ===================== Report 5: "alive" card component helpers =====================
      Thin wrappers around the .icon-box / .pill-badge CSS (styles.css) — every colour that
@@ -1155,6 +1172,7 @@
     const hero = el('div', 'hero-cta');
     const hasHistory = s.total > 0;
     hero.innerHTML = `
+      ${HERO_DECO_SVG}
       <span class="eyebrow">${hasHistory ? 'Continue in ' + esc(trackLabel) : 'Welcome to ' + esc(trackLabel)}</span>
       <h2>${hasHistory ? esc(rec.text) : 'Start with a short guided session — no setup needed.'}</h2>
       <p>${hasHistory ? 'One tap resumes an adaptive set built from your weakest topics right now.' : 'We’ll build a first set from the fundamentals and adjust as you go.'}</p>

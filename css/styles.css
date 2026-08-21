@@ -596,9 +596,11 @@ kbd {
 }
 @media (max-width: 899px) { kbd { display: none; } }
 
-/* hero CTA on the dashboard */
+/* hero CTA on the dashboard — Report 5, point F: a real dark-to-blue gradient (not just two
+   neutral panel shades) plus the radial glow below and the decorative rings/points in
+   .hero-deco, together giving this one welcome frame genuine depth. */
 .hero-cta {
-  background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%);
+  background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 55%, var(--brand-soft) 160%);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   padding: var(--sp-5); margin-bottom: var(--sp-3); position: relative; overflow: hidden;
 }
@@ -607,6 +609,12 @@ kbd {
   background: radial-gradient(circle, var(--brand-soft) 0%, transparent 70%);
   pointer-events: none;
 }
+/* Report 5, point F: the one place in the app a "worked" background earns its keep — the
+   Dashboard welcome frame, seen once per session rather than during a long study stretch.
+   Concentric rings + scattered points, low-opacity, real SVG (not a data-URI background)
+   so it scales cleanly and needs no extra asset. z-index:-1 keeps it behind the hero's real
+   content regardless of DOM order, the same technique gradient-card's ::before glow uses. */
+.hero-deco { position: absolute; inset: 0; z-index: -1; pointer-events: none; color: var(--brand); overflow: hidden; }
 .hero-cta .eyebrow { color: var(--brand); }
 .hero-cta h2 { font-size: var(--fs-lg); margin: 6px 0 4px; }
 .hero-cta p { color: var(--muted); font-size: var(--fs-sm); margin-bottom: var(--sp-4); max-width: 46ch; }
