@@ -82,11 +82,40 @@
      worked example's own text, nested inside the Level 1/2/3 sequential accordion): nesting
      a second independent accordion inside an already-collapsible block would just stack two
      layers of "click to reveal" on top of each other for no reason. */
-  function renderPlainProse(text) {
+  /* Worked examples are full of standalone calculation-step sentences that are themselves
+     complete formulas ("P(X=2) = C(4,2)(0.5)²(0.5)² = 6 × 0.25 × 0.25 = 0.375."). A read-only
+     probe across the real dataset found 61 such full-sentence candidates inside worked
+     examples versus only 11 across ALL of primer/core/when/intuition/trap/why/solution/
+     approach combined — so inline detection is deliberately scoped to worked examples only:
+     the tradeoff (a substituted sentence's rendered .textContent is no longer character-
+     identical to its source, by design — a KaTeX-typeset fraction has no literal "/") isn't
+     worth taking on the huge, low-yield surface of free-form prose. Reuses the exact same
+     parseFormulaSegment gate the "formulas" field and the technique sheet already trust:
+     only whole sentences that independently pass it get substituted; every other sentence,
+     unchanged, keeps its exact source text (parseFormulaSegment is defined further down this
+     file — safe to reference here, function declarations are hoisted within the module). */
+  function renderTextWithInlineFormulas(text) {
+    const sentences = splitIntoSentences(text);
+    if (!sentences.length) return esc(text);
+    return sentences.map((raw) => {
+      const leadWS = (raw.match(/^\s+/) || [''])[0];
+      const core = raw.slice(leadWS.length);
+      const trailMatch = core.match(/([.!?]+['")\]]?)$/);
+      const trailPunct = trailMatch ? trailMatch[0] : '';
+      const mathPart = trailPunct ? core.slice(0, core.length - trailPunct.length) : core;
+      if (!mathPart.trim()) return esc(raw);
+      const parsed = parseFormulaSegment(mathPart.trim());
+      if (!parsed) return esc(raw);
+      const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
+      const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
+      return `${esc(leadWS)}<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>${esc(trailPunct)}`;
+    }).join('');
+  }
+  function renderPlainProseWithFormulas(text) {
     text = text || '';
-    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    if (text.length < 260) return `<p>${renderTextWithInlineFormulas(text)}</p>`;
     const paras = splitIntoDigestibleParagraphs(text);
-    return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+    return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${renderTextWithInlineFormulas(p.text)}</p>`).join('');
   }
   /* Editorial lead-in: wraps the first SENTENCE of a paragraph's raw text in a larger
      serif span, with that sentence's own first WORD carrying extra weight inside it — a
@@ -101,15 +130,29 @@
      definiciones"). Pure rendering: every character of the source, including the quote
      marks themselves, passes through esc() untouched — only wrapped in a span, nothing
      added, removed, or reordered, so this never affects the exact-text-reconstruction
-     guarantee the paragraph splitter already relies on. */
-  const QUOTED_TERM_RE = /"[^"]{2,40}"/g;
+     guarantee the paragraph splitter already relies on.
+     Quotes are paired by POSITION (1st+2nd, 3rd+4th, ...), never by nearest-neighbor regex
+     retry: this text also uses double quotes for quoted questions ('"how much did the
+     company earn... on paper?"'), which routinely run past the ~40-char "this is a term"
+     length. A naive /"[^"]{2,40}"/g regex that fails to match a too-long legitimate pair
+     doesn't skip it — it retries from that pair's own closing quote, which then wrongly
+     pairs with the NEXT unrelated opening quote and corrupts every pairing after it (e.g.
+     misreading the boundary between two sentences as a highlighted term reading '" The "').
+     Finding every quote index up front and pairing them in fixed (even, odd) order keeps
+     parity correct regardless of how long any individual pair's content is; a pair is only
+     rendered as a highlight when its content also satisfies the original length/shape
+     bounds, otherwise both its quote characters are left as plain text. */
   function highlightKeyTerms(rawText) {
-    let out = '', last = 0, m;
-    QUOTED_TERM_RE.lastIndex = 0;
-    while ((m = QUOTED_TERM_RE.exec(rawText))) {
-      out += esc(rawText.slice(last, m.index));
-      out += `<span class="key-term">${esc(m[0])}</span>`;
-      last = m.index + m[0].length;
+    const idx = [];
+    for (let i = 0; i < rawText.length; i++) if (rawText[i] === '"') idx.push(i);
+    let out = '', last = 0;
+    for (let p = 0; p + 1 < idx.length; p += 2) {
+      const start = idx[p], end = idx[p + 1];
+      const contentLen = end - start - 1;
+      if (contentLen < 2 || contentLen > 40) continue;
+      out += esc(rawText.slice(last, start));
+      out += `<span class="key-term">${esc(rawText.slice(start, end + 1))}</span>`;
+      last = end + 1;
     }
     out += esc(rawText.slice(last));
     return out;
@@ -189,14 +232,14 @@
         : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${(options.highlightTerms ? highlightKeyTerms : esc)(b.text)}</p>`;
       const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
       const expandLabel = b.ctaLabel || 'Continue reading';
-      const collapseLabel = b.collapseLabel || '− Collapse';
-      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
+      const collapseLabel = b.collapseLabel || 'Collapse';
+      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : '', b.cardClass || ''].filter(Boolean).join(' ');
       return `<div class="${cls}" data-idx="${i}">
           <button class="expand-toggle" type="button" data-expand-toggle
             data-expand-label="${esc(expandLabel)}" data-collapse-label="${esc(collapseLabel)}"
             aria-expanded="${open}" tabindex="${locked ? '-1' : '0'}">
             <span class="expand-preview-text">${esc(preview)}</span>
-            <span class="expand-cta">${esc(open ? collapseLabel : expandLabel)}</span>
+            <span class="expand-cta"><span class="expand-cta-label">${esc(open ? collapseLabel : expandLabel)}</span><i class="expand-chevron">&#8250;</i></span>
           </button>
           <div class="expand-body">${body}</div>
         </div>`;
@@ -559,6 +602,18 @@
   function trackIcon(id, cls) {
     const d = TRACK_ICONS[id] || TRACK_ICONS.quant;
     return `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+  /* Problem 3e: one small consistent glyph per breadcrumb step (Context/Core/Examples/
+     Practice) — same 24x24, stroke=currentColor language as every other icon in the app, so
+     a reader recognises where they are in a concept at a glance instead of only via text. */
+  const STEP_ICONS = {
+    context: '<path d="M6 3v18"/><path d="M6 4h11l-3 4 3 4H6z"/>',
+    core: '<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/>',
+    examples: '<path d="M12 4 3 9l9 5 9-5-9-5z"/><path d="M3 14l9 5 9-5"/>'
+  };
+  function stepIcon(name) {
+    const d = STEP_ICONS[name];
+    return d ? `<svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>` : '';
   }
 
   const VIEWS = [
@@ -1200,17 +1255,19 @@
           <div class="acc-body">
             <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
             <div class="concept-stepper${studied ? ' stepper-done' : ''}">
-              <button data-jump="context">Context</button><i></i>
-              <button data-jump="core">Core</button><i></i>
-              <button data-jump="examples">Examples</button><i></i>
-              <button data-jump="practice">Practice</button>
+              <button data-jump="context">${stepIcon('context')}Context</button><i></i>
+              <button data-jump="core">${stepIcon('core')}Core</button><i></i>
+              <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
+              <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
             </div>
             ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
-              <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+              <div class="core-formula-grid">
+                <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+                <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
+                  <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
+              </div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
-              <div class="flow-item"><span class="micro-label">Key formulas</span>
-                <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
@@ -1227,10 +1284,11 @@
         const exBox = $('.examples-flow', d);
         const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
-          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProse(ex.text)}`,
+          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
-          collapseLabel: `− Collapse Level ${ex.level}`
+          collapseLabel: `Collapse Level ${ex.level}`,
+          cardClass: 'lvl-' + ex.level
         })), { mode: 'sequential' });
 
         // section-jump stepper
@@ -1244,8 +1302,7 @@
         // practice checks (unchanged mechanics, just re-targeted into #...-practice)
         const box = $('.checks', d);
         c.checks.forEach((chk, ci) => {
-          const wrap = el('div');
-          wrap.style.margin = '10px 0';
+          const wrap = el('div', 'check-card');
           const lv = chk.level || 1;
           wrap.innerHTML = `<p class="mb-2"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
@@ -1831,15 +1888,14 @@
     global.QTL_FORMULAS.forEach((g) => {
       const p = el('div', 'panel');
       p.innerHTML = `<div class="panel-head"><span class="eyebrow">${esc(g.group)}</span></div>`;
-      g.items.forEach((it) => {
-        const d = el('details', 'acc');
-        d.innerHTML = `<summary><strong>${esc(it.t)}</strong></summary>
-          <div class="acc-body">
-            <p class="trigger">Trigger: ${esc(it.trigger)}</p>
-            <p>${esc(it.body)}</p>
-          </div>`;
-        p.appendChild(d);
-      });
+      const grid = el('div', 'formula-sheet-grid');
+      grid.innerHTML = g.items.map((it) => `
+        <div class="formula-sheet-card">
+          <span class="formula-card-title">${esc(it.t)}</span>
+          <p class="formula-card-trigger">${esc(it.trigger)}</p>
+          <div class="formula-card-body">${renderFormula(it.body)}</div>
+        </div>`).join('');
+      p.appendChild(grid);
       root.appendChild(p);
     });
   }
@@ -2226,7 +2282,7 @@
     const btn = card.querySelector('[data-expand-toggle]');
     if (!btn) return;
     btn.setAttribute('aria-expanded', String(opening));
-    const cta = btn.querySelector('.expand-cta');
+    const cta = btn.querySelector('.expand-cta-label');
     if (cta) cta.textContent = opening ? btn.dataset.collapseLabel : btn.dataset.expandLabel;
   }
   function unlockExpandCard(card) {
@@ -2286,5 +2342,5 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment };
+  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas };
 })(window);

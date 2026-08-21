@@ -104,6 +104,7 @@
   /* data semantics (distinct from the achievement accent) */
   --pos: #5FAE85;
   --pos-soft: rgba(95, 174, 133, 0.14);
+  --pos-line: rgba(95, 174, 133, 0.4);
   --neg: #D08886;
   --neg-soft: rgba(208, 136, 134, 0.14);
   --info: var(--brand);
@@ -167,6 +168,7 @@ html[data-theme="light"] {
 
   --pos: #2F7A54;
   --pos-soft: #E4F1EA;
+  --pos-line: #A9D6BE;
   --neg: #AB4C4A;
   --neg-soft: #F5E7E6;
   --info: var(--brand);
@@ -359,9 +361,9 @@ main { padding: var(--sp-4); max-width: 1180px; margin: 0 auto; }
   display: flex; align-items: center; gap: var(--sp-3);
   background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
   padding: var(--sp-3); cursor: pointer; text-align: left; width: 100%;
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform 80ms var(--ease);
 }
-.track-card:hover { border-color: var(--brand-line); }
+.track-card:hover { border-color: var(--brand-line); background: var(--panel-3); transform: scale(1.012); }
 .track-card.active { border-color: var(--brand-line); background: var(--brand-soft); }
 .track-card .ic {
   width: 38px; height: 38px; border-radius: 50%; flex: none;
@@ -527,8 +529,10 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   border-radius: var(--radius-sm); padding: 13px; font-size: var(--fs-base); cursor: pointer; min-height: 48px;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform 80ms var(--ease);
 }
-.opt:not(:disabled):hover { border-color: var(--brand-line); }
-.opt:not(:disabled):active { transform: scale(0.995); }
+/* Problem 3d: a real background shift + slight lift on hover — not just a border-color
+   change — so every answer option reads as "alive" the instant a pointer is over it. */
+.opt:not(:disabled):hover { border-color: var(--brand-line); background: var(--panel-3); transform: scale(1.012); }
+.opt:not(:disabled):active { transform: scale(0.99); }
 .opt .idx { font-family: var(--font-mono); color: var(--dim); margin-right: 9px; }
 .opt.sel { border-color: var(--brand); background: var(--brand-soft); }
 .opt.right { border-color: var(--accent); background: var(--accent-soft); animation: optRight 320ms var(--ease); }
@@ -554,22 +558,32 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 
 /* long-form reading blocks (primer, and any solution/why long enough to be split into
    several paragraphs by renderProse) — a genuinely larger reading type size (not the
-   15px UI body size), generous line-height, and a measure capped in ch (character
-   units, so it tracks the actual reading font-size) at the ~65-75 characters per line
-   editorial typesetting convention — the biggest single difference between "a document"
-   and "a designed reading column." Text is always left-aligned, never justified: ragged
-   right edges avoid the uneven word-spacing justify produces at this column width.
+   15px UI body size) and generous line-height. Text is always left-aligned, never
+   justified: ragged right edges avoid the uneven word-spacing justify produces.
    .reading-block is the wrapper used once content becomes an expand-group accordion (see
    below): unlike .reveal it carries no box of its own, since the individual cards inside
    already frame themselves — wrapping them in a second box would just nest one frame
-   inside another. */
-.reveal.primer, .reveal.prose-block, .reading-block {
-  font-size: 17.5px; line-height: 1.8; max-width: 70ch; text-align: left;
-}
+   inside another. Deliberately no max-width HERE — this wrapper (and the cards inside it)
+   must span the full width of its parent, exactly like every sibling block at the same
+   level (.panel-head, .acc, .concept-flow); a box narrower than its siblings reads as a
+   layout bug, not a design choice. The ~65-75-characters-per-line editorial measure is
+   capped on the paragraph text itself below (.prose-p, .reveal p), not on the box that
+   contains it — the box stays full width, the running text inside it stays comfortable to
+   read, and the two don't have to be the same width. */
 .reading-block { margin: var(--sp-3) 0; }
 .reading-block > .eyebrow { display: block; margin-bottom: var(--sp-2); }
-.prose-p { margin: 0 0 var(--sp-4); text-align: left; }
-.prose-p:last-child { margin-bottom: 0; }
+.reveal.primer, .reveal.prose-block, .reading-block { font-size: 17.5px; line-height: 1.8; }
+.reveal.primer p, .reveal.prose-block p, .reading-block p, .prose-p {
+  max-width: 70ch; margin: 0 0 var(--sp-4); text-align: left;
+}
+.prose-p:last-child, .reveal.primer p:last-child, .reveal.prose-block p:last-child, .reading-block p:last-child {
+  margin-bottom: 0;
+}
+/* Problem 3a: "Start from zero" is foundational/context material — the same role blue
+   already plays everywhere else in this flow (concept-flow's border, the track picker) — so
+   its own expand-cards pick up a quiet blue left border, distinct from the neutral trap/
+   solution cards that share the same .expand-card component but a different eyebrow class. */
+.reveal.primer .expand-card, .reading-block.primer .expand-card { border-left: 3px solid var(--brand-line); }
 /* a quiet, non-textual marker on paragraphs that open a genuinely new sub-topic —
    a thin accent rule, not a boxed-off section, so the read stays continuous */
 .prose-p.topic-shift { position: relative; padding-left: 14px; }
@@ -585,7 +599,10 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   font-family: var(--font-serif); font-size: 1.22em; line-height: 1.5;
   color: var(--text);
 }
-.lead-word { font-weight: 700; }
+/* Problem 3c: the lead-word picks up brand blue instead of plain black-bold — a small,
+   deliberate touch of colour right at the entry point of every reading block, consistent
+   with blue meaning "foundational/context" everywhere else in this flow. */
+.lead-word { font-weight: 700; color: var(--brand-2); }
 /* Mejora C: a term the content is already marking with double quotes as "being defined
    right here" gets a soft blue highlight — the same brand blue as navigation, softened for
    the reading area, never the vivid nav tone itself. */
@@ -625,10 +642,23 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .expand-preview-text {
   color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; min-width: 0;
 }
+/* Problem 3d: the toggle's CTA — "Continue reading" collapsed, "− Collapse" open — is the
+   single most-clicked control on this page, and used to be small gray/plain-blue text easy
+   to miss. Now a real pill: soft blue background, generous padding, a visible fill-in on
+   hover/focus so the whole thing reads as "this is a button," not a caption. */
 .expand-cta {
-  flex: none; color: var(--brand); font-size: var(--fs-xs); font-family: var(--font-mono);
-  white-space: nowrap;
+  flex: none; display: inline-flex; align-items: center; gap: 4px;
+  color: var(--brand-2); font-size: var(--fs-xs); font-family: var(--font-mono);
+  white-space: nowrap; background: var(--brand-soft); border-radius: 999px; padding: 5px 12px;
+  transition: background var(--dur) var(--ease);
 }
+.expand-toggle:hover .expand-cta, .expand-toggle:focus-visible .expand-cta { background: var(--brand-line); }
+/* a single chevron that rotates open/closed instead of the plain +/- swap this project used
+   to rely on — same idea as the top-level .acc summary marker above, applied here too */
+.expand-chevron {
+  font-style: normal; display: inline-block; transition: transform var(--dur) var(--ease);
+}
+[aria-expanded="true"] .expand-chevron { transform: rotate(90deg); }
 .expand-body .prose-p:last-child { margin-bottom: 0; }
 
 .expand-all-controls {
@@ -688,8 +718,14 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; align-items: center; gap: var(--sp-2); background: var(--panel-2);
 }
 .acc > summary::-webkit-details-marker { display: none; }
-.acc > summary::before { content: "+"; font-family: var(--font-mono); color: var(--brand); width: 14px; flex: none; }
-.acc[open] > summary::before { content: "\2212"; }
+/* Problem 3e: a single chevron that rotates open instead of swapping between two flat
+   glyphs (+/−) — the same "this responds to you" feedback the pill CTAs below now give,
+   applied to the very first thing a reader clicks on this page. */
+.acc > summary::before {
+  content: "\203A"; font-family: var(--font-mono); color: var(--brand); width: 14px; flex: none;
+  display: inline-block; transition: transform var(--dur) var(--ease);
+}
+.acc[open] > summary::before { transform: rotate(90deg); }
 .acc > summary .studied-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--line); flex: none; margin-left: auto;
 }
@@ -738,11 +774,13 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; align-items: center; gap: 6px; margin-bottom: var(--sp-4); overflow-x: auto;
 }
 .concept-stepper button {
-  flex: none; background: none; border: 0; color: var(--muted); font-size: var(--fs-xs);
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: 0; color: var(--muted); font-size: var(--fs-xs);
   font-family: var(--font-body); cursor: pointer; padding: 3px 2px; border-bottom: 2px solid transparent;
   transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 .concept-stepper button:hover { color: var(--brand); border-color: var(--brand-line); }
+.step-icon { width: 13px; height: 13px; flex: none; }
 .concept-stepper i { flex: 1 1 12px; max-width: 24px; height: 1px; background: var(--line); }
 /* progress breadcrumb: once a concept is fully studied, its stepper picks up the same
    achievement gold used everywhere else completion is marked (studied-dot, correct answers) */
@@ -766,24 +804,78 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: block; font-size: var(--fs-xs); color: var(--dim); font-style: italic;
   margin-bottom: 3px; font-family: var(--font-body);
 }
+/* Problem 3a: "Core idea" is the single most load-bearing sentence in a concept — it earns
+   its own compact, gold-tinted card instead of blending into the same plain text list as
+   When/Formulas/Intuition below it. Achievement gold (not blue) deliberately: this is the
+   one idea worth remembering, closer in spirit to "the thing that matters" than to
+   "background context," which blue already means everywhere else in this flow. */
+.flow-item-core {
+  background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-2);
+}
+.flow-item-core .micro-label { color: var(--accent-2); font-style: normal; }
+.flow-item-core p { font-weight: 600; }
+.flow-item-core + .flow-item { border-top: 0; margin-top: 0; }
 
-/* a quiet connector between sections — a short label and a hairline, not a boxed header */
+/* Problem 3b (riskiest change, done last): Core idea and its Key formulas sit side by side
+   on desktop — text explaining the idea on the left, the formula that captures it on the
+   right, so a reader can hold both at once instead of scrolling past one to reach the
+   other. Single column below 900px: at narrow widths a side-by-side split would squeeze
+   both the reading column AND the formula's own centered layout, so it reverts to the
+   original stacked order (Core, then Formulas) rather than force two half-width columns
+   onto a phone screen. The .flow-item + .flow-item border-top rule doesn't cross the grid
+   boundary (its sibling is .core-formula-grid, not another .flow-item), so a mismatched
+   thin line at the join is added back explicitly instead of relying on that selector. */
+.core-formula-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+.core-formula-grid .flow-item + .flow-item { border-top: 0; margin-top: 0; }
+.core-formula-grid + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
+@media (min-width: 900px) {
+  .core-formula-grid { grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+  .flow-item-core { margin-bottom: 0; height: 100%; }
+}
+/* a quiet connector between sections — a short label and a hairline, not a boxed header.
+   Problem 3b: the hairline now fades out instead of running flat, and a small brand-blue
+   dot leads the label — a touch of personality without turning a transition into a header. */
 .concept-transition {
   display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-4) 0 var(--sp-3);
 }
+.concept-transition::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--brand-line); flex: none;
+}
 .concept-transition .micro-label { margin: 0; white-space: nowrap; }
-.concept-transition::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+.concept-transition::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(to right, var(--line-soft), transparent);
+}
 
-/* Mejora C: teal identifies worked examples specifically — every example card picks up a
-   teal left border and its "Level N" eyebrow recolors, so scrolling past this zone reads as
-   "now in examples" before the label is even read. */
+/* Mejora C / Problem 3a: worked examples identify as a zone via teal (fallback, in case a
+   level is ever missing/out of range), then each LEVEL gets its own colour extended to the
+   whole card — not just its badge — reusing the exact same green/blue/gold semantic the
+   difficulty tags elsewhere in the app already use (easier reads calmer, harder reads as
+   "closer to the achievement colour"), so a reader recognises L1 vs L2 vs L3 by colour while
+   scrolling, before reading a single word. */
 .examples-flow .expand-card { border-left: 3px solid var(--teal-line); }
 .examples-flow .eyebrow { color: var(--teal-2); }
+.examples-flow .expand-card.lvl-1 { border-left-color: var(--pos-line); background: var(--pos-soft); }
+.examples-flow .expand-card.lvl-1 .eyebrow { color: var(--pos); }
+.examples-flow .expand-card.lvl-2 { border-left-color: var(--brand-line); background: var(--brand-soft); }
+.examples-flow .expand-card.lvl-2 .eyebrow { color: var(--brand-2); }
+.examples-flow .expand-card.lvl-3 { border-left-color: var(--accent-line); background: var(--accent-soft); }
+.examples-flow .expand-card.lvl-3 .eyebrow { color: var(--accent-2); }
 
 /* Mejora C: gold identifies the practice zone — same accent already used for correct
    answers and the studied-dot, so "you're now in the part that counts toward mastery"
    reads consistently with the rest of the app. */
 .checks { border-left: 3px solid var(--accent-line); padding-left: var(--sp-3); }
+/* Problem 3a/3d: each practice question is now a real interactive-looking card, not a bare
+   question line — a visible border that warms to gold on hover signals "this responds to
+   you" before a reader even reaches the answer buttons below it. */
+.check-card {
+  background: var(--panel-2); border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.check-card:hover { border-color: var(--accent-line); background: var(--panel-3); }
 
 .concept-nav-footer {
   display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap;
@@ -838,8 +930,8 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula-katex {
   display: block; text-align: center; overflow-x: auto; overflow-y: hidden;
   background: var(--formula-bg); border: 1px solid var(--formula-line);
-  border-radius: var(--radius-sm); padding: var(--sp-3) var(--sp-4);
-  font-size: 1.35em; color: var(--text);
+  border-left: 3px solid var(--brand); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); font-size: 1.5em; color: var(--text);
 }
 .formula-katex .katex { font-size: 1em; }
 .formula-label {
@@ -849,6 +941,35 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula-note {
   display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
   margin-top: 3px;
+}
+
+/* Formula / technique sheet — a GRID of cards (one per formula/technique) instead of the
+   previous click-to-expand accordion list: this page exists to be glanced at as a reference,
+   not read top-to-bottom, so hiding every entry behind a click worked against its own
+   purpose. Each card surfaces its trigger (when to reach for this) and its rendered formula
+   body without any interaction required. */
+.formula-sheet-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-4); margin-top: var(--sp-2);
+}
+.formula-sheet-card {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  background: var(--panel-2); border: 1px solid var(--brand-line); border-left: 3px solid var(--brand);
+  border-radius: var(--radius); padding: var(--sp-4);
+}
+.formula-card-title {
+  font-weight: 700; font-size: var(--fs-sm); letter-spacing: .02em; text-transform: uppercase;
+  color: var(--brand-2);
+}
+.formula-card-trigger { margin: 0; font-size: var(--fs-xs); color: var(--muted); font-style: italic; }
+.formula-card-body { margin-top: auto; }
+/* a clause the parser fell back on (plain text, not real KaTeX) still gets real presence
+   inside this specific view — it's the one place in the app where EVERY entry is meant to
+   read as "a real reference card," never bare monospace text sitting in a gray box. */
+.formula-card-body .formula {
+  display: block; text-align: center; white-space: normal; font-size: var(--fs-sm);
+  background: var(--panel-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm);
+  margin: 2px 0;
 }
 
 /* ------------------------------ skeleton loaders --------------------------- */
