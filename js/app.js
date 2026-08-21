@@ -616,6 +616,58 @@
     return d ? `<svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>` : '';
   }
 
+  /* ===================== Report 5: "alive" card component helpers =====================
+     Thin wrappers around the .icon-box / .pill-badge CSS (styles.css) — every colour that
+     flows through them is one of the app's existing brand/accent/pos/teal/neg tokens, or one
+     of the two new per-track hues (wm/consulting) added specifically because 6 tracks need 6
+     distinguishable identities and the existing 4-hue set runs out. Nothing here introduces a
+     colour without an established, single, consistent meaning. */
+
+  // quant/reasoning/ib/am reuse the hue that section already carries elsewhere in the app
+  // (brand=foundational, pos=growth/verbal, accent=achievement/finance-flagship,
+  // teal=worked-examples' third accent, reused here as a fourth distinct track hue since
+  // it never overlaps with a track picker on screen at the same time as a worked example).
+  const TRACK_COLOR_VAR = { quant: 'brand', reasoning: 'pos', ib: 'accent', am: 'teal', wm: 'track-wm', consulting: 'track-consulting' };
+  // one-line UI captions for the track picker cards — presentation chrome describing what
+  // each track covers, not scored quiz/lesson content, and not sourced from any content file
+  const TRACK_TAGLINE = {
+    quant: 'Probability, EV, and market-making intuition',
+    reasoning: 'Verbal, abstract, and logical speed drills',
+    ib: 'Valuation, M&A, and technical interview prep',
+    am: 'Portfolio construction and market fundamentals',
+    wm: 'Client planning, wealth strategy, and fixed income',
+    consulting: 'Case frameworks, mental math, and industry knowledge'
+  };
+
+  function iconBox(colorVar, iconSvg, sizeCls) {
+    const cls = ['icon-box', sizeCls || ''].filter(Boolean).join(' ');
+    return `<span class="${cls}" style="--ib-bg:var(--${colorVar});--ib-fg:var(--${colorVar}-ink)">${iconSvg}</span>`;
+  }
+  function pillBadge(colorVar, iconSvg, text) {
+    return `<span class="pill-badge" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
+  }
+  function kicker(text, warm) {
+    return `<span class="kicker${warm ? ' warm' : ''}">${esc(text)}</span>`;
+  }
+  /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
+     grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
+     icon adds a second, redundant signal on top of a colour meaning that already exists
+     rather than inventing a new one. */
+  const DIFF_TIER_ICON = {
+    easy: '<path d="M6 20c9 0 12-6 12-14-8 0-12 5-12 14z"/><path d="M6 20c2-4 5-8 12-14"/>',
+    mid: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+    hard: ICONS.flame
+  };
+  function diffTier(level) { return level <= 1 ? 'easy' : level <= 3 ? 'mid' : 'hard'; }
+  function diffColorVar(level) { return level <= 1 ? 'pos' : level <= 3 ? 'brand' : 'neg'; }
+  function diffIcon(level, cls) {
+    const d = DIFF_TIER_ICON[diffTier(level)];
+    return `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+  function diffPill(level, label) {
+    return pillBadge(diffColorVar(level), diffIcon(level), label || ('L' + level));
+  }
+
   const VIEWS = [
     { id: 'dashboard', label: 'Dash', title: 'Dashboard', group: 'primary', navgroup: 'Overview' },
     { id: 'learn', label: 'Learn', title: 'Learn', group: 'primary', navgroup: 'Practice' },
@@ -1127,14 +1179,18 @@
     S.tracks().forEach((t) => {
       const sum = S.trackSummary(t.id);
       const started = sum.total > 0;
-      const card = el('button', 'track-card' + (t.id === track ? ' active' : ''));
-      card.style.cssText = 'flex-direction:column;align-items:flex-start;gap:8px;text-align:left';
-      card.innerHTML = `<span class="flex between" style="width:100%">
-          <span class="ic">${trackIcon(t.id)}</span>
-          ${started ? ring(sum.accuracy, { size: 30, stroke: 3, accent: t.id === track, showNum: false }) : ''}
+      const active = t.id === track;
+      const colorVar = TRACK_COLOR_VAR[t.id];
+      const card = el('button', 'track-card gradient-card' + (active ? ' active' : ''));
+      card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+      card.innerHTML = `
+        <span class="track-card-top">
+          ${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
         </span>
-        <span class="name" style="font-size:var(--fs-sm)">${esc(t.label)}</span>
-        <span class="meta">${started ? sum.accuracy + '% · n=' + sum.total : 'Not started'}</span>`;
+        <span class="track-card-title">${esc(t.label)}</span>
+        <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
+        ${pillBadge(colorVar, icon(started ? 'check' : 'learn'), started ? sum.accuracy + '% · ' + sum.total + ' done' : 'Not started')}`;
       card.onclick = () => {
         if (t.id !== track) { S.setTrack(t.id); current = S.getLastView(t.id); }
         else go('dashboard');
@@ -2220,12 +2276,15 @@
     const r = (size - sw) / 2, c = 2 * Math.PI * r;
     const v = Math.max(0, Math.min(100, pct || 0));
     const off = c * (1 - v / 100);
+    // colorVar: an explicit "--<name>" CSS var to stroke the value arc with (e.g. a track's
+    // own identity colour) — overrides the .accent class-based colour when supplied.
+    const strokeStyle = opts.colorVar ? ` style="stroke:var(--${opts.colorVar})"` : '';
     return `<span class="ring-label" style="width:${size}px;height:${size}px">
       <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
         <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"/>
         <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"
           stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
-          transform="rotate(-90 ${size / 2} ${size / 2})"/>
+          transform="rotate(-90 ${size / 2} ${size / 2})"${strokeStyle}/>
       </svg>
       ${opts.showNum === false ? '' : `<span class="num" style="font-size:${Math.max(10, size * 0.28)}px">${Math.round(v)}</span>`}
     </span>`;
@@ -2236,13 +2295,16 @@
     const body = '<div class="sheet-grid">' + S.tracks().map((t) => {
       const sum = S.trackSummary(t.id);
       const started = sum.total > 0;
-      return `<button class="track-card ${t.id === active ? 'active' : ''}" data-track="${esc(t.id)}">
-        <span class="ic">${trackIcon(t.id)}</span>
-        <span class="body">
-          <span class="name">${esc(t.label)}</span>
-          <span class="meta">${started ? sum.total + ' answered · ' + sum.accuracy + '% accuracy' : 'Not started yet'}</span>
+      const colorVar = TRACK_COLOR_VAR[t.id];
+      return `<button class="track-card gradient-card ${t.id === active ? 'active' : ''}" data-track="${esc(t.id)}"
+          style="--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)">
+        <span class="track-card-top">
+          ${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
         </span>
-        <span class="ring-wrap">${started ? ring(sum.accuracy, { size: 34, stroke: 3.5, accent: t.id === active }) : ''}</span>
+        <span class="track-card-title">${esc(t.label)}</span>
+        <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
+        ${pillBadge(colorVar, icon(started ? 'check' : 'learn'), started ? sum.total + ' answered · ' + sum.accuracy + '%' : 'Not started yet')}
       </button>`;
     }).join('') + '</div>';
     const sh = mountSheet('track-sheet', 'track-sheet',
