@@ -232,14 +232,14 @@
         : `<p class="prose-p${b.shift ? ' topic-shift' : ''}">${(options.highlightTerms ? highlightKeyTerms : esc)(b.text)}</p>`;
       const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
       const expandLabel = b.ctaLabel || 'Continue reading';
-      const collapseLabel = b.collapseLabel || '− Collapse';
+      const collapseLabel = b.collapseLabel || 'Collapse';
       const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : '', b.cardClass || ''].filter(Boolean).join(' ');
       return `<div class="${cls}" data-idx="${i}">
           <button class="expand-toggle" type="button" data-expand-toggle
             data-expand-label="${esc(expandLabel)}" data-collapse-label="${esc(collapseLabel)}"
             aria-expanded="${open}" tabindex="${locked ? '-1' : '0'}">
             <span class="expand-preview-text">${esc(preview)}</span>
-            <span class="expand-cta">${esc(open ? collapseLabel : expandLabel)}</span>
+            <span class="expand-cta"><span class="expand-cta-label">${esc(open ? collapseLabel : expandLabel)}</span><i class="expand-chevron">&#8250;</i></span>
           </button>
           <div class="expand-body">${body}</div>
         </div>`;
@@ -602,6 +602,18 @@
   function trackIcon(id, cls) {
     const d = TRACK_ICONS[id] || TRACK_ICONS.quant;
     return `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  }
+  /* Problem 3e: one small consistent glyph per breadcrumb step (Context/Core/Examples/
+     Practice) — same 24x24, stroke=currentColor language as every other icon in the app, so
+     a reader recognises where they are in a concept at a glance instead of only via text. */
+  const STEP_ICONS = {
+    context: '<path d="M6 3v18"/><path d="M6 4h11l-3 4 3 4H6z"/>',
+    core: '<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/>',
+    examples: '<path d="M12 4 3 9l9 5 9-5-9-5z"/><path d="M3 14l9 5 9-5"/>'
+  };
+  function stepIcon(name) {
+    const d = STEP_ICONS[name];
+    return d ? `<svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>` : '';
   }
 
   const VIEWS = [
@@ -1243,10 +1255,10 @@
           <div class="acc-body">
             <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
             <div class="concept-stepper${studied ? ' stepper-done' : ''}">
-              <button data-jump="context">Context</button><i></i>
-              <button data-jump="core">Core</button><i></i>
-              <button data-jump="examples">Examples</button><i></i>
-              <button data-jump="practice">Practice</button>
+              <button data-jump="context">${stepIcon('context')}Context</button><i></i>
+              <button data-jump="core">${stepIcon('core')}Core</button><i></i>
+              <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
+              <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
             </div>
             ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
@@ -1273,7 +1285,7 @@
           bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
-          collapseLabel: `− Collapse Level ${ex.level}`,
+          collapseLabel: `Collapse Level ${ex.level}`,
           cardClass: 'lvl-' + ex.level
         })), { mode: 'sequential' });
 
@@ -2268,7 +2280,7 @@
     const btn = card.querySelector('[data-expand-toggle]');
     if (!btn) return;
     btn.setAttribute('aria-expanded', String(opening));
-    const cta = btn.querySelector('.expand-cta');
+    const cta = btn.querySelector('.expand-cta-label');
     if (cta) cta.textContent = opening ? btn.dataset.collapseLabel : btn.dataset.expandLabel;
   }
   function unlockExpandCard(card) {

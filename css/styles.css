@@ -647,11 +647,18 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
    to miss. Now a real pill: soft blue background, generous padding, a visible fill-in on
    hover/focus so the whole thing reads as "this is a button," not a caption. */
 .expand-cta {
-  flex: none; color: var(--brand-2); font-size: var(--fs-xs); font-family: var(--font-mono);
+  flex: none; display: inline-flex; align-items: center; gap: 4px;
+  color: var(--brand-2); font-size: var(--fs-xs); font-family: var(--font-mono);
   white-space: nowrap; background: var(--brand-soft); border-radius: 999px; padding: 5px 12px;
   transition: background var(--dur) var(--ease);
 }
 .expand-toggle:hover .expand-cta, .expand-toggle:focus-visible .expand-cta { background: var(--brand-line); }
+/* a single chevron that rotates open/closed instead of the plain +/- swap this project used
+   to rely on — same idea as the top-level .acc summary marker above, applied here too */
+.expand-chevron {
+  font-style: normal; display: inline-block; transition: transform var(--dur) var(--ease);
+}
+[aria-expanded="true"] .expand-chevron { transform: rotate(90deg); }
 .expand-body .prose-p:last-child { margin-bottom: 0; }
 
 .expand-all-controls {
@@ -711,8 +718,14 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; align-items: center; gap: var(--sp-2); background: var(--panel-2);
 }
 .acc > summary::-webkit-details-marker { display: none; }
-.acc > summary::before { content: "+"; font-family: var(--font-mono); color: var(--brand); width: 14px; flex: none; }
-.acc[open] > summary::before { content: "\2212"; }
+/* Problem 3e: a single chevron that rotates open instead of swapping between two flat
+   glyphs (+/−) — the same "this responds to you" feedback the pill CTAs below now give,
+   applied to the very first thing a reader clicks on this page. */
+.acc > summary::before {
+  content: "\203A"; font-family: var(--font-mono); color: var(--brand); width: 14px; flex: none;
+  display: inline-block; transition: transform var(--dur) var(--ease);
+}
+.acc[open] > summary::before { transform: rotate(90deg); }
 .acc > summary .studied-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--line); flex: none; margin-left: auto;
 }
@@ -761,11 +774,13 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; align-items: center; gap: 6px; margin-bottom: var(--sp-4); overflow-x: auto;
 }
 .concept-stepper button {
-  flex: none; background: none; border: 0; color: var(--muted); font-size: var(--fs-xs);
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: 0; color: var(--muted); font-size: var(--fs-xs);
   font-family: var(--font-body); cursor: pointer; padding: 3px 2px; border-bottom: 2px solid transparent;
   transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 .concept-stepper button:hover { color: var(--brand); border-color: var(--brand-line); }
+.step-icon { width: 13px; height: 13px; flex: none; }
 .concept-stepper i { flex: 1 1 12px; max-width: 24px; height: 1px; background: var(--line); }
 /* progress breadcrumb: once a concept is fully studied, its stepper picks up the same
    achievement gold used everywhere else completion is marked (studied-dot, correct answers) */
