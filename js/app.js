@@ -82,11 +82,40 @@
      worked example's own text, nested inside the Level 1/2/3 sequential accordion): nesting
      a second independent accordion inside an already-collapsible block would just stack two
      layers of "click to reveal" on top of each other for no reason. */
-  function renderPlainProse(text) {
+  /* Worked examples are full of standalone calculation-step sentences that are themselves
+     complete formulas ("P(X=2) = C(4,2)(0.5)²(0.5)² = 6 × 0.25 × 0.25 = 0.375."). A read-only
+     probe across the real dataset found 61 such full-sentence candidates inside worked
+     examples versus only 11 across ALL of primer/core/when/intuition/trap/why/solution/
+     approach combined — so inline detection is deliberately scoped to worked examples only:
+     the tradeoff (a substituted sentence's rendered .textContent is no longer character-
+     identical to its source, by design — a KaTeX-typeset fraction has no literal "/") isn't
+     worth taking on the huge, low-yield surface of free-form prose. Reuses the exact same
+     parseFormulaSegment gate the "formulas" field and the technique sheet already trust:
+     only whole sentences that independently pass it get substituted; every other sentence,
+     unchanged, keeps its exact source text (parseFormulaSegment is defined further down this
+     file — safe to reference here, function declarations are hoisted within the module). */
+  function renderTextWithInlineFormulas(text) {
+    const sentences = splitIntoSentences(text);
+    if (!sentences.length) return esc(text);
+    return sentences.map((raw) => {
+      const leadWS = (raw.match(/^\s+/) || [''])[0];
+      const core = raw.slice(leadWS.length);
+      const trailMatch = core.match(/([.!?]+['")\]]?)$/);
+      const trailPunct = trailMatch ? trailMatch[0] : '';
+      const mathPart = trailPunct ? core.slice(0, core.length - trailPunct.length) : core;
+      if (!mathPart.trim()) return esc(raw);
+      const parsed = parseFormulaSegment(mathPart.trim());
+      if (!parsed) return esc(raw);
+      const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
+      const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
+      return `${esc(leadWS)}<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>${esc(trailPunct)}`;
+    }).join('');
+  }
+  function renderPlainProseWithFormulas(text) {
     text = text || '';
-    if (text.length < 260) return `<p>${esc(text)}</p>`;
+    if (text.length < 260) return `<p>${renderTextWithInlineFormulas(text)}</p>`;
     const paras = splitIntoDigestibleParagraphs(text);
-    return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${esc(p.text)}</p>`).join('');
+    return paras.map((p) => `<p class="prose-p${p.shift ? ' topic-shift' : ''}">${renderTextWithInlineFormulas(p.text)}</p>`).join('');
   }
   /* Editorial lead-in: wraps the first SENTENCE of a paragraph's raw text in a larger
      serif span, with that sentence's own first WORD carrying extra weight inside it — a
@@ -1241,7 +1270,7 @@
         const exBox = $('.examples-flow', d);
         const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
-          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProse(ex.text)}`,
+          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
           collapseLabel: `− Collapse Level ${ex.level}`
@@ -1845,15 +1874,14 @@
     global.QTL_FORMULAS.forEach((g) => {
       const p = el('div', 'panel');
       p.innerHTML = `<div class="panel-head"><span class="eyebrow">${esc(g.group)}</span></div>`;
-      g.items.forEach((it) => {
-        const d = el('details', 'acc');
-        d.innerHTML = `<summary><strong>${esc(it.t)}</strong></summary>
-          <div class="acc-body">
-            <p class="trigger">Trigger: ${esc(it.trigger)}</p>
-            <p>${esc(it.body)}</p>
-          </div>`;
-        p.appendChild(d);
-      });
+      const grid = el('div', 'formula-sheet-grid');
+      grid.innerHTML = g.items.map((it) => `
+        <div class="formula-sheet-card">
+          <span class="formula-card-title">${esc(it.t)}</span>
+          <p class="formula-card-trigger">${esc(it.trigger)}</p>
+          <div class="formula-card-body">${renderFormula(it.body)}</div>
+        </div>`).join('');
+      p.appendChild(grid);
       root.appendChild(p);
     });
   }
@@ -2300,5 +2328,5 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment };
+  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas };
 })(window);

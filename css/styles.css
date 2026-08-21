@@ -843,8 +843,8 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula-katex {
   display: block; text-align: center; overflow-x: auto; overflow-y: hidden;
   background: var(--formula-bg); border: 1px solid var(--formula-line);
-  border-radius: var(--radius-sm); padding: var(--sp-3) var(--sp-4);
-  font-size: 1.35em; color: var(--text);
+  border-left: 3px solid var(--brand); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); font-size: 1.5em; color: var(--text);
 }
 .formula-katex .katex { font-size: 1em; }
 .formula-label {
@@ -854,6 +854,35 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula-note {
   display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
   margin-top: 3px;
+}
+
+/* Formula / technique sheet — a GRID of cards (one per formula/technique) instead of the
+   previous click-to-expand accordion list: this page exists to be glanced at as a reference,
+   not read top-to-bottom, so hiding every entry behind a click worked against its own
+   purpose. Each card surfaces its trigger (when to reach for this) and its rendered formula
+   body without any interaction required. */
+.formula-sheet-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-4); margin-top: var(--sp-2);
+}
+.formula-sheet-card {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  background: var(--panel-2); border: 1px solid var(--brand-line); border-left: 3px solid var(--brand);
+  border-radius: var(--radius); padding: var(--sp-4);
+}
+.formula-card-title {
+  font-weight: 700; font-size: var(--fs-sm); letter-spacing: .02em; text-transform: uppercase;
+  color: var(--brand-2);
+}
+.formula-card-trigger { margin: 0; font-size: var(--fs-xs); color: var(--muted); font-style: italic; }
+.formula-card-body { margin-top: auto; }
+/* a clause the parser fell back on (plain text, not real KaTeX) still gets real presence
+   inside this specific view — it's the one place in the app where EVERY entry is meant to
+   read as "a real reference card," never bare monospace text sitting in a gray box. */
+.formula-card-body .formula {
+  display: block; text-align: center; white-space: normal; font-size: var(--fs-sm);
+  background: var(--panel-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm);
+  margin: 2px 0;
 }
 
 /* ------------------------------ skeleton loaders --------------------------- */
