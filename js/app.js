@@ -653,6 +653,13 @@
   function pillBadge(colorVar, iconSvg, text) {
     return `<span class="pill-badge" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
   }
+  const TAG_ICON = '<path d="M12.5 2.5h6a2 2 0 0 1 2 2v6L11 20 2.5 11.5 12.5 2.5z"/><circle cx="16.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/>';
+  // topic/subtopic have no assigned colour anywhere in the app (unlike difficulty) — a
+  // neutral icon+pill keeps the same STRUCTURE (icon, translucent fill, full pill) the
+  // reference established, without inventing a colour meaning that doesn't exist.
+  function topicPill(text) {
+    return `<span class="pill-badge neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TAG_ICON}</svg><span>${esc(text)}</span></span>`;
+  }
   function kicker(text, colorVar) {
     const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
     return `<span class="kicker"${style}>${esc(text)}</span>`;
@@ -964,8 +971,8 @@
     const card = el('div', 'panel');
     card.innerHTML = `
       <div class="qmeta">
-        <span class="tag d${q.difficulty}">L${q.difficulty}</span>
-        ${cfg.hideTopic ? '' : `<span class="tag">${esc(q.topic)}</span>`}
+        ${diffPill(q.difficulty)}
+        ${cfg.hideTopic ? '' : topicPill(q.topic)}
         ${q.targetTime ? `<span>target ${q.targetTime}s</span>` : ''}
         ${q.source === 'curated' ? '<span>curated</span>' : ''}
       </div>
@@ -1384,7 +1391,7 @@
         c.checks.forEach((chk, ci) => {
           const wrap = el('div', 'check-card');
           const lv = chk.level || 1;
-          wrap.innerHTML = `<p class="mb-2"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
+          wrap.innerHTML = `<p class="mb-2">${diffPill(lv, 'L' + lv + ' ' + levelWord(lv))} ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
             const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
             b.onclick = () => {
@@ -1845,8 +1852,8 @@
 
     r.recs.forEach((x, i) => {
       const p = el('div', 'panel');
-      p.innerHTML = `<div class="qmeta"><span class="tag d${x.q.difficulty}">L${x.q.difficulty}</span>
-          <span class="tag">${esc(x.q.topic)}</span><span>${fmtTime(x.timeSec)}</span></div>
+      p.innerHTML = `<div class="qmeta">${diffPill(x.q.difficulty)}
+          ${topicPill(x.q.topic)}<span>${fmtTime(x.timeSec)}</span></div>
         <div class="verdict ${x.correct ? 'ok' : 'no'}">Q${i + 1} — ${x.correct ? 'correct' : 'incorrect'}
           · your answer ${x.given === null ? '—' : esc(String(x.given))} · correct ${esc(String(x.q.correctAnswer))}</div>
         <div class="qprompt small">${/^\s*</.test(x.q.prompt) ? x.q.prompt : '<p>' + esc(x.q.prompt) + '</p>'}</div>

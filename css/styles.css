@@ -453,6 +453,10 @@ main { padding: var(--sp-4); max-width: 1180px; margin: 0 auto; }
   white-space: nowrap;
 }
 .pill-badge svg { width: 13px; height: 13px; flex: none; }
+/* topic/subtopic/target-time badges have no assigned colour anywhere in the app (unlike
+   difficulty) — neutral keeps the same icon+translucent-pill structure without inventing a
+   colour meaning that doesn't exist. */
+.pill-badge.neutral { background: var(--panel-3); color: var(--muted); }
 
 /* Kicker label: small, uppercase, wide tracking, accent colour — sits above
    a large bold title, the "editorial premium" pattern from the reference. */
@@ -621,12 +625,6 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center;
   font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--dim); margin-bottom: var(--sp-3);
 }
-.tag {
-  border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px;
-  font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--muted);
-}
-.tag.d1 { color: var(--pos); } .tag.d2 { color: var(--info); }
-.tag.d3 { color: var(--brand); } .tag.d4, .tag.d5 { color: var(--neg); }
 .qprompt { font-size: var(--fs-lg); line-height: 1.55; margin-bottom: var(--sp-4); }
 .qprompt p:last-child { margin-bottom: 0; }
 .opt {
