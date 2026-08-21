@@ -259,9 +259,16 @@
      already frames itself, so it's dropped in exactly this case, not removed everywhere. */
   function renderReadingBlock(eyebrowLabel, text, extraClass, idAttr, options) {
     text = text || '';
+    options = options || {};
     const cls = extraClass ? ' ' + extraClass : '';
     const idStr = idAttr ? ` id="${esc(idAttr)}"` : '';
-    const eyebrow = eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '';
+    // Report 5, point C: a block type with an assigned identity colour (Context=blue) gets a
+    // real header — icon-box + kicker — instead of a plain caption; blocks without one (the
+    // secondary "Common trap") keep the quieter existing eyebrow, so identity is reserved for
+    // the four block types the brief actually named, not applied indiscriminately everywhere.
+    const eyebrow = options.blockIcon
+      ? `<div class="block-header">${iconBox(options.blockIcon.colorVar, options.blockIcon.iconSvg, 'sm')}${kicker(eyebrowLabel)}</div>`
+      : (eyebrowLabel ? `<span class="eyebrow">${esc(eyebrowLabel)}</span>` : '');
     const prose = renderProse(text, options);
     if (text.length < 260) return `<div class="reveal${cls}"${idStr}>${eyebrow}${prose}</div>`;
     return `<div class="reading-block${cls}"${idStr}>${eyebrow}${prose}</div>`;
@@ -646,8 +653,9 @@
   function pillBadge(colorVar, iconSvg, text) {
     return `<span class="pill-badge" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
   }
-  function kicker(text, warm) {
-    return `<span class="kicker${warm ? ' warm' : ''}">${esc(text)}</span>`;
+  function kicker(text, colorVar) {
+    const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
+    return `<span class="kicker"${style}>${esc(text)}</span>`;
   }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
@@ -666,6 +674,15 @@
   }
   function diffPill(level, label) {
     return pillBadge(diffColorVar(level), diffIcon(level), label || ('L' + level));
+  }
+  /* worked-example levels use their own 3-tier green/blue/gold scheme (Problem 3a of the
+     previous pass), distinct from the 5-level d1-d5 Drill scale diffColorVar/diffIcon above
+     map to — a Level 2 example is "blue," not lumped into the same mid-tier bucket as
+     Level 3 the way d2/d3 are for Drill's finer 5-point scale. */
+  const EXAMPLE_LEVEL_COLOR = { 1: 'pos', 2: 'brand', 3: 'accent' };
+  function exampleLevelIcon(level) {
+    const d = level <= 1 ? DIFF_TIER_ICON.easy : level === 2 ? DIFF_TIER_ICON.mid : DIFF_TIER_ICON.hard;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   }
 
   const VIEWS = [
@@ -1298,7 +1315,10 @@
       const p = el('div', 'panel');
       p.id = 'learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_');
       const doneCount = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
-      p.innerHTML = `<div class="panel-head"><span class="eyebrow">Unit ${esc(unit.unit)} · ${doneCount}/${unit.concepts.length} studied</span><h2>${esc(unit.title)}</h2></div>`;
+      p.innerHTML = `<div class="panel-head unit-head">
+          <div>${kicker('Unit ' + unit.unit)}<h2>${esc(unit.title)}</h2></div>
+          ${pillBadge('brand', icon('check'), doneCount + '/' + unit.concepts.length + ' studied')}
+        </div>`;
       unit.concepts.forEach((c) => {
         const d = el('details', 'acc');
         d.id = cid(c.id);
@@ -1316,10 +1336,13 @@
               <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
               <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
             </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
+            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true, blockIcon: { colorVar: 'brand', iconSvg: stepIcon('context') } }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
               <div class="core-formula-grid">
-                <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+                <div class="flow-item flow-item-core">
+                  <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
+                  <p>${esc(c.core)}</p>
+                </div>
                 <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
                   <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               </div>
@@ -1330,6 +1353,7 @@
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
             ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
+            <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
             <div class="concept-nav-footer"></div>
           </div>`;
@@ -1340,7 +1364,7 @@
         const exBox = $('.examples-flow', d);
         const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
         exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
-          bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
+          bodyHtml: `<div class="block-header">${iconBox(EXAMPLE_LEVEL_COLOR[ex.level] || 'teal', exampleLevelIcon(ex.level), 'sm')}${kicker('Level ' + ex.level + ' — ' + levelWord(ex.level), EXAMPLE_LEVEL_COLOR[ex.level] || 'teal')}</div>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
           collapseLabel: `Collapse Level ${ex.level}`,
