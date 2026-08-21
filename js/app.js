@@ -1617,6 +1617,11 @@
 
   /* ============================= MIXED PRACTICE ============================ */
 
+  // Report 5, point E: each Mixed practice mode gets its own identity colour (Easy/Medium/
+  // Hard reuse the standard pos/brand/neg difficulty grouping; the two named-firm presets
+  // get a distinct colour each so they read as "special," not just another difficulty tier).
+  const MODE_COLOR = { Easy: 'pos', Medium: 'brand', Hard: 'neg', 'Wincent level': 'accent', 'SIG speed level': 'teal', 'Fully mixed': 'brand' };
+  const MODE_ICON = { Easy: 'easy', Medium: 'mid', Hard: 'hard', 'Wincent level': 'hard', 'SIG speed level': 'mid', 'Fully mixed': null };
   function viewMixed(root) {
     const modes = [
       { k: 'Easy', d: [1, 2], n: 12, help: true },
@@ -1628,10 +1633,21 @@
     ];
     const p = el('div', 'panel');
     p.innerHTML = '<div class="panel-head"><span class="eyebrow">Mixed practice</span></div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>';
-    const row = el('div', 'btn-row');
+    const grid = el('div', 'grid c2');
     modes.forEach((m) => {
-      const b = el('button', 'btn', m.k);
-      b.onclick = () => {
+      const colorVar = MODE_COLOR[m.k] || 'brand';
+      const tier = MODE_ICON[m.k];
+      const iconD = tier ? DIFF_TIER_ICON[tier] : ICONS.mixed;
+      const iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconD}</svg>`;
+      const diffLabel = m.d.length >= 5 ? 'All levels' : 'L' + m.d[0] + '–' + m.d[m.d.length - 1];
+      const card = el('button', 'mode-card gradient-card');
+      card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+      card.innerHTML = `
+        ${iconBox(colorVar, iconSvg, 'sm')}
+        <span class="mode-card-title">${esc(m.k)}</span>
+        <span class="mode-card-desc">${m.n} questions${m.per ? ' · ' + m.per + 's each' : ''}${m.help ? '' : ' · no hints'}</span>
+        ${diffPill(Math.max.apply(null, m.d), diffLabel)}`;
+      card.onclick = () => {
         const items = S.buildSession({ count: m.n, difficulties: m.d, topics: m.topics || null });
         startSession({
           items, mode: 'Mixed', testType: 'Mixed — ' + m.k, allowHelp: m.help,
@@ -1639,9 +1655,9 @@
           title: 'Mixed — ' + m.k, returnTo: 'mixed'
         });
       };
-      row.appendChild(b);
+      grid.appendChild(card);
     });
-    p.appendChild(row);
+    p.appendChild(grid);
     root.appendChild(p);
 
     const cm = S.confidenceMatrix();

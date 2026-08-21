@@ -108,6 +108,7 @@
   --pos-ink: #0D2016;
   --neg: #D08886;
   --neg-soft: rgba(208, 136, 134, 0.14);
+  --neg-ink: #260C0B;
   --info: var(--brand);
 
   /* third accent — teal, coherent with navy+gold, reserved for "worked examples" content
@@ -193,6 +194,7 @@ html[data-theme="light"] {
   --pos-ink: #FFFFFF;
   --neg: #AB4C4A;
   --neg-soft: #F5E7E6;
+  --neg-ink: #FFFFFF;
   --info: var(--brand);
 
   --teal: #2B8A82;
@@ -482,6 +484,18 @@ main { padding: var(--sp-4); max-width: 1180px; margin: 0 auto; }
 .track-card-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: var(--sp-2); }
 .track-card-title { font-size: var(--fs-lg); font-weight: 700; color: var(--text); line-height: 1.2; }
 .track-card-desc { font-size: var(--fs-sm); color: var(--muted); line-height: 1.4; margin-top: -4px; }
+
+/* Report 5, point E: Mixed practice's mode picker (Easy/Medium/Hard/Wincent/SIG/Fully mixed)
+   — same gradient-card + icon-box + pill language as the track picker, at a slightly more
+   compact scale since these are six peer options in a grid, not a handful of course cards. */
+.mode-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4); cursor: pointer; text-align: left; width: 100%;
+  transition: transform 80ms var(--ease);
+}
+.mode-card:hover { transform: scale(1.012); }
+.mode-card-title { font-size: var(--fs-base); font-weight: 700; color: var(--text); }
+.mode-card-desc { font-size: var(--fs-xs); color: var(--muted); line-height: 1.4; }
 
 /* ---------------------------------- panels -------------------------------- */
 .panel {
