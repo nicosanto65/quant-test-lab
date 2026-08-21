@@ -817,12 +817,36 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .flow-item-core p { font-weight: 600; }
 .flow-item-core + .flow-item { border-top: 0; margin-top: 0; }
 
-/* a quiet connector between sections — a short label and a hairline, not a boxed header */
+/* Problem 3b (riskiest change, done last): Core idea and its Key formulas sit side by side
+   on desktop — text explaining the idea on the left, the formula that captures it on the
+   right, so a reader can hold both at once instead of scrolling past one to reach the
+   other. Single column below 900px: at narrow widths a side-by-side split would squeeze
+   both the reading column AND the formula's own centered layout, so it reverts to the
+   original stacked order (Core, then Formulas) rather than force two half-width columns
+   onto a phone screen. The .flow-item + .flow-item border-top rule doesn't cross the grid
+   boundary (its sibling is .core-formula-grid, not another .flow-item), so a mismatched
+   thin line at the join is added back explicitly instead of relying on that selector. */
+.core-formula-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+.core-formula-grid .flow-item + .flow-item { border-top: 0; margin-top: 0; }
+.core-formula-grid + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
+@media (min-width: 900px) {
+  .core-formula-grid { grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+  .flow-item-core { margin-bottom: 0; height: 100%; }
+}
+/* a quiet connector between sections — a short label and a hairline, not a boxed header.
+   Problem 3b: the hairline now fades out instead of running flat, and a small brand-blue
+   dot leads the label — a touch of personality without turning a transition into a header. */
 .concept-transition {
   display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-4) 0 var(--sp-3);
 }
+.concept-transition::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--brand-line); flex: none;
+}
 .concept-transition .micro-label { margin: 0; white-space: nowrap; }
-.concept-transition::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+.concept-transition::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(to right, var(--line-soft), transparent);
+}
 
 /* Mejora C / Problem 3a: worked examples identify as a zone via teal (fallback, in case a
    level is ever missing/out of range), then each LEVEL gets its own colour extended to the

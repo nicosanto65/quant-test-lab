@@ -1262,10 +1262,12 @@
             </div>
             ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
-              <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+              <div class="core-formula-grid">
+                <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+                <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
+                  <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
+              </div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
-              <div class="flow-item"><span class="micro-label">Key formulas</span>
-                <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
