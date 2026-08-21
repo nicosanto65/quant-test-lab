@@ -554,22 +554,27 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 
 /* long-form reading blocks (primer, and any solution/why long enough to be split into
    several paragraphs by renderProse) — a genuinely larger reading type size (not the
-   15px UI body size), generous line-height, and a measure capped in ch (character
-   units, so it tracks the actual reading font-size) at the ~65-75 characters per line
-   editorial typesetting convention — the biggest single difference between "a document"
-   and "a designed reading column." Text is always left-aligned, never justified: ragged
-   right edges avoid the uneven word-spacing justify produces at this column width.
+   15px UI body size) and generous line-height. Text is always left-aligned, never
+   justified: ragged right edges avoid the uneven word-spacing justify produces.
    .reading-block is the wrapper used once content becomes an expand-group accordion (see
    below): unlike .reveal it carries no box of its own, since the individual cards inside
    already frame themselves — wrapping them in a second box would just nest one frame
-   inside another. */
-.reveal.primer, .reveal.prose-block, .reading-block {
-  font-size: 17.5px; line-height: 1.8; max-width: 70ch; text-align: left;
-}
+   inside another. Deliberately no max-width HERE — this wrapper (and the cards inside it)
+   must span the full width of its parent, exactly like every sibling block at the same
+   level (.panel-head, .acc, .concept-flow); a box narrower than its siblings reads as a
+   layout bug, not a design choice. The ~65-75-characters-per-line editorial measure is
+   capped on the paragraph text itself below (.prose-p, .reveal p), not on the box that
+   contains it — the box stays full width, the running text inside it stays comfortable to
+   read, and the two don't have to be the same width. */
 .reading-block { margin: var(--sp-3) 0; }
 .reading-block > .eyebrow { display: block; margin-bottom: var(--sp-2); }
-.prose-p { margin: 0 0 var(--sp-4); text-align: left; }
-.prose-p:last-child { margin-bottom: 0; }
+.reveal.primer, .reveal.prose-block, .reading-block { font-size: 17.5px; line-height: 1.8; }
+.reveal.primer p, .reveal.prose-block p, .reading-block p, .prose-p {
+  max-width: 70ch; margin: 0 0 var(--sp-4); text-align: left;
+}
+.prose-p:last-child, .reveal.primer p:last-child, .reveal.prose-block p:last-child, .reading-block p:last-child {
+  margin-bottom: 0;
+}
 /* a quiet, non-textual marker on paragraphs that open a genuinely new sub-topic —
    a thin accent rule, not a boxed-off section, so the read stays continuous */
 .prose-p.topic-shift { position: relative; padding-left: 14px; }

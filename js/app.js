@@ -101,15 +101,29 @@
      definiciones"). Pure rendering: every character of the source, including the quote
      marks themselves, passes through esc() untouched — only wrapped in a span, nothing
      added, removed, or reordered, so this never affects the exact-text-reconstruction
-     guarantee the paragraph splitter already relies on. */
-  const QUOTED_TERM_RE = /"[^"]{2,40}"/g;
+     guarantee the paragraph splitter already relies on.
+     Quotes are paired by POSITION (1st+2nd, 3rd+4th, ...), never by nearest-neighbor regex
+     retry: this text also uses double quotes for quoted questions ('"how much did the
+     company earn... on paper?"'), which routinely run past the ~40-char "this is a term"
+     length. A naive /"[^"]{2,40}"/g regex that fails to match a too-long legitimate pair
+     doesn't skip it — it retries from that pair's own closing quote, which then wrongly
+     pairs with the NEXT unrelated opening quote and corrupts every pairing after it (e.g.
+     misreading the boundary between two sentences as a highlighted term reading '" The "').
+     Finding every quote index up front and pairing them in fixed (even, odd) order keeps
+     parity correct regardless of how long any individual pair's content is; a pair is only
+     rendered as a highlight when its content also satisfies the original length/shape
+     bounds, otherwise both its quote characters are left as plain text. */
   function highlightKeyTerms(rawText) {
-    let out = '', last = 0, m;
-    QUOTED_TERM_RE.lastIndex = 0;
-    while ((m = QUOTED_TERM_RE.exec(rawText))) {
-      out += esc(rawText.slice(last, m.index));
-      out += `<span class="key-term">${esc(m[0])}</span>`;
-      last = m.index + m[0].length;
+    const idx = [];
+    for (let i = 0; i < rawText.length; i++) if (rawText[i] === '"') idx.push(i);
+    let out = '', last = 0;
+    for (let p = 0; p + 1 < idx.length; p += 2) {
+      const start = idx[p], end = idx[p + 1];
+      const contentLen = end - start - 1;
+      if (contentLen < 2 || contentLen > 40) continue;
+      out += esc(rawText.slice(last, start));
+      out += `<span class="key-term">${esc(rawText.slice(start, end + 1))}</span>`;
+      last = end + 1;
     }
     out += esc(rawText.slice(last));
     return out;
