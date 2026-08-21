@@ -233,7 +233,7 @@
       const preview = b.preview !== undefined ? b.preview : previewWords(b.text);
       const expandLabel = b.ctaLabel || 'Continue reading';
       const collapseLabel = b.collapseLabel || '− Collapse';
-      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : ''].filter(Boolean).join(' ');
+      const cls = ['expand-card', open ? 'open' : 'collapsed', locked ? 'locked' : '', b.cardClass || ''].filter(Boolean).join(' ');
       return `<div class="${cls}" data-idx="${i}">
           <button class="expand-toggle" type="button" data-expand-toggle
             data-expand-label="${esc(expandLabel)}" data-collapse-label="${esc(collapseLabel)}"
@@ -1250,7 +1250,7 @@
             </div>
             ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true }) : ''}
             <div class="concept-flow" id="${cid(c.id)}-core">
-              <div class="flow-item"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
+              <div class="flow-item flow-item-core"><span class="micro-label">Core idea</span><p>${esc(c.core)}</p></div>
               <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
               <div class="flow-item"><span class="micro-label">Key formulas</span>
                 <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
@@ -1273,7 +1273,8 @@
           bodyHtml: `<span class="eyebrow">Level ${ex.level} — ${levelWord(ex.level)}</span>${renderPlainProseWithFormulas(ex.text)}`,
           preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
           ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
-          collapseLabel: `− Collapse Level ${ex.level}`
+          collapseLabel: `− Collapse Level ${ex.level}`,
+          cardClass: 'lvl-' + ex.level
         })), { mode: 'sequential' });
 
         // section-jump stepper
@@ -1287,8 +1288,7 @@
         // practice checks (unchanged mechanics, just re-targeted into #...-practice)
         const box = $('.checks', d);
         c.checks.forEach((chk, ci) => {
-          const wrap = el('div');
-          wrap.style.margin = '10px 0';
+          const wrap = el('div', 'check-card');
           const lv = chk.level || 1;
           wrap.innerHTML = `<p class="mb-2"><span class="tag d${lv}">L${lv} ${levelWord(lv)}</span> ${esc(chk.q)}</p>`;
           chk.options.forEach((o, oi) => {
