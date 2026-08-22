@@ -618,7 +618,12 @@
     settings: '<circle cx="12" cy="12" r="3.1"/><path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M18.1 5.9l-1.7 1.7M7.6 16.5l-1.7 1.7M18.1 18.1l-1.7-1.7M7.6 7.6 5.9 5.9"/>',
     more: '<circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
     check: '<path d="M4 12.5 9.5 18 20 6"/>',
-    flame: '<path d="M12 2.5c1 2.6-.3 4-1.6 5.4C9 9.1 8 10.6 8 13a4 4 0 0 0 8 0c0-1-.3-1.8-.8-2.6.9.6 1.8 2 1.8 3.9a5 5 0 0 1-10 0c0-4.7 3-6.4 5-11.8z"/>'
+    flame: '<path d="M12 2.5c1 2.6-.3 4-1.6 5.4C9 9.1 8 10.6 8 13a4 4 0 0 0 8 0c0-1-.3-1.8-.8-2.6.9.6 1.8 2 1.8 3.9a5 5 0 0 1-10 0c0-4.7 3-6.4 5-11.8z"/>',
+    // Report 6, Part 3: two more block-identity glyphs (same 24x24 stroke language as the
+    // rest of this set) — a forward-arrow-in-circle for "When to use it" (apply/put into
+    // action) and a lightbulb for "Intuition" (the plain-language why behind the formula).
+    compass: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5 14 12l-4 3.5"/>',
+    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>'
   };
   const TRACK_ICONS = {
     quant: '<path d="M3 17 9 9l4 4 8-9"/><path d="M15 3.5h4.5V8"/>',
@@ -1339,6 +1344,11 @@
     }
 
     const idx = el('div', 'learn-index');
+    // Report 6, Part 3: the active unit pill picks up THIS track's own identity colour
+    // (the same TRACK_COLOR_VAR map the track picker uses) instead of always brand-blue,
+    // so Learn's unit index reads consistently with whichever track is currently open.
+    const idxColorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
+    idx.style.cssText = `--li-c:var(--${idxColorVar}-2, var(--${idxColorVar}));--li-line:var(--${idxColorVar}-line);--li-bg:var(--${idxColorVar}-soft)`;
     units.forEach((unit) => {
       const b = el('button', '', esc(unit.unit));
       b.title = unit.title;
@@ -1359,6 +1369,8 @@
       subIdx.innerHTML = `<span class="sub-label">Unit ${esc(unit.unit)}:</span>` + unit.concepts.map((cc, i) =>
         `<button class="sub-dot ${cc.id === activeConceptId ? 'active' : ''}" data-cid="${esc(cc.id)}" title="${esc(cc.name)}">${i + 1}</button>`).join('');
       $$('[data-cid]', subIdx).forEach((btn) => { btn.onclick = () => openConcept(btn.dataset.cid); });
+      // the top learn-index row (A, B, C...) tracks the same active unit, in the track's colour
+      $$('button', idx).forEach((btn) => btn.classList.toggle('on', btn.textContent === unit.unit));
     }
     function $$(sel, root2) { return Array.from((root2 || document).querySelectorAll(sel)); }
 
@@ -1394,15 +1406,20 @@
                   <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
                   <p>${esc(c.core)}</p>
                 </div>
-                <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
+                <div class="flow-item flow-item-tinted flow-item-formulas">
+                  <div class="block-header">${iconBox('teal', icon('sheet'), 'sm')}${kicker('Key formulas', 'teal')}</div>
                   <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               </div>
-              <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
-              <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
+              <div class="flow-item flow-item-tinted flow-item-when">
+                <div class="block-header">${iconBox('pos', icon('compass'), 'sm')}${kicker('When to use it', 'pos')}</div>
+                <p>${esc(c.when)}</p></div>
+              <div class="flow-item flow-item-tinted flow-item-intuition">
+                <div class="block-header">${iconBox('brand', icon('bulb'), 'sm')}${kicker('Intuition', 'brand')}</div>
+                <p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
+            ${renderReadingBlock('Common trap', c.trap, 'prose-block trap', undefined, { blockIcon: { colorVar: 'warn', iconSvg: icon('mistakes') } })}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
             <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
