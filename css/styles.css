@@ -1094,6 +1094,14 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
   margin-top: 3px;
 }
+/* Report 6, Part 2: even when a clause's math couldn't safely convert to KaTeX (too much
+   real prose mixed through it for a confident partial extraction), a clean "Label: " prefix
+   still gets split out from the plain-text fallback instead of being mashed into one flat
+   .formula span — quiet, slightly muted caption text right before the monospace formula. */
+.formula-label-plain {
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--dim);
+  margin-right: 4px;
+}
 
 /* Formula / technique sheet — a GRID of cards (one per formula/technique) instead of the
    previous click-to-expand accordion list: this page exists to be glanced at as a reference,

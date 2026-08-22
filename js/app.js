@@ -297,6 +297,16 @@
   function wordIsProse(w) {
     const lower = w.toLowerCase();
     if (ALLOWED_WORDS.has(lower)) return false;
+    // an all-caps run (EUR, NWC, GDP, YTM...) is a ticker/acronym used directly as a symbol,
+    // not prose — isLatexSafe already grants this same exemption further down the pipeline;
+    // this gate runs earlier and used to be stricter than the final check, silently rejecting
+    // formulas (e.g. "EUR/JPY = EUR/USD × USD/JPY") that would have passed if they'd reached
+    // isLatexSafe at all.
+    if (/^[A-Z]+$/.test(w)) return false;
+    // a known math function name (Var, Cov, min, max, ...) is notation, not prose — same
+    // reasoning: isLatexSafe already exempts these, this gate needs to match or it rejects
+    // formulas like "Var(X) = E[Var(X|Y)] + Var(E[X|Y])" before they ever reach that check.
+    if (KNOWN_FUNC_NAME_EXACT_RE.test(w)) return false;
     return /^[a-zA-Z]{3,}$/.test(w);
   }
 
@@ -509,6 +519,11 @@
   // the whole segment rather than emit a partially-garbled result. All-caps runs (GDP, YTM,
   // WACC...) are allowed through: those are acronyms used directly as symbols, not prose.
   const KNOWN_FUNC_NAMES_RE = /\b(Var|Cov|Cor|Corr|min|max|log|ln|exp|sin|cos|tan|lim|sup|inf|mean|mode|median|Pr)\b/g;
+  // exact-word variant derived from the SAME source (never hand-duplicated — the class of
+  // map/regex-drift bug this project has hit before) — used by wordIsProse below, which runs
+  // BEFORE isLatexSafe in the pipeline and needs the identical "this is a known math function
+  // name, not English prose" exemption isLatexSafe already grants later.
+  const KNOWN_FUNC_NAME_EXACT_RE = new RegExp('^' + KNOWN_FUNC_NAMES_RE.source + '$');
   function isLatexSafe(latex) {
     let s = latex.replace(/\\text\{[^}]*\}/g, ' ');
     s = s.replace(/\\[a-zA-Z]+/g, ' ');
@@ -567,7 +582,18 @@
     const { parts, note } = splitFormulaClauses(text);
     const rendered = parts.map((part) => {
       const parsed = parseFormulaSegment(part);
-      if (!parsed) return `<span class="formula">${esc(part.trim())}</span>`;
+      if (!parsed) {
+        // even when the math couldn't safely convert to KaTeX, a clean "Label: " prefix
+        // (if present) is still split out for display — quiet label text, then the rest as
+        // plain formula text — instead of mashing both into one flat span. This reuses the
+        // SAME label-detection stripLeadingLabel already trusts elsewhere; it never touches
+        // or reinterprets the math itself, and label+core concatenate back to the exact
+        // original trimmed text (nothing added, dropped, or reordered).
+        const trimmed = part.trim();
+        const { label, core } = stripLeadingLabel(trimmed);
+        if (label) return `<span class="formula-label-plain">${esc(label)}</span><span class="formula">${esc(core)}</span>`;
+        return `<span class="formula">${esc(trimmed)}</span>`;
+      }
       const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
       const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
       return `<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>`;
@@ -2469,5 +2495,11 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas };
+  global.QTL_APP = {
+    go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas,
+    // internal formula-pipeline stages, exposed purely for audit/diagnostic scripts (same
+    // precedent as parseFormulaSegment/renderFormula above) — never used by production UI code
+    stripLeadingLabel, stripTrailingAside, stripTrailingClause, wrapNamedOperands,
+    countProseWordsOutsideText, formulaToLatex, isLatexSafe
+  };
 })(window);
