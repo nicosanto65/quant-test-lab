@@ -111,6 +111,15 @@
   --neg-ink: #260C0B;
   --info: var(--brand);
 
+  /* Report 6, Part 3: a calm amber, distinct from --neg (reserved for actual wrong-answer
+     feedback) — "Common trap" is a heads-up, not an error the reader already made, so it
+     gets its own quieter warning identity rather than borrowing red's "you got this wrong"
+     meaning. */
+  --warn: #C9A24B;
+  --warn-soft: rgba(201, 162, 75, 0.16);
+  --warn-line: rgba(201, 162, 75, 0.45);
+  --warn-ink: #241C08;
+
   /* third accent — teal, coherent with navy+gold, reserved for "worked examples" content
      so a reader recognises that section by colour, the way tracks already have colours */
   --teal: #4FAFA8;
@@ -196,6 +205,12 @@ html[data-theme="light"] {
   --neg-soft: #F5E7E6;
   --neg-ink: #FFFFFF;
   --info: var(--brand);
+
+  /* see the dark-theme block above for the rationale — same calm amber, not red */
+  --warn: #9C7A1F;
+  --warn-soft: #F6EFDC;
+  --warn-line: #E3CE97;
+  --warn-ink: #FFFFFF;
 
   --teal: #2B8A82;
   --teal-2: #1F6F68;
@@ -718,6 +733,19 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(130% 110% at 100% 0%, var(--brand-soft), transparent 65%);
 }
+/* Report 6, Part 3: "Common trap" gets the same treatment as "primer" above, just in its own
+   amber identity — .reveal's base rule hardcodes a blue left border, so .trap overrides it
+   here rather than reusing brand's meaning for an unrelated warning. */
+.reveal.trap { border-left-color: var(--warn-line); }
+.reveal.trap .expand-card, .reading-block.trap .expand-card {
+  border-left: 3px solid var(--warn-line);
+  background: linear-gradient(160deg, var(--panel-3) 0%, var(--panel-2) 100%);
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.reveal.trap .expand-card::before, .reading-block.trap .expand-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(130% 110% at 100% 0%, var(--warn-soft), transparent 65%);
+}
 /* Report 5, point C: the block-level identity header (icon-box + kicker) that now leads
    "Start from zero" and any other block type given one via renderReadingBlock's blockIcon
    option — replaces the plain small-caps eyebrow those blocks used to carry alone. */
@@ -877,7 +905,14 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .concept-title { font-family: var(--font-serif); font-size: 1.08em; font-weight: 600; }
 .acc .trigger { color: var(--muted); font-size: var(--fs-sm); font-style: italic; }
 
-/* Learn: sticky concept index */
+/* Learn: sticky concept index. Report 6, Part 3: with up to ~19 units on screen at once,
+   giving each its OWN colour would either run out of distinguishable hues fast or force
+   assigning a colour meaning that isn't actually meaningful (there's no "unit A is blue"
+   fact anywhere else in the app) — so this reuses the track's own single identity colour
+   (the same --li-* variables the current TRACK_COLOR_VAR already assigns everywhere else,
+   set once on the container) for the ACTIVE unit, and gives the resting pills the same
+   neutral translucent fill .pill-badge.neutral already uses elsewhere for "no assigned
+   colour meaning" badges — a real pill, not a flat grey dot. */
 .learn-index {
   position: sticky; top: 54px; z-index: 20; background: var(--bg);
   padding: var(--sp-2) 0; margin-bottom: var(--sp-3); border-bottom: 1px solid var(--line-soft);
@@ -885,11 +920,17 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .learn-index::-webkit-scrollbar { display: none; }
 .learn-index button {
-  flex: none; font-family: var(--font-mono); font-size: var(--fs-xs); border: 1px solid var(--line);
-  background: var(--panel-2); color: var(--muted); border-radius: var(--radius-pill); padding: 5px 11px; cursor: pointer;
-  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  flex: none; font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; border: 1px solid var(--line-soft);
+  background: var(--panel-3); color: var(--muted); border-radius: var(--radius-pill); padding: 5px 11px; cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
-.learn-index button.on { color: var(--brand); border-color: var(--brand-line); background: var(--brand-soft); }
+.learn-index button:hover { border-color: var(--li-line, var(--brand-line)); color: var(--text); }
+.learn-index button.on {
+  color: var(--li-c, var(--brand-2, var(--brand)));
+  border-color: var(--li-line, var(--brand-line));
+  background: var(--li-bg, var(--brand-soft));
+  font-weight: 700;
+}
 @media (min-width: 900px) { .learn-index { top: 0; } }
 
 /* secondary index row: which CONCEPT within the current unit is open, not just the unit */
@@ -972,12 +1013,41 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
    boundary (its sibling is .core-formula-grid, not another .flow-item), so a mismatched
    thin line at the join is added back explicitly instead of relying on that selector. */
 .core-formula-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
-.core-formula-grid .flow-item + .flow-item { border-top: 0; margin-top: 0; }
-.core-formula-grid + .flow-item { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
+/* :not(.flow-item-tinted) added in Report 6, Part 3 — Key formulas now carries its own
+   full border via .flow-item-tinted (see below); without this exclusion the adjacent-
+   sibling rule here would zero out just its top edge, leaving the card looking open. */
+.core-formula-grid .flow-item + .flow-item:not(.flow-item-tinted) { border-top: 0; margin-top: 0; }
+.core-formula-grid + .flow-item:not(.flow-item-tinted) { border-top: 1px solid var(--line-soft); margin-top: var(--sp-2); }
+.core-formula-grid + .flow-item-tinted { margin-top: var(--sp-2); }
 @media (min-width: 900px) {
   .core-formula-grid { grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
   .flow-item-core { margin-bottom: 0; height: 100%; }
 }
+
+/* Report 6, Part 3: the same tinted-card identity flow-item-core (Core idea, gold) already
+   uses, extended to Key formulas / When to use it / Intuition — one shared base plus a
+   --fi-tint/--fi-line pair per block (the exact --gc-tint/--gc-line technique gradient-card
+   already established), kept on .flow-item rather than switched to .gradient-card since
+   these need to stay full-width flow items in the same document flow, not a grid of
+   independent cards. flow-item-core itself is left untouched (a working, already-shipped
+   rule) rather than folded into this base, to avoid any risk of visual regression there. */
+.flow-item-tinted {
+  background: linear-gradient(160deg, var(--panel-3) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--fi-line, var(--line)); border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-2);
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.flow-item-tinted::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(130% 110% at 100% 0%, var(--fi-tint, transparent), transparent 65%);
+}
+.flow-item-tinted .block-header { margin-bottom: var(--sp-2); }
+/* two tinted cards stacked back to back just need spacing — their own borders already
+   separate them, so the shared .flow-item + .flow-item hairline would just double up */
+.flow-item-tinted + .flow-item-tinted { border-top: 0; margin-top: var(--sp-2); }
+.flow-item-formulas { --fi-tint: var(--teal-soft); --fi-line: var(--teal-line); }
+.flow-item-when { --fi-tint: var(--pos-soft); --fi-line: var(--pos-line); }
+.flow-item-intuition { --fi-tint: var(--brand-soft); --fi-line: var(--brand-line); }
 /* a quiet connector between sections — a short label and a hairline, not a boxed header.
    Problem 3b: the hairline now fades out instead of running flat, and a small brand-blue
    dot leads the label — a touch of personality without turning a transition into a header. */
@@ -1093,6 +1163,14 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .formula-note {
   display: block; font-size: var(--fs-xs); color: var(--muted); text-align: center;
   margin-top: 3px;
+}
+/* Report 6, Part 2: even when a clause's math couldn't safely convert to KaTeX (too much
+   real prose mixed through it for a confident partial extraction), a clean "Label: " prefix
+   still gets split out from the plain-text fallback instead of being mashed into one flat
+   .formula span — quiet, slightly muted caption text right before the monospace formula. */
+.formula-label-plain {
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--dim);
+  margin-right: 4px;
 }
 
 /* Formula / technique sheet — a GRID of cards (one per formula/technique) instead of the

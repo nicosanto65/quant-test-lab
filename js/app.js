@@ -297,6 +297,16 @@
   function wordIsProse(w) {
     const lower = w.toLowerCase();
     if (ALLOWED_WORDS.has(lower)) return false;
+    // an all-caps run (EUR, NWC, GDP, YTM...) is a ticker/acronym used directly as a symbol,
+    // not prose — isLatexSafe already grants this same exemption further down the pipeline;
+    // this gate runs earlier and used to be stricter than the final check, silently rejecting
+    // formulas (e.g. "EUR/JPY = EUR/USD × USD/JPY") that would have passed if they'd reached
+    // isLatexSafe at all.
+    if (/^[A-Z]+$/.test(w)) return false;
+    // a known math function name (Var, Cov, min, max, ...) is notation, not prose — same
+    // reasoning: isLatexSafe already exempts these, this gate needs to match or it rejects
+    // formulas like "Var(X) = E[Var(X|Y)] + Var(E[X|Y])" before they ever reach that check.
+    if (KNOWN_FUNC_NAME_EXACT_RE.test(w)) return false;
     return /^[a-zA-Z]{3,}$/.test(w);
   }
 
@@ -509,6 +519,11 @@
   // the whole segment rather than emit a partially-garbled result. All-caps runs (GDP, YTM,
   // WACC...) are allowed through: those are acronyms used directly as symbols, not prose.
   const KNOWN_FUNC_NAMES_RE = /\b(Var|Cov|Cor|Corr|min|max|log|ln|exp|sin|cos|tan|lim|sup|inf|mean|mode|median|Pr)\b/g;
+  // exact-word variant derived from the SAME source (never hand-duplicated — the class of
+  // map/regex-drift bug this project has hit before) — used by wordIsProse below, which runs
+  // BEFORE isLatexSafe in the pipeline and needs the identical "this is a known math function
+  // name, not English prose" exemption isLatexSafe already grants later.
+  const KNOWN_FUNC_NAME_EXACT_RE = new RegExp('^' + KNOWN_FUNC_NAMES_RE.source + '$');
   function isLatexSafe(latex) {
     let s = latex.replace(/\\text\{[^}]*\}/g, ' ');
     s = s.replace(/\\[a-zA-Z]+/g, ' ');
@@ -567,7 +582,18 @@
     const { parts, note } = splitFormulaClauses(text);
     const rendered = parts.map((part) => {
       const parsed = parseFormulaSegment(part);
-      if (!parsed) return `<span class="formula">${esc(part.trim())}</span>`;
+      if (!parsed) {
+        // even when the math couldn't safely convert to KaTeX, a clean "Label: " prefix
+        // (if present) is still split out for display — quiet label text, then the rest as
+        // plain formula text — instead of mashing both into one flat span. This reuses the
+        // SAME label-detection stripLeadingLabel already trusts elsewhere; it never touches
+        // or reinterprets the math itself, and label+core concatenate back to the exact
+        // original trimmed text (nothing added, dropped, or reordered).
+        const trimmed = part.trim();
+        const { label, core } = stripLeadingLabel(trimmed);
+        if (label) return `<span class="formula-label-plain">${esc(label)}</span><span class="formula">${esc(core)}</span>`;
+        return `<span class="formula">${esc(trimmed)}</span>`;
+      }
       const labelHtml = parsed.label ? `<span class="formula-label">${esc(parsed.label)}</span>` : '';
       const trailHtml = parsed.trail ? `<span class="formula-note">${esc(parsed.trail)}</span>` : '';
       return `<span class="formula-katex-wrap">${labelHtml}<span class="formula-katex">${parsed.html}</span>${trailHtml}</span>`;
@@ -592,7 +618,12 @@
     settings: '<circle cx="12" cy="12" r="3.1"/><path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M18.1 5.9l-1.7 1.7M7.6 16.5l-1.7 1.7M18.1 18.1l-1.7-1.7M7.6 7.6 5.9 5.9"/>',
     more: '<circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
     check: '<path d="M4 12.5 9.5 18 20 6"/>',
-    flame: '<path d="M12 2.5c1 2.6-.3 4-1.6 5.4C9 9.1 8 10.6 8 13a4 4 0 0 0 8 0c0-1-.3-1.8-.8-2.6.9.6 1.8 2 1.8 3.9a5 5 0 0 1-10 0c0-4.7 3-6.4 5-11.8z"/>'
+    flame: '<path d="M12 2.5c1 2.6-.3 4-1.6 5.4C9 9.1 8 10.6 8 13a4 4 0 0 0 8 0c0-1-.3-1.8-.8-2.6.9.6 1.8 2 1.8 3.9a5 5 0 0 1-10 0c0-4.7 3-6.4 5-11.8z"/>',
+    // Report 6, Part 3: two more block-identity glyphs (same 24x24 stroke language as the
+    // rest of this set) — a forward-arrow-in-circle for "When to use it" (apply/put into
+    // action) and a lightbulb for "Intuition" (the plain-language why behind the formula).
+    compass: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5 14 12l-4 3.5"/>',
+    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>'
   };
   const TRACK_ICONS = {
     quant: '<path d="M3 17 9 9l4 4 8-9"/><path d="M15 3.5h4.5V8"/>',
@@ -680,6 +711,15 @@
   function kicker(text, colorVar) {
     const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
     return `<span class="kicker"${style}>${esc(text)}</span>`;
+  }
+  /* Report 6, Part 3d: the same icon-box + kicker block-header Learn's content blocks use,
+     for the top-level headers of Drill / Pattern recognition / Mixed practice / Mocks — so
+     these don't read as a plainer style than Learn. Colour is the CURRENT TRACK's own
+     identity (the same TRACK_COLOR_VAR reuse the unit index above just adopted), not a new
+     per-view colour meaning invented for this pass. */
+  function panelHeader(iconName, text) {
+    const colorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
+    return `<div class="block-header">${iconBox(colorVar, icon(iconName), 'sm')}${kicker(text, colorVar)}</div>`;
   }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
@@ -1313,6 +1353,11 @@
     }
 
     const idx = el('div', 'learn-index');
+    // Report 6, Part 3: the active unit pill picks up THIS track's own identity colour
+    // (the same TRACK_COLOR_VAR map the track picker uses) instead of always brand-blue,
+    // so Learn's unit index reads consistently with whichever track is currently open.
+    const idxColorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
+    idx.style.cssText = `--li-c:var(--${idxColorVar}-2, var(--${idxColorVar}));--li-line:var(--${idxColorVar}-line);--li-bg:var(--${idxColorVar}-soft)`;
     units.forEach((unit) => {
       const b = el('button', '', esc(unit.unit));
       b.title = unit.title;
@@ -1333,6 +1378,8 @@
       subIdx.innerHTML = `<span class="sub-label">Unit ${esc(unit.unit)}:</span>` + unit.concepts.map((cc, i) =>
         `<button class="sub-dot ${cc.id === activeConceptId ? 'active' : ''}" data-cid="${esc(cc.id)}" title="${esc(cc.name)}">${i + 1}</button>`).join('');
       $$('[data-cid]', subIdx).forEach((btn) => { btn.onclick = () => openConcept(btn.dataset.cid); });
+      // the top learn-index row (A, B, C...) tracks the same active unit, in the track's colour
+      $$('button', idx).forEach((btn) => btn.classList.toggle('on', btn.textContent === unit.unit));
     }
     function $$(sel, root2) { return Array.from((root2 || document).querySelectorAll(sel)); }
 
@@ -1368,15 +1415,20 @@
                   <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
                   <p>${esc(c.core)}</p>
                 </div>
-                <div class="flow-item flow-item-formulas"><span class="micro-label">Key formulas</span>
+                <div class="flow-item flow-item-tinted flow-item-formulas">
+                  <div class="block-header">${iconBox('teal', icon('sheet'), 'sm')}${kicker('Key formulas', 'teal')}</div>
                   <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
               </div>
-              <div class="flow-item"><span class="micro-label">When to use it</span><p>${esc(c.when)}</p></div>
-              <div class="flow-item"><span class="micro-label">Intuition</span><p>${esc(c.intuition)}</p></div>
+              <div class="flow-item flow-item-tinted flow-item-when">
+                <div class="block-header">${iconBox('pos', icon('compass'), 'sm')}${kicker('When to use it', 'pos')}</div>
+                <p>${esc(c.when)}</p></div>
+              <div class="flow-item flow-item-tinted flow-item-intuition">
+                <div class="block-header">${iconBox('brand', icon('bulb'), 'sm')}${kicker('Intuition', 'brand')}</div>
+                <p>${esc(c.intuition)}</p></div>
             </div>
             <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
             <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            ${renderReadingBlock('Common trap', c.trap, 'prose-block')}
+            ${renderReadingBlock('Common trap', c.trap, 'prose-block trap', undefined, { blockIcon: { colorVar: 'warn', iconSvg: icon('mistakes') } })}
             <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
             <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
             <div class="checks" id="${cid(c.id)}-practice"></div>
@@ -1468,7 +1520,7 @@
 
   function viewDrill(root) {
     const p = el('div', 'panel');
-    p.innerHTML = `<div class="panel-head"><span class="eyebrow">Configure drill</span></div>
+    p.innerHTML = `<div class="panel-head">${panelHeader('drill', 'Configure drill')}</div>
       <label class="field"><span>Topic</span><select id="d-topic">
         <option value="">All topics</option>
         ${S.topics().map((t) => `<option ${t === drillState.topic ? 'selected' : ''}>${esc(t)}</option>`).join('')}
@@ -1539,7 +1591,7 @@
   function viewPattern(root) {
     if (patternState.run) return viewPatternRun(root);
     const p = el('div', 'panel');
-    p.innerHTML = `<div class="panel-head"><span class="eyebrow">Pattern recognition</span></div>
+    p.innerHTML = `<div class="panel-head">${panelHeader('pattern', 'Pattern recognition')}</div>
       <p class="small muted">You are not asked to solve the problem. Classify the primary technique before the clock runs out. Recognition accuracy is tracked separately from calculation accuracy.</p>
       <label class="field"><span>Seconds per item</span>
         <select id="p-sec">${[15, 20, 25, 30].map((s) => `<option ${s === patternState.seconds ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
@@ -1650,7 +1702,7 @@
       { k: 'Fully mixed', d: [1, 2, 3, 4, 5], n: 15, help: true }
     ];
     const p = el('div', 'panel');
-    p.innerHTML = '<div class="panel-head"><span class="eyebrow">Mixed practice</span></div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>';
+    p.innerHTML = `<div class="panel-head">${panelHeader('mixed', 'Mixed practice')}</div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>`;
     const grid = el('div', 'grid c2');
     modes.forEach((m) => {
       const colorVar = MODE_COLOR[m.k] || 'brand';
@@ -1700,7 +1752,7 @@
     /* --- Speed Sprint (reasoning track) --- */
     if (track === 'reasoning') {
       const sp = el('div', 'panel');
-      sp.innerHTML = `<div class="panel-head"><span class="eyebrow">Speed Sprint</span><h2>Fast numerical / abstract / logical / verbal reasoning</h2></div>
+      sp.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'Speed Sprint')}<h2>Fast numerical / abstract / logical / verbal reasoning</h2></div></div>
         <p class="small muted">One question at a time, a short hard timer per question, no skipping back, no hints. This is the format real speed-reasoning assessments use — the clock is the whole point.</p>
         <label class="field"><span>Seconds per question</span><select id="sprint-sec">
           ${[12, 15, 18, 20].map((s) => `<option ${s === sprintState.seconds ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
@@ -1728,7 +1780,7 @@
     const set = S.state.settings;
     if (track === 'quant') {
     const w = el('div', 'panel');
-    w.innerHTML = `<div class="panel-head"><span class="eyebrow">Wincent mock</span><h2>12 questions · 100 minutes</h2></div>
+    w.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'Wincent mock')}<h2>12 questions · 100 minutes</h2></div></div>
       <p class="small muted">Substantial probability and mathematical reasoning. No hints, no solutions until submission. Target pace is roughly 8 minutes per question.</p>`;
     const wb = el('button', 'btn primary full', 'Start Wincent mock');
     wb.onclick = () => {
@@ -1748,7 +1800,7 @@
     root.appendChild(w);
 
     const g = el('div', 'panel');
-    g.innerHTML = `<div class="panel-head"><span class="eyebrow">SIG mock</span><h2>${set.sigMinutes} minutes · no skipping</h2></div>
+    g.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'SIG mock')}<h2>${set.sigMinutes} minutes · no skipping</h2></div></div>
       <p class="small muted">One total timer. Once an answer is submitted the test moves on and cannot go back. Speed and accuracy both count.</p>
       <label class="field"><span>Questions</span><select id="sig-n">
         ${[15, 20, 25, 30].map((n) => `<option ${n === set.sigCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`;
@@ -1773,7 +1825,7 @@
     /* --- IMC --- */
     const imc = set.imc;
     const i = el('div', 'panel');
-    i.innerHTML = `<div class="panel-head"><span class="eyebrow">IMC mock — provisional</span><h2>${esc(imc.label)}</h2></div>
+    i.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'IMC mock — provisional')}<h2>${esc(imc.label)}</h2></div></div>
       <p class="small muted">The real structure is unknown. This framework is defined by a single JS object
       (<code>settings.imc</code>) and can be edited below or in <code>js/store.js</code> once you have the official practice assessment.</p>
       <ul class="list">${imc.sections.map((sec) =>
@@ -1796,7 +1848,7 @@
 
     /* --- McKinsey-style --- */
     const k = el('div', 'panel');
-    k.innerHTML = `<div class="panel-head"><span class="eyebrow">McKinsey Solve preparation</span><h2>Analogous exercises only</h2></div>
+    k.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'McKinsey Solve preparation')}<h2>Analogous exercises only</h2></div></div>
       <p class="small muted">These are original exercises built to train the same underlying skills. They do not reproduce or imitate any proprietary assessment content, and this section is kept separate from the quantitative trading material.</p>`;
     const krow = el('div', 'btn-row');
     [['A · Data interpretation sprint', ['Data Interpretation'], 10, 75],
@@ -2469,5 +2521,11 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  global.QTL_APP = { go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas };
+  global.QTL_APP = {
+    go, render, startSession, renderFormula, parseFormulaSegment, splitIntoSentences, renderTextWithInlineFormulas,
+    // internal formula-pipeline stages, exposed purely for audit/diagnostic scripts (same
+    // precedent as parseFormulaSegment/renderFormula above) — never used by production UI code
+    stripLeadingLabel, stripTrailingAside, stripTrailingClause, wrapNamedOperands,
+    countProseWordsOutsideText, formulaToLatex, isLatexSafe
+  };
 })(window);

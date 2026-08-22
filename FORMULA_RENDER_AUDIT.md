@@ -8,12 +8,12 @@ technique sheet" view), and every sentence of every worked example (checked whol
 not clause-split — see `renderTextWithInlineFormulas`). No content file was modified
 to produce this report.
 
-**Formula-field + technique-sheet totals: 667 clauses audited, 114
-rendered as real KaTeX typesetting (17.1%), 553
+**Formula-field + technique-sheet totals: 667 clauses audited, 125
+rendered as real KaTeX typesetting (18.7%), 542
 fell back to clean plain text.**
 
-**Worked-example totals: 1752 sentences checked, 61 full-sentence formulas
-rendered as real KaTeX (3.5%), the remaining 1691 are
+**Worked-example totals: 1752 sentences checked, 64 full-sentence formulas
+rendered as real KaTeX (3.7%), the remaining 1688 are
 ordinary narrative sentences left untouched.**
 
 **Grand total: 2419 items checked, 0 caused an error (goal: 0 —
@@ -21,6 +21,77 @@ a bug to fix, never shipped to a user as a visible rendering failure).**
 
 Every clause/sentence that isn't converted renders as the plain text it always did —
 the fallback is never a visible error, just the pre-KaTeX presentation for that one part.
+
+## Report 6: mixed-formula-label bug — diagnosis and fix
+
+**Hypothesis going in:** formulas with a plain-text label before the math notation
+(`"Bayes: P(A|B) = P(B|A)P(A)/P(B)"`) were suspected of failing because the parser
+expects a formula to start directly with math notation, discarding the label and the
+whole clause on any leading prose.
+
+**What the diagnostic script (`scratch_diagnose_mixed_formulas.js`) actually found:** the
+label-stripping step (`stripLeadingLabel`, regex-matching a `"Word(s): "` prefix) already
+existed and was already wired into `parseFormulaSegment` from a prior pass — proven
+because many labeled formulas (e.g. `"Chain rule: P(A ∩ B) = P(B) · P(A|B)"`) already
+converted successfully before any change this session. The real bug was narrower: an
+*earlier* pipeline gate, `wordIsProse` / `countProseWordsOutsideText`, was stricter than
+a *later* gate, `isLatexSafe`. The later gate already exempted all-caps tickers/acronyms
+(`GDP`, `EUR`, `WACC`...) and known math function names (`Var`, `Cov`, `min`, `max`, `Pr`,
+...) from counting as "prose" — but the earlier gate had neither exemption, so it rejected
+the *whole clause* as "too much prose" before the formula ever reached the permissive check.
+This affected labeled AND unlabeled formulas alike (not exclusively ones with a text label),
+though it happened to show up in several labeled failures the user pointed at.
+
+**Fix applied (`js/app.js`):** gave `wordIsProse` the same two exemptions `isLatexSafe`
+already had — an all-caps run (`/^[A-Z]+$/`) and a known math function name (matched via
+`KNOWN_FUNC_NAME_EXACT_RE`, an exact-anchored variant derived from the *same* source regex
+as `KNOWN_FUNC_NAMES_RE` used later, not hand-duplicated). No change to `stripLeadingLabel`
+itself, no change to how much text is sent to LaTeX — purely a gate-consistency fix.
+
+**Also added:** when a clause has a detected `"Label: "` prefix but its math still can't
+safely convert (genuine prose mixed all through it, not just a clean label), the label is
+now split into its own muted `.formula-label-plain` span ahead of the plain-text `.formula`
+fallback, instead of one flat span mashing both together. This only reuses the
+already-trusted `stripLeadingLabel` output — no new math-detection heuristic, so no new
+risk of mis-converting prose into LaTeX.
+
+**Before → after (this session's diagnostic run):**
+
+| Metric | Before | After |
+|---|---|---|
+| Labeled formula clauses converted | 21 / 195 (10.8%) | 24 / 195 (12.3%) |
+| Unlabeled formula clauses converted | 93 / 472 (19.7%) | 101 / 472 (21.4%) |
+| Total formula clauses converted | 114 / 667 (17.1%) | 125 / 667 (18.7%) |
+| Worked-example sentences converted | 61 / 1752 | 64 / 1752 |
+| Render errors | 0 | 0 |
+
+Exactly 3 clauses moved from fallback to real KaTeX, all via the gate fix (confirmed by
+`scratch_verify_mixed_formula_labels.js`):
+
+- `Var(X) = E[Var(X|Y)] + Var(E[X|Y]).` — rejected for containing `Var`/`E` (known-function
+  names), now recognized as notation.
+- `Cross rate chains: EUR/JPY = EUR/USD × USD/JPY.` — rejected for the all-caps currency
+  tickers `EUR`, `JPY`, `USD`, now recognized as symbols, not prose.
+- `Build the CDF, not the pmf: P(max ≤ k) = F(k)ⁿ, P(min ≥ k) = (1−F)ⁿ` — rejected for
+  `min`/`max`, now recognized as known function names.
+
+The remaining unconverted labeled clauses are either genuinely not equations (a label
+followed by prose with no real notation to typeset — correct to leave as plain text) or
+have real English prose interleaved through the entire clause, not isolable into clean
+alternating math/text segments.
+
+**Explicitly out of scope for this pass (reasoned decisions, not omissions):**
+
+- *Token-alternating segmentation* (splitting a clause into alternating "looks like math"
+  vs. "looks like English" runs when there's no clean `:`/` — ` separator) — the diagnostic
+  showed most remaining failures are either correctly-plain-text or have prose spread
+  through the whole clause, not isolable into clean alternating spans. A token heuristic
+  there would be high-risk (chance of mis-typesetting a prose fragment as math) for low
+  remaining value, against this project's established conservative bias.
+- *Bracket-delimited operand wrapping* (`E[net gain]` style, extending `wrapNamedOperands`'
+  `PHRASE_RE` beyond `(...)`-parenthesized phrases) — only one low-frequency instance seen
+  in the corpus, and `[...]` is also legitimately used for array/matrix indexing elsewhere
+  (e.g. `P[i][j]`), making this a higher-risk, lower-value change. Deferred.
 
 ## Converted (rendered as KaTeX)
 
@@ -54,9 +125,12 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [quant/D] What variance measures, and why we square the deviations | `Var(X) = E[(X−E[X])²] ` | `Var(X) = E[(X- E[X])^{2}]` |
 | [quant/D] What variance measures, and why we square the deviations | `Var(X) = E[X²] − (E[X])² ` | `Var(X) = E[X^{2}] - (E[X])^{2}` |
 | [quant/D] What variance measures, and why we square the deviations | `SD(X) = √Var(X)` | `SD(X) = \sqrt{Var(X)}` |
+| [quant/D] Variance rules for scaling and adding random variables | `Var(aX+b) = a²Var(X)  ` | `Var(aX+b) = a^{2}Var(X)` |
 | [quant/D] Covariance and correlation: measuring how two variables move together | `Cov(X,Y) = E[XY] − E[X]E[Y]  ` | `Cov(X,Y) = E[XY] - E[X]E[Y]` |
+| [quant/D] Covariance and correlation: measuring how two variables move together | `Cov(X,X) = Var(X)  ` | `Cov(X,X) = Var(X)` |
 | [quant/D] Portfolio variance: combining two risky assets, and the mathematics of diversification | `Var(portfolio) = w²σ₁² + (1−w)²σ₂² + 2w(1−w)ρσ₁σ₂` | `Var(\text{portfolio}) = w^{2}\sigma _{1}^{2} + (1- w)^{2}\sigma _{2}^{2} + 2w(1- w)\rho \sigma _{1}\sigma _{2}` |
 | [quant/D] Portfolio variance: combining two risky assets, and the mathematics of diversification | `SD(portfolio) = √Var(portfolio) ` | `SD(\text{portfolio}) = \sqrt{Var(\text{portfolio})}` |
+| [quant/D] Correlation and simple linear regression | `β (regression slope of Y on X) = Cov(X,Y) / Var(X)` | `\beta (\text{regression slope of Y on X}) = Cov(X,Y) / Var(X)` |
 | [quant/D] Correlation and simple linear regression | `R² = ρ²  ` | `R^{2} = \rho ^{2}` |
 | [quant/E] The Binomial distribution | `P(X=k) = C(n,k) pᵏ(1−p)ⁿ⁻ᵏ` | `P(X = k) = C(n,k) p^{k}(1- p)^{n-k}` |
 | [quant/E] The Binomial distribution | `E[X] = np  ` | `E[X] = np` |
@@ -93,6 +167,8 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [ib/IB-D] Accretion and dilution: what it means, and why the market does not just reward "bigger" | `All-stock deal: exchange ratio = deal price per target share / acquirer's share price` | `\text{exchange ratio} = \frac{\text{deal price per target share}}{\text{acquirer&#x27;s share price}}` |
 | [ib/IB-E] Sources and uses, and why leverage is the whole point of an LBO | `Sources: Debt = leverage multiple × EBITDA (a separate multiple from the entry purchase multiple)` | `\text{Debt} = \text{leverage multiple}\times EBITDA` |
 | [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `DSO = (Accounts Receivable / Revenue) × 365` | `DSO = (\text{Accounts Receivable}/ \text{Revenue}) \times 365` |
+| [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `DIO = (Inventory / COGS) × 365` | `DIO = (\text{Inventory}/ COGS) \times 365` |
+| [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `DPO = (Accounts Payable / COGS) × 365.` | `DPO = (\text{Accounts Payable}/ COGS) \times 365.` |
 | [ib/IB-I] Levered and unlevered beta: stripping out capital structure to compare companies fairly | `Unlever: βu = βl / [1 + (1−t) × (D/E)], where t = tax rate, D/E = that company's own debt-to-equity ratio.` | `\beta u = \beta l / [1 + (1- t) \times (D/E)],` |
 | [ib/IB-I] Systematic versus unsystematic risk: why only market-wide risk earns extra return | `CAPM: Cost of equity = Rf + β × (Rm − Rf), where Rf = risk-free rate, Rm = expected market return, (Rm−Rf) = equity risk premium (ERP).` | `\text{Cost of equity} = Rf + \beta \times (Rm - Rf),` |
 | [ib/IB-I] Systematic versus unsystematic risk: why only market-wide risk earns extra return | `Total risk = systematic risk + unsystematic risk` | `\text{Total risk} = \text{systematic risk}+ \text{unsystematic risk}` |
@@ -105,13 +181,16 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [am/AM-C] Real versus nominal rates, and what the yield curve's shape is telling you | `Term spread = long-maturity yield − short-maturity yield` | `\text{Term spread} = \text{long-maturity yield}- \text{short-maturity yield}` |
 | [am/AM-E] Reading the market for an AM interview: building a 60-second thesis on any headline number | `Forward P/E = current price / estimated next-12-months earnings (uses analyst ESTIMATES, can be wrong)` | `\text{Forward P}/E = \frac{\text{current price}}{\text{estimated next-12-months earnings}}` |
 | [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `Forward P/E = price / estimated next-12-month EPS` | `\text{Forward P}/E = \frac{\text{price}}{\text{estimated next-12-month EPS}}` |
+| [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `EV/EBITDA = (equity value + debt − cash) / EBITDA` | `EV/EBITDA = \frac{\text{equity value}+ \text{debt}- \text{cash}}{EBITDA}` |
 | [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `Buffett Indicator = total stock market capitalization / GDP` | `\text{Buffett Indicator} = \frac{\text{total stock market capitalization}}{GDP}` |
 | [am/AM-H] Gold versus silver: two "monetary" metals with genuinely different portfolio roles | `Gold/silver ratio = gold price / silver price` | `\text{Gold}/\text{silver ratio} = \frac{\text{gold price}}{\text{silver price}}` |
 | [wm/WM-E] Coupon rate vs. current yield vs. yield to maturity: which number actually tells a client their return | `At par: coupon rate = current yield = YTM` | `\text{coupon rate} = \text{current yield}= YTM` |
+| [wm/WM-H] Reading private equity performance: the J-curve, DPI, TVPI, and IRR | `TVPI = DPI + RVPI (residual value to paid-in).` | `TVPI = DPI + RVPI (\text{residual value to paid-in}).` |
 | [wm/WM-J] Managing a concentrated stock position: strategies beyond a simple sale | `Outright sale tax cost = (Sale proceeds − cost basis) × applicable capital gains tax rate` | `\text{Outright sale tax cost} = (\text{Sale proceeds}- \text{cost basis}) \times \text{applicable capital gains tax rate}` |
 | [formulas.js/Recognition triggers] TAIL SUM | `E[X] = Σ_{k≥1} P(X ≥ k)` | `E[X] = \sum_{k\geq 1} P(X \geq k)` |
 | [formulas.js/Recognition triggers] LINEARITY OF EXPECTATION | `E[ΣXᵢ] = ΣE[Xᵢ]` | `E[\sum X_{i}] = \sum E[X_{i}]` |
 | [formulas.js/Recognition triggers] BAYES | `Posterior odds = prior odds × likelihood ratio` | `\text{Posterior odds} = \text{prior odds}\times \text{likelihood ratio}` |
+| [formulas.js/Recognition triggers] ORDER STATISTICS | `Build the CDF, not the pmf: P(max ≤ k) = F(k)ⁿ, P(min ≥ k) = (1−F)ⁿ` | `P(max \leq k) = F(k)^{n}, P(min \geq k) = (1- F)^{n}` |
 | [formulas.js/Recognition triggers] ORDER STATISTICS | `Uniform spacings: E[X_(k)] = k/(n+1).` | `E[X_(k)] = \frac{k}{n+1}.` |
 | [formulas.js/Probability] Basic identities | `P(A∪B) = P(A)+P(B)−P(A∩B)` | `P(A\cup B) = P(A)+P(B)- P(A\cap B)` |
 | [formulas.js/Probability] Basic identities | `P(A\|B) = P(A∩B)/P(B)` | `P(A\mid B) = P(A\cap B)/P(B)` |
@@ -127,10 +206,13 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [formulas.js/Expectation and variance] Expectation toolkit | `E[X] = E[E[X\|Y]]` | `E[X] = E[E[X\|Y]]` |
 | [formulas.js/Expectation and variance] Expectation toolkit | `Geometric wait E = 1/p.` | `\text{Geometric wait E} = \frac{1}{p}.` |
 | [formulas.js/Expectation and variance] Variance toolkit | `Var(X) = E[X²]−E[X]²` | `Var(X) = E[X^{2}]- E[X]^{2}` |
+| [formulas.js/Expectation and variance] Variance toolkit | `Var(aX+b) = a²Var(X)` | `Var(aX+b) = a^{2}Var(X)` |
+| [formulas.js/Expectation and variance] Variance toolkit | `Law of total variance: Var(X) = E[Var(X\|Y)] + Var(E[X\|Y]).` | `Var(X) = E[Var(X\mid Y)] + Var(E[X\mid Y]).` |
 | [formulas.js/Expectation and variance] Standard results worth memorising | `First ace in a deck: 53/5 = 10.6.` | `53/5 = 10.6.` |
 | [formulas.js/Distributions] Dice constants | `E\|X−Y\| = 70/36 ≈ 1.944.` | `E\left\|X- Y\right\| = \frac{70}{36} \approx 1.944.` |
 | [formulas.js/Finance (SIG)] Per-share effects | `EPS = NI/shares` | `EPS = \frac{NI}{\text{shares}}` |
 | [formulas.js/Finance (SIG)] Rates and FX | `Current yield = coupon/price` | `\text{Current yield} = \frac{\text{coupon}}{\text{price}}` |
+| [formulas.js/Finance (SIG)] Rates and FX | `Cross rate chains: EUR/JPY = EUR/USD × USD/JPY.` | `EUR/JPY = \frac{EUR}{USD} \times \frac{USD}{JPY}.` |
 | [formulas.js/Finance (SIG)] Events | `Surprise = (actual − consensus)/consensus` | `\text{Surprise} = \frac{\text{actual}- \text{consensus}}{\text{consensus}}` |
 | [formulas.js/Markets and sizing] Adverse selection | `EV per trade = (1−p)·spread earned − p·loss to informed flow` | `\text{EV per trade} = (1- p)\cdot \text{spread earned}- p\cdot \text{loss to informed flow}` |
 | [formulas.js/Markets and sizing] Kelly | `f* = (bp − q)/b` | `f* = \frac{bp - q}{b}` |
@@ -143,7 +225,7 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 
 ## Fell back to plain text (not converted — shown exactly as before)
 
-<details><summary>Expand full list (553 clauses)</summary>
+<details><summary>Expand full list (542 clauses)</summary>
 
 | Source | Text |
 |---|---|
@@ -179,17 +261,14 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [quant/C] Conditioning and first-step analysis | `Geometric wait (repeating an action that independently succeeds with probability p each time, stopping at the first success): E = 1/p` |
 | [quant/C] Conditioning and first-step analysis | `General first-step equation: E = 1 + Σ [P(each possible outcome of the next step) × E(expected further repeats needed, starting from that outcome)]` |
 | [quant/D] What variance measures, and why we square the deviations | `Var(X) ≥ 0 always, with equality only when X is a constant (never actually varies)` |
-| [quant/D] Variance rules for scaling and adding random variables | `Var(aX+b) = a²Var(X)  ` |
 | [quant/D] Variance rules for scaling and adding random variables | `Var(X+Y) = Var(X)+Var(Y)+2Cov(X,Y)  ` |
 | [quant/D] Variance rules for scaling and adding random variables | `Var(X−Y) = Var(X)+Var(Y)−2Cov(X,Y)  ` |
 | [quant/D] Variance rules for scaling and adding random variables | `For independent (or uncorrelated) X,Y specifically: Var(X+Y) = Var(X)+Var(Y) and also Var(X−Y) = Var(X)+Var(Y)` |
 | [quant/D] Variance rules for scaling and adding random variables | `Var(X̄ₙ) = σ²/n  for the sample mean of n independent, identically-distributed observations, each with variance σ²` |
 | [quant/D] Covariance and correlation: measuring how two variables move together | `ρ(X,Y) = Cov(X,Y) / (σ_X σ_Y), always satisfying −1 ≤ ρ ≤ 1` |
 | [quant/D] Covariance and correlation: measuring how two variables move together | `If X, Y are independent, then Cov(X,Y) = 0 (and hence ρ=0)` |
-| [quant/D] Covariance and correlation: measuring how two variables move together | `Cov(X,X) = Var(X)  ` |
 | [quant/D] Portfolio variance: combining two risky assets, and the mathematics of diversification | `Special case ρ=1 (perfectly correlated, no diversification benefit at all): Var(portfolio) = [wσ₁+(1−w)σ₂]², so SD(portfolio) is exactly the weighted average of the two individual SDs` |
 | [quant/D] Portfolio variance: combining two risky assets, and the mathematics of diversification | `Special case ρ=−1 (perfectly negatively correlated): Var(portfolio) = [wσ₁−(1−w)σ₂]², which can even reach exactly ZERO for the right weight w` |
-| [quant/D] Correlation and simple linear regression | `β (regression slope of Y on X) = Cov(X,Y) / Var(X)` |
 | [quant/D] Correlation and simple linear regression | `α (intercept) = E[Y] − β×E[X]  (the line always passes through the point (E[X], E[Y]))` |
 | [quant/D] Correlation and simple linear regression | `Minimum-variance hedge ratio (hedging asset S using futures F) = Cov(S,F)/Var(F)` |
 | [quant/E] What a "distribution" is, and why certain patterns get their own name | `Binomial: a FIXED number of independent yes/no trials, and you count the total number of successes` |
@@ -331,8 +410,6 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `NWC = Current Assets − Current Liabilities ≈ (Receivables + Inventory) − Payables, for operating purposes.` |
 | [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `Impact on FCF: an INCREASE in NWC is a USE of cash (subtract from FCF)` |
 | [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `a DECREASE in NWC is a SOURCE of cash (add to FCF).` |
-| [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `DIO = (Inventory / COGS) × 365` |
-| [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `DPO = (Accounts Payable / COGS) × 365.` |
 | [ib/IB-G] Net working capital: an operating efficiency signal, and a battleground in every M&A deal | `M&A purchase price adjustment ≈ (actual NWC delivered at closing − target/normalized NWC), added to or subtracted from the agreed purchase price.` |
 | [ib/IB-G] Operating leverage: how a fixed-cost structure amplifies both good news and bad news | `Degree of operating leverage (DOL) ≈ % change in operating income / % change in revenue.` |
 | [ib/IB-G] Operating leverage: how a fixed-cost structure amplifies both good news and bad news | `Contribution margin = Revenue − Variable Costs (the amount left over to cover fixed costs and then generate profit).` |
@@ -457,7 +534,6 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [am/AM-E] Sector rotation: who wins and who loses under different macro regimes, and why | `Winners: importers, domestic-focused companies.` |
 | [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `Trailing P/E = price / actual last-12-month EPS.` |
 | [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `CAPE = price / (10-year average of inflation-adjusted earnings)` |
-| [am/AM-E] Market valuation: when a multiple says "cheap" or "expensive," and when it lies | `EV/EBITDA = (equity value + debt − cash) / EBITDA` |
 | [am/AM-E] Sector beta and the GICS framework: what "risk" looks like at the sector level | `Approximate typical sector betas: Utilities ~0.5, Consumer Staples ~0.6, Healthcare ~0.7 (defensive/low-beta) versus Technology ~1.2, Financials ~1.3, Energy ~1.4 (cyclical/high-beta).` |
 | [am/AM-E] Sector beta and the GICS framework: what "risk" looks like at the sector level | `Overweighting high-beta (cyclical) sectors relative to the market = deliberately increasing the portfolio's systematic risk exposure` |
 | [am/AM-E] Sector beta and the GICS framework: what "risk" looks like at the sector level | `overweighting low-beta (defensive) sectors = deliberately decreasing it.` |
@@ -551,7 +627,6 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [wm/WM-G] Risk budgeting: allocating a portfolio by risk contribution, not just by dollars | `Risk parity target: size each asset class's dollar allocation so its contribution to total portfolio risk is roughly EQUAL across asset classes, rather than equal in dollar terms.` |
 | [wm/WM-H] Reading private equity performance: the J-curve, DPI, TVPI, and IRR | `DPI = Cumulative cash distributed to investor / Cumulative cash paid in (called) by the fund.` |
 | [wm/WM-H] Reading private equity performance: the J-curve, DPI, TVPI, and IRR | `TVPI = (Cumulative cash distributed + Current estimated value of remaining fund holdings) / Cumulative cash paid in` |
-| [wm/WM-H] Reading private equity performance: the J-curve, DPI, TVPI, and IRR | `TVPI = DPI + RVPI (residual value to paid-in).` |
 | [wm/WM-H] Reading private equity performance: the J-curve, DPI, TVPI, and IRR | `IRR: the annualized discount rate that accounts for the actual timing of every capital call (cash out) and distribution (cash in)` |
 | [wm/WM-H] Hedge fund strategy types and real assets: matching the specific vehicle to the client's actual goal | `Merger arbitrage spread ≈ Deal's implied value per target share − Target's current market price (compensation for residual deal-completion risk and time value).` |
 | [wm/WM-H] Hedge fund strategy types and real assets: matching the specific vehicle to the client's actual goal | `Correlation-to-public-markets ranking (typical, not absolute): market-neutral/relative-value (lowest) < long/short equity < event-driven < global macro (varies more by positioning).` |
@@ -638,7 +713,6 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [formulas.js/Recognition triggers] CONDITIONING / FIRST-STEP ANALYSIS | `Condition on the first step, write E (or P) in terms of itself, solve the small linear system` |
 | [formulas.js/Recognition triggers] CONDITIONING / FIRST-STEP ANALYSIS | `Lump equivalent states.` |
 | [formulas.js/Recognition triggers] BAYES | `Under time pressure use natural frequencies out of 10,000.` |
-| [formulas.js/Recognition triggers] ORDER STATISTICS | `Build the CDF, not the pmf: P(max ≤ k) = F(k)ⁿ, P(min ≥ k) = (1−F)ⁿ` |
 | [formulas.js/Recognition triggers] OPTIMAL STOPPING | `Backward induction` |
 | [formulas.js/Recognition triggers] OPTIMAL STOPPING | `Accept when the current value beats the expected value of continuing` |
 | [formulas.js/Recognition triggers] OPTIMAL STOPPING | `the threshold changes at every stage.` |
@@ -655,10 +729,8 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [formulas.js/Counting] Useful numbers | `Catalan 1,2,5,14,42,132` |
 | [formulas.js/Counting] Useful numbers | `Fibonacci 1,1,2,3,5,8,13,21,34,55,89,144` |
 | [formulas.js/Expectation and variance] Expectation toolkit | `Wald: E[ΣᴺXᵢ] = E[N]E[X] for independent N` |
-| [formulas.js/Expectation and variance] Variance toolkit | `Var(aX+b) = a²Var(X)` |
 | [formulas.js/Expectation and variance] Variance toolkit | `Var(X±Y) = VarX + VarY ± 2Cov` |
 | [formulas.js/Expectation and variance] Variance toolkit | `Var(X̄) = σ²/n` |
-| [formulas.js/Expectation and variance] Variance toolkit | `Law of total variance: Var(X) = E[Var(X\|Y)] + Var(E[X\|Y]).` |
 | [formulas.js/Expectation and variance] Pattern waits | `E[HH] = 6, E[HT] = 4, E[HHH] = 14, E[n heads in a row] = 2ⁿ⁺¹ − 2` |
 | [formulas.js/Expectation and variance] Pattern waits | `Overlapping patterns are slower.` |
 | [formulas.js/Expectation and variance] Standard results worth memorising | `Fixed points of a random permutation: mean 1, variance 1` |
@@ -684,7 +756,6 @@ the fallback is never a visible error, just the pre-KaTeX presentation for that 
 | [formulas.js/Finance (SIG)] Per-share effects | `Issuing m shares on top of s dilutes EPS by m/(s+m)` |
 | [formulas.js/Finance (SIG)] Per-share effects | `A buyback is accretive when the earnings yield exceeds the after-tax cost of funding.` |
 | [formulas.js/Finance (SIG)] Rates and FX | `ΔP/P ≈ −D_mod·Δy (+ ½·convexity·Δy²)` |
-| [formulas.js/Finance (SIG)] Rates and FX | `Cross rate chains: EUR/JPY = EUR/USD × USD/JPY.` |
 | [formulas.js/Finance (SIG)] Events | `Price reflects forward expectations, so a guidance cut can dominate a reported beat.` |
 | [formulas.js/Finance (SIG)] Leverage | `RoE = asset return × assets/equity, symmetric in gains and losses.` |
 | [formulas.js/Markets and sizing] Fair value first | `Compute fair value before looking at the quote` |
@@ -728,6 +799,8 @@ for the verbatim-reconstruction check).
 | [quant/D] What variance measures, and why we square the deviations L2 | `E[X²] = (1+4+9+16+25+36)/6 = 91/6 ≈ 15.167.` | `E[X^{2}] = \frac{1+4+9+16+25+36}{6} = \frac{91}{6} \approx 15.167` |
 | [quant/D] What variance measures, and why we square the deviations L3 | `E[X] = 0.3×10 + 0.7×0 = 3.` | `E[X] = 0.3\times 10 + 0.7\times 0 = 3` |
 | [quant/D] Variance rules for scaling and adding random variables L1 | `Var(X)=4.` | `Var(X) = 4` |
+| [quant/D] Variance rules for scaling and adding random variables L1 | `Apply the scaling rule directly: Var(3X) = 3²×Var(X) = 9×4 = 36.` | `Var(3X) = 3^{2}\times Var(X) = 9\times 4 = 36` |
+| [quant/D] Correlation and simple linear regression L1 | `Cov(X,Y)=12, Var(X)=4.` | `Cov(X,Y) = 12, Var(X)=4` |
 | [quant/D] Correlation and simple linear regression L2 | `ρ(X,Y)=0.6.` | `\rho (X,Y) = 0.6` |
 | [quant/E] The Binomial distribution L1 | `P(X=2) = C(4,2)(0.5)²(0.5)² = 6 × 0.25 × 0.25 = 6 × 0.0625 = 0.375.` | `P(X = 2) = C(4,2)(0.5)^{2}(0.5)^{2} = 6 \times 0.25 \times 0.25 = 6 \times 0.0625 = 0.375` |
 | [quant/E] The Binomial distribution L3 | `P(X=4) = C(5,4)(0.7)⁴(0.3)¹ = 5 × 0.2401 × 0.3 = 5 × 0.07203 = 0.36015 ≈ 0.360.` | `P(X = 4) = C(5,4)(0.7)^{4}(0.3)^{1} = 5 \times 0.2401 \times 0.3 = 5 \times 0.07203 = 0.36015 \approx 0.360` |
@@ -735,6 +808,7 @@ for the verbatim-reconstruction check).
 | [quant/E] The Poisson distribution L2 | `P(X=2) = e⁻³×(3²)/2! = e⁻³×9/2 = 0.0498×4.5 ≈ 0.2240.` | `P(X = 2) = e^{-3}\times \frac{3^{2}}{2}! = e^{-3}\times \frac{9}{2} = 0.0498\times 4.5 \approx 0.2240` |
 | [quant/E] The Hypergeometric distribution L1 | `P(X=2) = C(5,2)C(5,1)/C(10,3) = 10×5/120 = 50/120 ≈ 0.417.` | `P(X = 2) = C(5,2)C(5,1)/C(10,3) = 10\times \frac{5}{120} = \frac{50}{120} \approx 0.417` |
 | [quant/E] The Negative Binomial distribution L2 | `P(X=5) = C(4,1)(0.3)²(0.7)³ = 4×0.09×0.343 ≈ 0.1235.` | `P(X = 5) = C(4,1)(0.3)^{2}(0.7)^{3} = 4\times 0.09\times 0.343 \approx 0.1235` |
+| [quant/F] What order statistics are, and the single trick that unlocks them L3 | `Use the subtraction trick: P(max=3) = P(max≤3) − P(max≤2) = (3/6)³ − (2/6)³ = 27/216 − 8/216 = 19/216.` | `P(max = 3) = P(max\leq 3) - P(max\leq 2) = (3/6)^{3} - (2/6)^{3} = \frac{27}{216} - \frac{8}{216} = \frac{19}{216}` |
 | [quant/F] Expected value of order statistics via the tail-sum formula L2 | `Summing these six tail probabilities: (36+35+32+27+20+11)/36 = 161/36 ≈ 4.472.` | `(36+35+32+27+20+11)/36 = \frac{161}{36} \approx 4.472` |
 | [quant/F] Expected value of order statistics via the tail-sum formula L3 | `Summing: (36+25+16+9+4+1)/36 = 91/36 ≈ 2.528.` | `(36+25+16+9+4+1)/36 = \frac{91}{36} \approx 2.528` |
 | [quant/P] Margins, growth rates, and leverage: reading the health of a business L1 | `Gross margin = 200/500 = 40%.` | `\text{Gross margin} = \frac{200}{500} = 40%` |
@@ -774,8 +848,8 @@ for the verbatim-reconstruction check).
 | [consulting/CE-C] Market sizing: building a transparent chain, top-down or bottom-up L1 | `Households = 1,000,000/2.5 = 400,000.` | `\text{Households} = 1,000,\frac{000}{2}.5 = 400,000` |
 | [consulting/CE-C] Market sizing: building a transparent chain, top-down or bottom-up L1 | `Dog owners = 400,000×30% = 120,000.` | `\text{Dog owners} = 400,000\times 30% = 120,000` |
 
-<details><summary>Worked-example sentences left as plain text (1691)</summary>
+<details><summary>Worked-example sentences left as plain text (1688)</summary>
 
-Not shown individually — these are ordinary narrative sentences (1691 of 1752 total), included here only as a count for completeness.
+Not shown individually — these are ordinary narrative sentences (1688 of 1752 total), included here only as a count for completeness.
 
 </details>
