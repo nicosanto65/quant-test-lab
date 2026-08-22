@@ -3,6 +3,7 @@
   'use strict';
   const S = global.QTL_STORE, U = global.QTL_UTIL;
   const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
   const el = (tag, cls, html) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -1340,189 +1341,245 @@
 
   /* ================================= LEARN ================================= */
 
+  /* ================================= LEARN =================================
+     Report 8, Cambio 1: replaced the old "row of unit-letter buttons + every unit's
+     concepts stacked as accordions on one long page" structure with three focused screens
+     — a topic menu, a per-topic concept dropdown, and a dedicated single-concept page —
+     navigated via S.getLearnNav/setLearnNav (persisted per track, same lightweight pattern
+     lastView already used elsewhere) rather than the top-level go()/VIEWS router, exactly
+     mirroring how viewPattern/viewPatternRun already switch between a config screen and a
+     run screen within the single 'pattern' nav entry. Chose a full drill-down transition
+     over an inline-expanding dropdown specifically for mobile: no accordion reflow/scroll-
+     jank to manage on a small screen, and it's the same navigation shape (menu -> focused
+     list -> detail) every other view in this app already uses. */
+  function learnStudiedSet() {
+    return new Set(S.state.attempts.filter((a) => a.mode === 'Learn').map((a) => String(a.qid).split(':')[1]));
+  }
+  function setLearnNav(sector, concept) { S.setLearnNav(S.activeTrack(), { sector, concept }); }
+
   function viewLearn(root) {
+    const track = S.activeTrack();
     const units = S.allLessonUnits();
-    const studiedSet = new Set(S.state.attempts.filter((a) => a.mode === 'Learn').map((a) => String(a.qid).split(':')[1]));
+    const nav = S.getLearnNav(track) || {};
+    const sector = nav.sector ? units.find((u) => u.unit === nav.sector) : null;
+    // a persisted sector/concept that no longer exists (content changed, or stale data from
+    // a different track's unit ids) falls back cleanly to the topic menu instead of erroring
+    if (nav.sector && !sector) { setLearnNav(null, null); return viewLearnMenu(root); }
+    const concept = sector && nav.concept ? sector.concepts.find((c) => c.id === nav.concept) : null;
+    if (nav.concept && !concept) { setLearnNav(sector ? sector.unit : null, null); return sector ? viewLearnSector(root, sector) : viewLearnMenu(root); }
+    if (concept) return viewLearnConcept(root, sector, concept);
+    if (sector) return viewLearnSector(root, sector);
+    return viewLearnMenu(root);
+  }
+
+  /* 1a — topic menu: one gradient-card per unit, reusing exactly the track-picker/Mixed-
+     practice card language (gradient-card + icon-box + pill-badge), labelled with the
+     unit's own `title` field (already-existing lessons.js data — only how it's presented
+     changes, not the unit letters/data themselves). */
+  function viewLearnMenu(root) {
+    const track = S.activeTrack();
+    const units = S.allLessonUnits();
+    const studiedSet = learnStudiedSet();
+    const colorVar = TRACK_COLOR_VAR[track] || 'brand';
+    const p = el('div', 'panel');
+    p.innerHTML = `<div class="panel-head">${panelHeader('learn', 'Topics')}</div>
+      <p class="small muted">Pick a topic to see its concepts.</p>`;
+    const grid = el('div', 'grid c2 learn-sector-grid');
+    units.forEach((unit) => {
+      const done = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
+      const card = el('button', 'mode-card gradient-card');
+      card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+      card.innerHTML = `
+        ${iconBox(colorVar, icon('learn'), 'sm')}
+        <span class="mode-card-title">${esc(unit.title)}</span>
+        <span class="mode-card-desc">${unit.concepts.length} concept${unit.concepts.length === 1 ? '' : 's'}</span>
+        ${pillBadge(colorVar, icon('check'), done + '/' + unit.concepts.length + ' studied')}`;
+      card.onclick = () => { setLearnNav(unit.unit, null); render(); };
+      grid.appendChild(card);
+    });
+    p.appendChild(grid);
+    root.appendChild(p);
+  }
+
+  /* 1b — sector dropdown: the concepts of ONE unit, name + studied indicator, tap to open
+     the dedicated concept page. */
+  function viewLearnSector(root, unit) {
+    const track = S.activeTrack();
+    const studiedSet = learnStudiedSet();
+    const colorVar = TRACK_COLOR_VAR[track] || 'brand';
+    const doneCount = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
+
+    const back = el('button', 'btn sm ghost mb-2', '← All topics');
+    back.onclick = () => { setLearnNav(null, null); render(); };
+    root.appendChild(back);
+
+    const p = el('div', 'panel');
+    p.innerHTML = `<div class="panel-head unit-head">
+        <div>${kicker('Unit ' + unit.unit, colorVar)}<h2>${esc(unit.title)}</h2></div>
+        ${pillBadge(colorVar, icon('check'), doneCount + '/' + unit.concepts.length + ' studied')}
+      </div>
+      <ul class="list sector-concept-list">
+        ${unit.concepts.map((c, i) => {
+          const studied = studiedSet.has(c.id);
+          return `<li class="sector-concept-row" data-cid="${esc(c.id)}" tabindex="0" role="button">
+              <span class="sc-idx">${i + 1}</span>
+              <span class="sc-name">${esc(c.name)}</span>
+              <span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span>
+            </li>`;
+        }).join('')}
+      </ul>`;
+    root.appendChild(p);
+    $$('.sector-concept-row', p).forEach((row) => {
+      const openIt = () => { setLearnNav(unit.unit, row.dataset.cid); render(); window.scrollTo(0, 0); };
+      row.onclick = openIt;
+      row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIt(); } };
+    });
+  }
+
+  /* 1c — the concept page itself: unchanged visual treatment from the prior accordion body
+     (Start from zero / Core idea+Key formulas / When to use it / Intuition / worked examples
+     / Common trap / Practice), just now the ONLY thing on screen instead of one of many
+     stacked accordions — plus a back-to-dropdown link and Previous/Next concept navigation
+     at the top (the existing bottom concept-nav-footer is kept too, for convenience at the
+     end of a long concept without scrolling back up). */
+  function viewLearnConcept(root, unit, c) {
+    const track = S.activeTrack();
+    const units = S.allLessonUnits();
+    const studiedSet = learnStudiedSet();
+    const colorVar = TRACK_COLOR_VAR[track] || 'brand';
     const levelWord = (lv) => lv === 1 ? 'Basic' : lv === 2 ? 'Intermediate' : 'Advanced';
     const cid = (id) => 'concept-' + id.replace(/[^a-zA-Z0-9]/g, '_');
 
-    // flat, ordered list of every concept across every unit — backs prev/next navigation
+    // flat, ordered list of every concept across every unit — backs prev/next navigation,
+    // exactly the ordering the old accordion list rendered them in
     const flat = [];
-    units.forEach((unit) => unit.concepts.forEach((c) => flat.push({ unit, c })));
-    const conceptEls = {}; // c.id -> <details> element, populated as concepts render below
+    units.forEach((u) => u.concepts.forEach((cc) => flat.push({ unit: u, c: cc })));
+    const flatIdx = flat.findIndex((x) => x.c.id === c.id);
+    const prevEntry = flat[flatIdx - 1], nextEntry = flat[flatIdx + 1];
+    const posInUnit = unit.concepts.findIndex((x) => x.id === c.id) + 1;
+    const studied = studiedSet.has(c.id);
 
-    let activeUnitId = null;
+    function goToConcept(entry) { setLearnNav(entry.unit.unit, entry.c.id); render(); window.scrollTo(0, 0); }
 
-    function openConcept(id) {
-      const entry = flat.find((x) => x.c.id === id);
-      const target = conceptEls[id];
-      if (!entry || !target) return;
-      Object.values(conceptEls).forEach((d) => { if (d !== target) d.removeAttribute('open'); });
-      target.setAttribute('open', '');
-      smoothScrollTo(target);
-      updateSubIndex(entry.unit, id);
-    }
+    const head = el('div', 'concept-page-head');
+    const back = el('button', 'btn sm ghost', '← ' + unit.title);
+    back.onclick = () => { setLearnNav(unit.unit, null); render(); };
+    head.appendChild(back);
+    const navBtns = el('div', 'concept-page-nav');
+    const pb = el('button', 'btn sm ghost concept-nav-btn', '← Previous concept');
+    pb.disabled = !prevEntry;
+    if (prevEntry) pb.onclick = () => goToConcept(prevEntry);
+    const nb = el('button', 'btn sm ghost concept-nav-btn', 'Next concept →');
+    nb.disabled = !nextEntry;
+    if (nextEntry) nb.onclick = () => goToConcept(nextEntry);
+    navBtns.appendChild(pb); navBtns.appendChild(nb);
+    head.appendChild(navBtns);
+    root.appendChild(head);
 
-    const idx = el('div', 'learn-index');
-    // Report 6, Part 3: the active unit pill picks up THIS track's own identity colour
-    // (the same TRACK_COLOR_VAR map the track picker uses) instead of always brand-blue,
-    // so Learn's unit index reads consistently with whichever track is currently open.
-    const idxColorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
-    idx.style.cssText = `--li-c:var(--${idxColorVar}-2, var(--${idxColorVar}));--li-line:var(--${idxColorVar}-line);--li-bg:var(--${idxColorVar}-soft)`;
-    units.forEach((unit) => {
-      const b = el('button', '', esc(unit.unit));
-      b.title = unit.title;
-      b.onclick = () => {
-        const target = $('#learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_'));
+    const d = el('div', 'panel concept-page');
+    d.id = cid(c.id);
+    d.innerHTML = `<div class="panel-head unit-head">
+        <div>${kicker('Unit ' + unit.unit, colorVar)}<h2 class="concept-title">${esc(c.name)}</h2></div>
+        <span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span>
+      </div>
+      <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
+      <div class="concept-stepper${studied ? ' stepper-done' : ''}">
+        <button data-jump="context">${stepIcon('context')}Context</button><i></i>
+        <button data-jump="core">${stepIcon('core')}Core</button><i></i>
+        <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
+        <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
+      </div>
+      ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true, blockIcon: { colorVar: 'brand', iconSvg: stepIcon('context') } }) : ''}
+      <div class="concept-flow" id="${cid(c.id)}-core">
+        <div class="core-formula-grid">
+          <div class="flow-item flow-item-core">
+            <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
+            <p>${esc(c.core)}</p>
+          </div>
+          <div class="flow-item flow-item-tinted flow-item-formulas">
+            <div class="block-header">${iconBox('teal', icon('sheet'), 'sm')}${kicker('Key formulas', 'teal')}</div>
+            <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
+        </div>
+        <div class="flow-item flow-item-tinted flow-item-when">
+          <div class="block-header">${iconBox('pos', icon('compass'), 'sm')}${kicker('When to use it', 'pos')}</div>
+          <p>${esc(c.when)}</p></div>
+        <div class="flow-item flow-item-tinted flow-item-intuition">
+          <div class="block-header">${iconBox('brand', icon('bulb'), 'sm')}${kicker('Intuition', 'brand')}</div>
+          <p>${esc(c.intuition)}</p></div>
+      </div>
+      <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
+      <div class="examples-flow" id="${cid(c.id)}-examples"></div>
+      ${renderReadingBlock('Common trap', c.trap, 'prose-block trap', undefined, { blockIcon: { colorVar: 'warn', iconSvg: icon('mistakes') } })}
+      <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
+      <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
+      <div class="checks" id="${cid(c.id)}-practice"></div>
+      <div class="concept-nav-footer"></div>`;
+    root.appendChild(d);
+
+    // progressive worked-example reveal: Level 1 open, later levels locked behind their
+    // own preview until the one before them opens — the same expandable-block accordion
+    // used for the primer/solution text above, just in 'sequential' mode.
+    const exBox = $('.examples-flow', d);
+    const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
+    exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
+      bodyHtml: `<div class="block-header">${iconBox(EXAMPLE_LEVEL_COLOR[ex.level] || 'teal', exampleLevelIcon(ex.level), 'sm')}${kicker('Level ' + ex.level + ' — ' + levelWord(ex.level), EXAMPLE_LEVEL_COLOR[ex.level] || 'teal')}</div>${renderPlainProseWithFormulas(ex.text)}`,
+      preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
+      ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
+      collapseLabel: `Collapse Level ${ex.level}`,
+      cardClass: 'lvl-' + ex.level
+    })), { mode: 'sequential' });
+
+    // section-jump stepper
+    $$('.concept-stepper [data-jump]', d).forEach((btn) => {
+      btn.onclick = () => {
+        const target = $('#' + cid(c.id) + '-' + btn.dataset.jump, d);
         if (target) smoothScrollTo(target);
-        updateSubIndex(unit, null);
       };
-      idx.appendChild(b);
     });
-    root.appendChild(idx);
 
-    // secondary row: which CONCEPT within the current unit is active — not just the unit
-    const subIdx = el('div', 'learn-subindex');
-    root.appendChild(subIdx);
-    function updateSubIndex(unit, activeConceptId) {
-      activeUnitId = unit.unit;
-      subIdx.innerHTML = `<span class="sub-label">Unit ${esc(unit.unit)}:</span>` + unit.concepts.map((cc, i) =>
-        `<button class="sub-dot ${cc.id === activeConceptId ? 'active' : ''}" data-cid="${esc(cc.id)}" title="${esc(cc.name)}">${i + 1}</button>`).join('');
-      $$('[data-cid]', subIdx).forEach((btn) => { btn.onclick = () => openConcept(btn.dataset.cid); });
-      // the top learn-index row (A, B, C...) tracks the same active unit, in the track's colour
-      $$('button', idx).forEach((btn) => btn.classList.toggle('on', btn.textContent === unit.unit));
-    }
-    function $$(sel, root2) { return Array.from((root2 || document).querySelectorAll(sel)); }
-
-    units.forEach((unit) => {
-      const p = el('div', 'panel');
-      p.id = 'learn-unit-' + unit.unit.replace(/[^a-zA-Z0-9]/g, '_');
-      const doneCount = unit.concepts.filter((c) => studiedSet.has(c.id)).length;
-      p.innerHTML = `<div class="panel-head unit-head">
-          <div>${kicker('Unit ' + unit.unit)}<h2>${esc(unit.title)}</h2></div>
-          ${pillBadge('brand', icon('check'), doneCount + '/' + unit.concepts.length + ' studied')}
-        </div>`;
-      unit.concepts.forEach((c) => {
-        const d = el('details', 'acc');
-        d.id = cid(c.id);
-        conceptEls[c.id] = d;
-        const studied = studiedSet.has(c.id);
-        const flatIdx = flat.findIndex((x) => x.c.id === c.id);
-        const posInUnit = unit.concepts.findIndex((x) => x.id === c.id) + 1;
-
-        d.innerHTML = `<summary><span class="concept-title">${esc(c.name)}</span><span class="studied-dot ${studied ? 'done' : ''}" title="${studied ? 'Studied' : 'Not yet studied'}"></span></summary>
-          <div class="acc-body">
-            <div class="concept-meta">Unit ${esc(unit.unit)} · concept ${posInUnit} of ${unit.concepts.length}</div>
-            <div class="concept-stepper${studied ? ' stepper-done' : ''}">
-              <button data-jump="context">${stepIcon('context')}Context</button><i></i>
-              <button data-jump="core">${stepIcon('core')}Core</button><i></i>
-              <button data-jump="examples">${stepIcon('examples')}Examples</button><i></i>
-              <button data-jump="practice">${icon('check', 'step-icon')}Practice</button>
-            </div>
-            ${c.primer ? renderReadingBlock('Start from zero', c.primer, 'primer', cid(c.id) + '-context', { leadIn: true, highlightTerms: true, blockIcon: { colorVar: 'brand', iconSvg: stepIcon('context') } }) : ''}
-            <div class="concept-flow" id="${cid(c.id)}-core">
-              <div class="core-formula-grid">
-                <div class="flow-item flow-item-core">
-                  <div class="block-header">${iconBox('accent', stepIcon('core'), 'sm')}${kicker('Core idea', 'accent')}</div>
-                  <p>${esc(c.core)}</p>
-                </div>
-                <div class="flow-item flow-item-tinted flow-item-formulas">
-                  <div class="block-header">${iconBox('teal', icon('sheet'), 'sm')}${kicker('Key formulas', 'teal')}</div>
-                  <ul class="formula-list">${c.formulas.map((f) => `<li>${renderFormula(f)}</li>`).join('')}</ul></div>
-              </div>
-              <div class="flow-item flow-item-tinted flow-item-when">
-                <div class="block-header">${iconBox('pos', icon('compass'), 'sm')}${kicker('When to use it', 'pos')}</div>
-                <p>${esc(c.when)}</p></div>
-              <div class="flow-item flow-item-tinted flow-item-intuition">
-                <div class="block-header">${iconBox('brand', icon('bulb'), 'sm')}${kicker('Intuition', 'brand')}</div>
-                <p>${esc(c.intuition)}</p></div>
-            </div>
-            <div class="concept-transition"><span class="micro-label">Now that the pieces are in place</span></div>
-            <div class="examples-flow" id="${cid(c.id)}-examples"></div>
-            ${renderReadingBlock('Common trap', c.trap, 'prose-block trap', undefined, { blockIcon: { colorVar: 'warn', iconSvg: icon('mistakes') } })}
-            <div class="concept-transition"><span class="micro-label">Try it yourself</span></div>
-            <div class="block-header">${iconBox('accent', icon('check', ''), 'sm')}${kicker('Practice', 'accent')}</div>
-            <div class="checks" id="${cid(c.id)}-practice"></div>
-            <div class="concept-nav-footer"></div>
-          </div>`;
-
-        // progressive worked-example reveal: Level 1 open, later levels locked behind their
-        // own preview until the one before them opens — the same expandable-block accordion
-        // used for the primer/solution text above, just in 'sequential' mode.
-        const exBox = $('.examples-flow', d);
-        const sortedEx = (c.examples || []).slice().sort((a, b) => a.level - b.level);
-        exBox.innerHTML = renderExpandableBlocks(sortedEx.map((ex) => ({
-          bodyHtml: `<div class="block-header">${iconBox(EXAMPLE_LEVEL_COLOR[ex.level] || 'teal', exampleLevelIcon(ex.level), 'sm')}${kicker('Level ' + ex.level + ' — ' + levelWord(ex.level), EXAMPLE_LEVEL_COLOR[ex.level] || 'teal')}</div>${renderPlainProseWithFormulas(ex.text)}`,
-          preview: `Level ${ex.level} — ${levelWord(ex.level)}: ${previewWords(ex.text, 8)}`,
-          ctaLabel: `Continue to Level ${ex.level} (${levelWord(ex.level)}) →`,
-          collapseLabel: `Collapse Level ${ex.level}`,
-          cardClass: 'lvl-' + ex.level
-        })), { mode: 'sequential' });
-
-        // section-jump stepper
-        $$('.concept-stepper [data-jump]', d).forEach((btn) => {
-          btn.onclick = () => {
-            const target = $('#' + cid(c.id) + '-' + btn.dataset.jump, d);
-            if (target) smoothScrollTo(target);
-          };
-        });
-
-        // practice checks (unchanged mechanics, just re-targeted into #...-practice)
-        const box = $('.checks', d);
-        c.checks.forEach((chk, ci) => {
-          const wrap = el('div', 'check-card');
-          const lv = chk.level || 1;
-          wrap.innerHTML = `<p class="mb-2">${diffPill(lv, 'L' + lv + ' ' + levelWord(lv))} ${esc(chk.q)}</p>`;
-          chk.options.forEach((o, oi) => {
-            const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
-            b.onclick = () => {
-              Array.from(wrap.querySelectorAll('.opt')).forEach((x, xi) => {
-                x.disabled = true;
-                if (xi === chk.a) x.classList.add('right');
-              });
-              if (oi !== chk.a) b.classList.add('wrong');
-              wrap.insertAdjacentHTML('beforeend', renderReadingBlock(oi === chk.a ? 'Correct' : 'Not quite', chk.why, 'prose-block'));
-              S.recordAttempt({
-                qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
-                topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
-                targetTime: 30, hintUsed: false, confidence: 'Medium', track: S.activeTrack()
-              });
-              const dot = $('.studied-dot', d);
-              if (dot) dot.classList.add('done');
-              const stepper = $('.concept-stepper', d);
-              if (stepper) stepper.classList.add('stepper-done');
-            };
-            wrap.appendChild(b);
+    // practice checks (unchanged mechanics, just re-targeted into #...-practice)
+    const box = $('.checks', d);
+    c.checks.forEach((chk, ci) => {
+      const wrap = el('div', 'check-card');
+      const lv = chk.level || 1;
+      wrap.innerHTML = `<p class="mb-2">${diffPill(lv, 'L' + lv + ' ' + levelWord(lv))} ${esc(chk.q)}</p>`;
+      chk.options.forEach((o, oi) => {
+        const b = el('button', 'opt', `<span class="idx">${String.fromCharCode(65 + oi)}</span>${esc(o)}`);
+        b.onclick = () => {
+          Array.from(wrap.querySelectorAll('.opt')).forEach((x, xi) => {
+            x.disabled = true;
+            if (xi === chk.a) x.classList.add('right');
           });
-          box.appendChild(wrap);
-        });
-
-        // prev/next concept navigation — read from the shared flat list + conceptEls map,
-        // both fully populated by the time any of these are actually clicked
-        const navFooter = $('.concept-nav-footer', d);
-        const prevEntry = flat[flatIdx - 1], nextEntry = flat[flatIdx + 1];
-        if (prevEntry) {
-          const pb = el('button', 'btn sm ghost concept-nav-btn', `← Previous: ${esc(prevEntry.c.name)}`);
-          pb.onclick = () => openConcept(prevEntry.c.id);
-          navFooter.appendChild(pb);
-        } else { navFooter.appendChild(el('span')); }
-        if (nextEntry) {
-          const nb = el('button', 'btn sm ghost concept-nav-btn', `Next: ${esc(nextEntry.c.name)} →`);
-          nb.onclick = () => openConcept(nextEntry.c.id);
-          navFooter.appendChild(nb);
-        }
-
-        d.addEventListener('toggle', () => {
-          if (d.open) {
-            Object.values(conceptEls).forEach((other) => { if (other !== d) other.removeAttribute('open'); });
-            updateSubIndex(unit, c.id);
-          }
-        });
-
-        p.appendChild(d);
+          if (oi !== chk.a) b.classList.add('wrong');
+          wrap.insertAdjacentHTML('beforeend', renderReadingBlock(oi === chk.a ? 'Correct' : 'Not quite', chk.why, 'prose-block'));
+          S.recordAttempt({
+            qid: 'lesson:' + c.id + ':' + ci, mode: 'Learn', testType: 'Learn',
+            topic: unit.topic, subtopic: c.name, difficulty: lv, correct: oi === chk.a, timeSec: 0,
+            targetTime: 30, hintUsed: false, confidence: 'Medium', track: S.activeTrack()
+          });
+          const dot = $('.studied-dot', d);
+          if (dot) dot.classList.add('done');
+          const stepper = $('.concept-stepper', d);
+          if (stepper) stepper.classList.add('stepper-done');
+        };
+        wrap.appendChild(b);
       });
-      root.appendChild(p);
+      box.appendChild(wrap);
     });
+
+    // bottom nav footer — same Previous/Next as the top of the page, for convenience once
+    // a reader has scrolled all the way through a long concept
+    const navFooter = $('.concept-nav-footer', d);
+    if (prevEntry) {
+      const fpb = el('button', 'btn sm ghost concept-nav-btn', `← Previous: ${esc(prevEntry.c.name)}`);
+      fpb.onclick = () => goToConcept(prevEntry);
+      navFooter.appendChild(fpb);
+    } else { navFooter.appendChild(el('span')); }
+    if (nextEntry) {
+      const fnb = el('button', 'btn sm ghost concept-nav-btn', `Next: ${esc(nextEntry.c.name)} →`);
+      fnb.onclick = () => goToConcept(nextEntry);
+      navFooter.appendChild(fnb);
+    }
   }
 
   /* ================================= DRILL ================================= */

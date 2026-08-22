@@ -26,6 +26,9 @@
     /* Per-track "which view was I on" memory, so switching tracks doesn't always bounce
        back to the Dashboard. UI navigation state only. */
     lastView: {},
+    /* Per-track "where was I inside Learn's topic menu / concept page" memory (Report 8,
+       Cambio 1). See setLearnNav/getLearnNav below. UI navigation state only. */
+    learnNav: {},
     settings: {
       theme: 'dark',
       calculator: true,
@@ -510,6 +513,14 @@
   function setLastView(track, view) { state.lastView[track] = view; }
   function getLastView(track) { return state.lastView[track] || 'dashboard'; }
 
+  /* Report 8, Cambio 1: per-track "where was I in Learn's topic/concept navigation" memory —
+     mirrors lastView above exactly. { sector: unitId|null, concept: conceptId|null }. Purely
+     UI navigation state, same as lastView; never read by grading or content logic, and its
+     absence (older saved states, via DEFAULTS.learnNav = {}) degrades gracefully to "no
+     sector open, show the topic menu". */
+  function setLearnNav(track, nav) { state.learnNav[track] = nav; }
+  function getLearnNav(track) { return state.learnNav[track] || null; }
+
   /* ------------------------------ import / export --------------------------- */
 
   function exportJSON() { return JSON.stringify(state, null, 2); }
@@ -540,7 +551,7 @@
     errorBreakdown, confidenceMatrix, recentMocks, readiness, internalRating,
     weaknessSession, adaptiveLevel, recommendation,
     recordSession, trackSummary, dayStreak, contributionDays, sessionComparison,
-    setLastView, getLastView,
+    setLastView, getLastView, setLearnNav, getLearnNav,
     exportJSON, importJSON, exportCSV
   };
 })(window);
