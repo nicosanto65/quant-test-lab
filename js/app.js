@@ -721,6 +721,17 @@
     const colorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
     return `<div class="block-header">${iconBox(colorVar, icon(iconName), 'sm')}${kicker(text, colorVar)}</div>`;
   }
+  /* Report 8, Cambio 2: display-only rename. The internal identifiers these two mocks are
+     stored and scored under — testType 'Wincent'/'SIG' in state.attempts/state.mocks, and the
+     'wincent'/'sig' keys inside store.js's readiness-weights object — are UNCHANGED, since
+     store.js's readiness() function keys its scoring off those exact strings. Only what a
+     reader actually sees is generic/mechanic-based now: mockLabel() is the single place that
+     mapping happens, so a mock finished under the old name (mock history, past-result
+     comparisons) renders under the same new label a freshly started one gets — one consistent
+     name everywhere, not two names for the same thing depending on when it was recorded. */
+  const MOCK_LABEL = { Wincent: 'Extended Timed Mock', SIG: 'No-Skip Timed Mock' };
+  function mockLabel(key) { return MOCK_LABEL[key] || key;
+  }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
      icon adds a second, redundant signal on top of a colour meaning that already exists
@@ -1290,8 +1301,8 @@
 
     if (track === 'quant') {
       root.appendChild(el('div', 'grid c3', `
-        <div class="stat"><span class="label">Wincent readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
-        <div class="stat"><span class="label">SIG readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
         <div class="stat"><span class="label">IMC readiness</span><span class="value">${rd.imc}</span><span class="sub">internal metric</span></div>`));
     }
 
@@ -1321,7 +1332,7 @@
     const m = S.recentMocks(null, 5);
     const p5 = el('div', 'panel');
     p5.innerHTML = '<span class="eyebrow">Recent mock scores</span>' +
-      (m.length ? '<ul class="list">' + m.map((x) => `<li>${esc(x.type)} — <strong>${x.score}/${x.total}</strong>
+      (m.length ? '<ul class="list">' + m.map((x) => `<li>${esc(mockLabel(x.type))} — <strong>${x.score}/${x.total}</strong>
         <span class="dim mono-sm" style="float:right">${new Date(x.ts).toLocaleDateString()} · ${fmtTime(x.timeSec)}</span></li>`).join('') + '</ul>'
         : '<div class="empty">No mocks taken yet.</div>');
     root.appendChild(p5);
@@ -1688,17 +1699,20 @@
   /* ============================= MIXED PRACTICE ============================ */
 
   // Report 5, point E: each Mixed practice mode gets its own identity colour (Easy/Medium/
-  // Hard reuse the standard pos/brand/neg difficulty grouping; the two named-firm presets
-  // get a distinct colour each so they read as "special," not just another difficulty tier).
-  const MODE_COLOR = { Easy: 'pos', Medium: 'brand', Hard: 'neg', 'Wincent level': 'accent', 'SIG speed level': 'teal', 'Fully mixed': 'brand' };
-  const MODE_ICON = { Easy: 'easy', Medium: 'mid', Hard: 'hard', 'Wincent level': 'hard', 'SIG speed level': 'mid', 'Fully mixed': null };
+  // Hard reuse the standard pos/brand/neg difficulty grouping; the two higher-difficulty
+  // presets — Report 8, Cambio 2: renamed from the two exam-brand names they carried before
+  // ("Wincent level", "SIG speed level") to labels describing the actual mechanic (no hints
+  // + curated hard topics; a hard per-question timer) — get a distinct colour each so they
+  // read as "special," not just another difficulty tier).
+  const MODE_COLOR = { Easy: 'pos', Medium: 'brand', Hard: 'neg', 'Advanced — No Hints': 'accent', 'Speed Round': 'teal', 'Fully mixed': 'brand' };
+  const MODE_ICON = { Easy: 'easy', Medium: 'mid', Hard: 'hard', 'Advanced — No Hints': 'hard', 'Speed Round': 'mid', 'Fully mixed': null };
   function viewMixed(root) {
     const modes = [
       { k: 'Easy', d: [1, 2], n: 12, help: true },
       { k: 'Medium', d: [2, 3], n: 12, help: true },
       { k: 'Hard', d: [4, 5], n: 10, help: true },
-      { k: 'Wincent level', d: [3, 4, 5], n: 8, help: false, topics: ['Probability', 'Expected Value', 'Combinatorics', 'Order Statistics', 'Symmetry', 'Recursion', 'Optimal Strategy', 'Information Problems', 'Variance', 'Distributions', 'Game Theory'] },
-      { k: 'SIG speed level', d: [1, 2, 3], n: 20, help: false, per: 55, topics: ['Mental Maths', 'Finance', 'Data Interpretation', 'Logic', 'Probability', 'Expected Value'] },
+      { k: 'Advanced — No Hints', d: [3, 4, 5], n: 8, help: false, topics: ['Probability', 'Expected Value', 'Combinatorics', 'Order Statistics', 'Symmetry', 'Recursion', 'Optimal Strategy', 'Information Problems', 'Variance', 'Distributions', 'Game Theory'] },
+      { k: 'Speed Round', d: [1, 2, 3], n: 20, help: false, per: 55, topics: ['Mental Maths', 'Finance', 'Data Interpretation', 'Logic', 'Probability', 'Expected Value'] },
       { k: 'Fully mixed', d: [1, 2, 3, 4, 5], n: 15, help: true }
     ];
     const p = el('div', 'panel');
@@ -1775,14 +1789,15 @@
       root.appendChild(sp);
     }
 
-    /* --- Wincent / SIG / IMC / McKinsey prep (quant track only — these mocks are defined
-       around quant-track topic names and have no matching content on other tracks) --- */
+    /* --- Extended Timed Mock (ex-"Wincent") / No-Skip Timed Mock (ex-"SIG") / IMC / McKinsey
+       prep (quant track only — these mocks are defined around quant-track topic names and
+       have no matching content on other tracks) --- */
     const set = S.state.settings;
     if (track === 'quant') {
     const w = el('div', 'panel');
-    w.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'Wincent mock')}<h2>12 questions · 100 minutes</h2></div></div>
+    w.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', mockLabel('Wincent'))}<h2>12 questions · 100 minutes</h2></div></div>
       <p class="small muted">Substantial probability and mathematical reasoning. No hints, no solutions until submission. Target pace is roughly 8 minutes per question.</p>`;
-    const wb = el('button', 'btn primary full', 'Start Wincent mock');
+    const wb = el('button', 'btn primary full', 'Start ' + mockLabel('Wincent'));
     wb.onclick = () => {
       const items = S.buildSession({
         count: 12, difficulties: [3, 4, 5], curatedShare: 0.6,
@@ -1791,8 +1806,10 @@
       });
       if (!items.length) return toast('No questions match that combination.');
       startSession({
+        // testType/finishMock arg stay literally 'Wincent' — the internal identifier
+        // store.js's readiness scoring keys off; only the rendered label changed (mockLabel)
         items, mode: 'Mock', testType: 'Wincent', allowHelp: false, deferFeedback: true,
-        totalSeconds: 100 * 60, title: 'WINCENT MOCK — 12 questions / 100 min',
+        totalSeconds: 100 * 60, title: mockLabel('Wincent').toUpperCase() + ' — 12 questions / 100 min',
         onFinish: (recs, elapsed) => finishMock('Wincent', recs, elapsed)
       });
     };
@@ -1800,11 +1817,11 @@
     root.appendChild(w);
 
     const g = el('div', 'panel');
-    g.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'SIG mock')}<h2>${set.sigMinutes} minutes · no skipping</h2></div></div>
+    g.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', mockLabel('SIG'))}<h2>${set.sigMinutes} minutes · no skipping</h2></div></div>
       <p class="small muted">One total timer. Once an answer is submitted the test moves on and cannot go back. Speed and accuracy both count.</p>
       <label class="field"><span>Questions</span><select id="sig-n">
         ${[15, 20, 25, 30].map((n) => `<option ${n === set.sigCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`;
-    const gb = el('button', 'btn primary full', 'Start SIG mock');
+    const gb = el('button', 'btn primary full', 'Start ' + mockLabel('SIG'));
     gb.onclick = () => {
       const n = +$('#sig-n').value;
       set.sigCount = n; S.save();
@@ -1814,8 +1831,9 @@
       });
       if (!items.length) return toast('No questions match that combination.');
       startSession({
+        // testType/finishMock arg stay literally 'SIG' — same reasoning as Wincent above
         items, mode: 'Mock', testType: 'SIG', allowHelp: false, deferFeedback: true, noSkip: true,
-        totalSeconds: set.sigMinutes * 60, title: 'SIG MOCK — ' + n + ' questions / ' + set.sigMinutes + ' min',
+        totalSeconds: set.sigMinutes * 60, title: mockLabel('SIG').toUpperCase() + ' — ' + n + ' questions / ' + set.sigMinutes + ' min',
         onFinish: (recs, elapsed) => finishMock('SIG', recs, elapsed)
       });
     };
@@ -1873,7 +1891,7 @@
     const hist = S.state.mocks.slice().reverse();
     const h = el('div', 'panel');
     h.innerHTML = '<span class="eyebrow">Mock history</span>' + (hist.length
-      ? '<ul class="list">' + hist.map((m) => `<li>${esc(m.type)} — <strong>${m.score}/${m.total}</strong>
+      ? '<ul class="list">' + hist.map((m) => `<li>${esc(mockLabel(m.type))} — <strong>${m.score}/${m.total}</strong>
           <span class="dim mono-sm" style="float:right">${new Date(m.ts).toLocaleString()} · ${fmtTime(m.timeSec)}${m.rating !== null && m.rating !== undefined ? ' · internal ' + m.rating : ''}</span></li>`).join('') + '</ul>'
       : '<div class="empty">No mocks yet.</div>');
     root.appendChild(h);
@@ -1907,7 +1925,7 @@
     })();
 
     const head = el('div', 'panel');
-    head.innerHTML = `<div class="panel-head"><span class="eyebrow">${esc(r.type)} mock result</span></div>
+    head.innerHTML = `<div class="panel-head"><span class="eyebrow">${esc(mockLabel(r.type))} result</span></div>
       <div class="grid c4">
         <div class="stat accent"><span class="label">Score</span><span class="value">${r.score}/${r.total}</span></div>
         <div class="stat"><span class="label">Time</span><span class="value">${fmtTime(r.elapsed)}</span></div>
@@ -1920,12 +1938,12 @@
     if (r.rating === 100) {
       const ms = el('div', 'milestone');
       ms.innerHTML = `<span class="mic">${icon('flame', 'navicon')}</span>
-        <span class="mtext">Your best <strong>${esc(r.type)}</strong> result yet — ahead of every previous attempt at this mock.</span>`;
+        <span class="mtext">Your best <strong>${esc(mockLabel(r.type))}</strong> result yet — ahead of every previous attempt at this mock.</span>`;
       root.insertBefore(ms, head);
     } else if (r.rating === null || r.rating === undefined) {
       const ms = el('div', 'milestone');
       ms.innerHTML = `<span class="mic">${icon('check', 'navicon')}</span>
-        <span class="mtext">First <strong>${esc(r.type)}</strong> mock recorded — future attempts will be compared against this one.</span>`;
+        <span class="mtext">First <strong>${esc(mockLabel(r.type))}</strong> recorded — future attempts will be compared against this one.</span>`;
       root.insertBefore(ms, head);
     }
 
@@ -2126,8 +2144,8 @@
     e.innerHTML = `<span class="eyebrow">Readiness scores</span>
       <p class="small muted mt-2">Internal progress metrics only. They do not predict employer test outcomes.</p>
       <div class="grid c3 mt-2">
-        <div class="stat accent"><span class="label">Wincent</span><span class="value">${rd.wincent}</span></div>
-        <div class="stat accent"><span class="label">SIG</span><span class="value">${rd.sig}</span></div>
+        <div class="stat accent"><span class="label">${esc(mockLabel('Wincent'))}</span><span class="value">${rd.wincent}</span></div>
+        <div class="stat accent"><span class="label">${esc(mockLabel('SIG'))}</span><span class="value">${rd.sig}</span></div>
         <div class="stat accent"><span class="label">IMC</span><span class="value">${rd.imc}</span></div>
       </div>
       <div class="hr"></div>
@@ -2159,7 +2177,11 @@
       <p class="small muted mt-2">Weights are relative; they are normalised automatically.</p>`;
     Object.keys(set.weights).forEach((test) => {
       const grp = el('div');
-      grp.innerHTML = `<div class="eyebrow mt-3 mb-2">${test.toUpperCase()}</div>`;
+      // display-only: 'test' itself (the settings.weights key store.js's readiness() reads
+      // off) is unchanged — 'wincent'/'sig'/'imc' — only the heading text goes through
+      // mockLabel so this editor doesn't leak the retired exam names either.
+      const testLabel = test === 'wincent' ? mockLabel('Wincent') : test === 'sig' ? mockLabel('SIG') : test.toUpperCase();
+      grp.innerHTML = `<div class="eyebrow mt-3 mb-2">${esc(testLabel)}</div>`;
       Object.keys(set.weights[test]).forEach((k) => {
         const lab = el('label', 'field');
         lab.innerHTML = `<span>${k}</span><input type="number" min="0" max="100" value="${set.weights[test][k]}">`;
@@ -2186,7 +2208,7 @@
     root.appendChild(i);
 
     const sg = el('div', 'panel');
-    sg.innerHTML = `<span class="eyebrow">SIG mock</span>
+    sg.innerHTML = `<span class="eyebrow">${esc(mockLabel('SIG'))}</span>
       <label class="field"><span>Total minutes</span><input type="number" id="sig-min" value="${set.sigMinutes}" min="1" max="120"></label>`;
     $('#sig-min', sg).onchange = (e) => { set.sigMinutes = Math.max(1, +e.target.value || 23); S.save(); toast('Saved.'); };
     root.appendChild(sg);
