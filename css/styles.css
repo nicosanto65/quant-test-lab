@@ -905,47 +905,50 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .concept-title { font-family: var(--font-serif); font-size: 1.08em; font-weight: 600; }
 .acc .trigger { color: var(--muted); font-size: var(--fs-sm); font-style: italic; }
 
-/* Learn: sticky concept index. Report 6, Part 3: with up to ~19 units on screen at once,
-   giving each its OWN colour would either run out of distinguishable hues fast or force
-   assigning a colour meaning that isn't actually meaningful (there's no "unit A is blue"
-   fact anywhere else in the app) — so this reuses the track's own single identity colour
-   (the same --li-* variables the current TRACK_COLOR_VAR already assigns everywhere else,
-   set once on the container) for the ACTIVE unit, and gives the resting pills the same
-   neutral translucent fill .pill-badge.neutral already uses elsewhere for "no assigned
-   colour meaning" badges — a real pill, not a flat grey dot. */
-.learn-index {
-  position: sticky; top: 54px; z-index: 20; background: var(--bg);
-  padding: var(--sp-2) 0; margin-bottom: var(--sp-3); border-bottom: 1px solid var(--line-soft);
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-}
-.learn-index::-webkit-scrollbar { display: none; }
-.learn-index button {
-  flex: none; font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; border: 1px solid var(--line-soft);
-  background: var(--panel-3); color: var(--muted); border-radius: var(--radius-pill); padding: 5px 11px; cursor: pointer;
-  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
-}
-.learn-index button:hover { border-color: var(--li-line, var(--brand-line)); color: var(--text); }
-.learn-index button.on {
-  color: var(--li-c, var(--brand-2, var(--brand)));
-  border-color: var(--li-line, var(--brand-line));
-  background: var(--li-bg, var(--brand-soft));
-  font-weight: 700;
-}
-@media (min-width: 900px) { .learn-index { top: 0; } }
+/* Learn navigation (Report 8, Cambio 1): topic menu -> sector dropdown -> concept page,
+   replacing the old sticky unit-letter index + all-units-stacked-as-accordions layout. */
 
-/* secondary index row: which CONCEPT within the current unit is open, not just the unit */
-.learn-subindex {
-  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-  margin: -6px 0 var(--sp-3); min-height: 22px;
+/* 1a — topic menu: reuses .mode-card/.gradient-card as-is (same grid Mixed practice's mode
+   picker already uses) — .learn-sector-grid only adds the grid wrapper, no new card look. */
+.learn-sector-grid { margin-top: var(--sp-3); }
+
+/* 1b — sector dropdown: a plain, hoverable row per concept — deliberately NOT another
+   gradient-card per row (16+ rows of gradient tint would read as noisy, the same restraint
+   already applied to individual Drill/Mixed practice question cards elsewhere). */
+.sector-concept-list { list-style: none; padding: 0; margin: var(--sp-2) 0 0; }
+.sector-concept-row {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3); border-radius: var(--radius-sm); cursor: pointer;
+  transition: background var(--dur) var(--ease);
 }
-.learn-subindex:empty { display: none; }
-.learn-subindex .sub-label { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--dim); margin-right: 2px; }
-.learn-subindex .sub-dot {
-  width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line);
-  background: var(--panel-2); color: var(--dim); font-family: var(--font-mono); font-size: 10px;
-  cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+.sector-concept-row:hover, .sector-concept-row:focus-visible { background: var(--panel-2); outline: none; }
+.sector-concept-row .sc-idx {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--panel-3);
+  color: var(--dim); font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
 }
-.learn-subindex .sub-dot.active { color: var(--brand); border-color: var(--brand-line); background: var(--brand-soft); font-weight: 700; }
+.sector-concept-row .sc-name { flex: 1; font-size: var(--fs-base); }
+.sector-concept-row .studied-dot {
+  flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--line);
+}
+.sector-concept-row .studied-dot.done { background: var(--accent); }
+
+/* 1c — concept page header: back link + Previous/Next, both full-width and stacked on
+   mobile so neither button gets squeezed illegibly narrow next to the other. */
+.concept-page-head {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: var(--sp-2); margin-bottom: var(--sp-3);
+}
+.concept-page-nav { display: flex; gap: var(--sp-2); }
+.concept-page-nav .concept-nav-btn:disabled { opacity: 0.4; cursor: default; }
+@media (max-width: 520px) {
+  .concept-page-head { flex-direction: column; align-items: stretch; }
+  .concept-page-nav { justify-content: space-between; }
+}
+.concept-page .panel-head .studied-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--line); flex: none;
+}
+.concept-page .panel-head .studied-dot.done { background: var(--accent); }
 
 /* -------------------------- concept flow (Mejora 3) -------------------------- */
 .concept-meta { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--dim); margin-bottom: var(--sp-3); }

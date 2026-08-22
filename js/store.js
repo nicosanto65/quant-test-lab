@@ -26,6 +26,9 @@
     /* Per-track "which view was I on" memory, so switching tracks doesn't always bounce
        back to the Dashboard. UI navigation state only. */
     lastView: {},
+    /* Per-track "where was I inside Learn's topic menu / concept page" memory (Report 8,
+       Cambio 1). See setLearnNav/getLearnNav below. UI navigation state only. */
+    learnNav: {},
     settings: {
       theme: 'dark',
       calculator: true,
@@ -409,11 +412,11 @@
     if (s.total < 5) return { text: 'Start with Learn → Probability fundamentals, then a 10-question Drill at difficulty 2.', action: 'learn' };
     const weak = weakestTopics(1)[0];
     const rec = recognitionAccuracy();
-    if (rec.n < 10) return { text: 'Run a Pattern Recognition set — classification speed is the cheapest score you can buy for Wincent.', action: 'pattern' };
+    if (rec.n < 10) return { text: 'Run a Pattern Recognition set — classification speed is the cheapest score you can buy before a timed mock.', action: 'pattern' };
     if (rec.accuracy < 65) return { text: 'Recognition accuracy is ' + rec.accuracy + '%. Do 15 Pattern Recognition items before more calculation drills.', action: 'pattern' };
     if (weak && weak.accuracy < 60) return { text: weak.key + ' is at ' + weak.accuracy + '%. Read the lesson, then drill 10 questions in it.', action: 'drill', topic: weak.key };
     const mocks = recentMocks(null, 1);
-    if (!mocks.length) return { text: 'Take a full Wincent mock to establish a baseline.', action: 'mock' };
+    if (!mocks.length) return { text: 'Take a full timed mock to establish a baseline.', action: 'mock' };
     return { text: 'Run "Train my weaknesses" for a 12-question adaptive set at level ' + adaptiveLevel() + '.', action: 'adaptive' };
   }
 
@@ -510,6 +513,14 @@
   function setLastView(track, view) { state.lastView[track] = view; }
   function getLastView(track) { return state.lastView[track] || 'dashboard'; }
 
+  /* Report 8, Cambio 1: per-track "where was I in Learn's topic/concept navigation" memory —
+     mirrors lastView above exactly. { sector: unitId|null, concept: conceptId|null }. Purely
+     UI navigation state, same as lastView; never read by grading or content logic, and its
+     absence (older saved states, via DEFAULTS.learnNav = {}) degrades gracefully to "no
+     sector open, show the topic menu". */
+  function setLearnNav(track, nav) { state.learnNav[track] = nav; }
+  function getLearnNav(track) { return state.learnNav[track] || null; }
+
   /* ------------------------------ import / export --------------------------- */
 
   function exportJSON() { return JSON.stringify(state, null, 2); }
@@ -540,7 +551,7 @@
     errorBreakdown, confidenceMatrix, recentMocks, readiness, internalRating,
     weaknessSession, adaptiveLevel, recommendation,
     recordSession, trackSummary, dayStreak, contributionDays, sessionComparison,
-    setLastView, getLastView,
+    setLastView, getLastView, setLearnNav, getLearnNav,
     exportJSON, importJSON, exportCSV
   };
 })(window);
