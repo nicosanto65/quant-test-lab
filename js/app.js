@@ -712,6 +712,15 @@
     const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
     return `<span class="kicker"${style}>${esc(text)}</span>`;
   }
+  /* Report 6, Part 3d: the same icon-box + kicker block-header Learn's content blocks use,
+     for the top-level headers of Drill / Pattern recognition / Mixed practice / Mocks — so
+     these don't read as a plainer style than Learn. Colour is the CURRENT TRACK's own
+     identity (the same TRACK_COLOR_VAR reuse the unit index above just adopted), not a new
+     per-view colour meaning invented for this pass. */
+  function panelHeader(iconName, text) {
+    const colorVar = TRACK_COLOR_VAR[S.activeTrack()] || 'brand';
+    return `<div class="block-header">${iconBox(colorVar, icon(iconName), 'sm')}${kicker(text, colorVar)}</div>`;
+  }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
      icon adds a second, redundant signal on top of a colour meaning that already exists
@@ -1511,7 +1520,7 @@
 
   function viewDrill(root) {
     const p = el('div', 'panel');
-    p.innerHTML = `<div class="panel-head"><span class="eyebrow">Configure drill</span></div>
+    p.innerHTML = `<div class="panel-head">${panelHeader('drill', 'Configure drill')}</div>
       <label class="field"><span>Topic</span><select id="d-topic">
         <option value="">All topics</option>
         ${S.topics().map((t) => `<option ${t === drillState.topic ? 'selected' : ''}>${esc(t)}</option>`).join('')}
@@ -1582,7 +1591,7 @@
   function viewPattern(root) {
     if (patternState.run) return viewPatternRun(root);
     const p = el('div', 'panel');
-    p.innerHTML = `<div class="panel-head"><span class="eyebrow">Pattern recognition</span></div>
+    p.innerHTML = `<div class="panel-head">${panelHeader('pattern', 'Pattern recognition')}</div>
       <p class="small muted">You are not asked to solve the problem. Classify the primary technique before the clock runs out. Recognition accuracy is tracked separately from calculation accuracy.</p>
       <label class="field"><span>Seconds per item</span>
         <select id="p-sec">${[15, 20, 25, 30].map((s) => `<option ${s === patternState.seconds ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
@@ -1693,7 +1702,7 @@
       { k: 'Fully mixed', d: [1, 2, 3, 4, 5], n: 15, help: true }
     ];
     const p = el('div', 'panel');
-    p.innerHTML = '<div class="panel-head"><span class="eyebrow">Mixed practice</span></div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>';
+    p.innerHTML = `<div class="panel-head">${panelHeader('mixed', 'Mixed practice')}</div><p class="small muted">The topic is hidden until you answer, so you have to recognise the structure yourself.</p>`;
     const grid = el('div', 'grid c2');
     modes.forEach((m) => {
       const colorVar = MODE_COLOR[m.k] || 'brand';
@@ -1743,7 +1752,7 @@
     /* --- Speed Sprint (reasoning track) --- */
     if (track === 'reasoning') {
       const sp = el('div', 'panel');
-      sp.innerHTML = `<div class="panel-head"><span class="eyebrow">Speed Sprint</span><h2>Fast numerical / abstract / logical / verbal reasoning</h2></div>
+      sp.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'Speed Sprint')}<h2>Fast numerical / abstract / logical / verbal reasoning</h2></div></div>
         <p class="small muted">One question at a time, a short hard timer per question, no skipping back, no hints. This is the format real speed-reasoning assessments use — the clock is the whole point.</p>
         <label class="field"><span>Seconds per question</span><select id="sprint-sec">
           ${[12, 15, 18, 20].map((s) => `<option ${s === sprintState.seconds ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
@@ -1771,7 +1780,7 @@
     const set = S.state.settings;
     if (track === 'quant') {
     const w = el('div', 'panel');
-    w.innerHTML = `<div class="panel-head"><span class="eyebrow">Wincent mock</span><h2>12 questions · 100 minutes</h2></div>
+    w.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'Wincent mock')}<h2>12 questions · 100 minutes</h2></div></div>
       <p class="small muted">Substantial probability and mathematical reasoning. No hints, no solutions until submission. Target pace is roughly 8 minutes per question.</p>`;
     const wb = el('button', 'btn primary full', 'Start Wincent mock');
     wb.onclick = () => {
@@ -1791,7 +1800,7 @@
     root.appendChild(w);
 
     const g = el('div', 'panel');
-    g.innerHTML = `<div class="panel-head"><span class="eyebrow">SIG mock</span><h2>${set.sigMinutes} minutes · no skipping</h2></div>
+    g.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'SIG mock')}<h2>${set.sigMinutes} minutes · no skipping</h2></div></div>
       <p class="small muted">One total timer. Once an answer is submitted the test moves on and cannot go back. Speed and accuracy both count.</p>
       <label class="field"><span>Questions</span><select id="sig-n">
         ${[15, 20, 25, 30].map((n) => `<option ${n === set.sigCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`;
@@ -1816,7 +1825,7 @@
     /* --- IMC --- */
     const imc = set.imc;
     const i = el('div', 'panel');
-    i.innerHTML = `<div class="panel-head"><span class="eyebrow">IMC mock — provisional</span><h2>${esc(imc.label)}</h2></div>
+    i.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'IMC mock — provisional')}<h2>${esc(imc.label)}</h2></div></div>
       <p class="small muted">The real structure is unknown. This framework is defined by a single JS object
       (<code>settings.imc</code>) and can be edited below or in <code>js/store.js</code> once you have the official practice assessment.</p>
       <ul class="list">${imc.sections.map((sec) =>
@@ -1839,7 +1848,7 @@
 
     /* --- McKinsey-style --- */
     const k = el('div', 'panel');
-    k.innerHTML = `<div class="panel-head"><span class="eyebrow">McKinsey Solve preparation</span><h2>Analogous exercises only</h2></div>
+    k.innerHTML = `<div class="panel-head"><div>${panelHeader('mocks', 'McKinsey Solve preparation')}<h2>Analogous exercises only</h2></div></div>
       <p class="small muted">These are original exercises built to train the same underlying skills. They do not reproduce or imitate any proprietary assessment content, and this section is kept separate from the quantitative trading material.</p>`;
     const krow = el('div', 'btn-row');
     [['A · Data interpretation sprint', ['Data Interpretation'], 10, 75],
