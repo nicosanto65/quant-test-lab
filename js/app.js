@@ -1304,18 +1304,22 @@
       tgrid.appendChild(card);
     });
 
-    /* ---- core stat tiles (scoped to this track) ---- */
+    /* ---- core stat tiles (scoped to this track) ----
+       Visual Rework, Bloque 2e: the headline numbers on the app's flagship screen count up
+       from 0 on mount instead of appearing already-complete (data-count-to + animateCounters,
+       called once per render() pass alongside activateRings — see there for how the two stay
+       in sync with the app's fully-synchronous render). */
     root.appendChild(el('div', 'grid c4', `
-      <div class="stat accent"><span class="label">Accuracy</span><span class="value">${s.accuracy}%</span><span class="sub">${s.correct}/${s.total}</span></div>
-      <div class="stat"><span class="label">Completed</span><span class="value">${s.total}</span><span class="sub">questions</span></div>
-      <div class="stat"><span class="label">Avg time</span><span class="value">${s.avgTime}s</span><span class="sub">per question</span></div>
-      <div class="stat brand"><span class="label">Best run</span><span class="value">${S.summary().bestStreak}</span><span class="sub">consecutive correct</span></div>`));
+      <div class="stat accent"><span class="label">Accuracy</span><span class="value" data-count-to="${s.accuracy}" data-count-suffix="%">0%</span><span class="sub">${s.correct}/${s.total}</span></div>
+      <div class="stat"><span class="label">Completed</span><span class="value" data-count-to="${s.total}">0</span><span class="sub">questions</span></div>
+      <div class="stat"><span class="label">Avg time</span><span class="value" data-count-to="${s.avgTime}" data-count-suffix="s">0s</span><span class="sub">per question</span></div>
+      <div class="stat brand"><span class="label">Best run</span><span class="value" data-count-to="${S.summary().bestStreak}">0</span><span class="sub">consecutive correct</span></div>`));
 
     if (track === 'quant') {
       root.appendChild(el('div', 'grid c3', `
-        <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
-        <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
-        <div class="stat"><span class="label">IMC readiness</span><span class="value">${rd.imc}</span><span class="sub">internal metric</span></div>`));
+        <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value" data-count-to="${rd.wincent}">0</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value" data-count-to="${rd.sig}">0</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">IMC readiness</span><span class="value" data-count-to="${rd.imc}">0</span><span class="sub">internal metric</span></div>`));
     }
 
     const cols = el('div', 'grid c2');
@@ -2377,6 +2381,7 @@
     // instant, jarring replace — and any progress ring just rendered animates in from 0.
     main.classList.remove('view-enter'); void main.offsetWidth; main.classList.add('view-enter');
     activateRings(main);
+    animateCounters(main);
   }
 
   /* ------------------------------- bottom sheets ---------------------------- */
@@ -2512,6 +2517,29 @@
     requestAnimationFrame(() => requestAnimationFrame(() => {
       vals.forEach((v) => { v.style.strokeDashoffset = v.dataset.ringOffset; });
     }));
+  }
+  /* Visual Rework, Bloque 2e: counts a .value span up from 0 to its real number over ~650ms
+     on mount, using data-count-to (+ optional data-count-suffix, e.g. "%" or "s"). Applied to
+     Dashboard's headline stat tiles — the numbers a returning user (or an evaluator sizing up
+     the product) looks at first — rather than retrofitted onto every numeric display in the
+     app; a deliberate, documented scope choice, not an oversight. */
+  function animateCounters(scope) {
+    const els = $$('[data-count-to]', scope || document);
+    if (!els.length) return;
+    const dur = 650;
+    els.forEach((elm) => {
+      const to = parseFloat(elm.dataset.countTo);
+      if (!isFinite(to)) return;
+      const suffix = elm.dataset.countSuffix || '';
+      const start = performance.now();
+      function step(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        elm.textContent = Math.round(to * eased) + suffix;
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
   }
 
   function buildTrackSheet() {

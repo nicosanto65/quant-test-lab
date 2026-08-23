@@ -761,13 +761,25 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 .opt:not(:disabled):active { transform: scale(0.99); }
 .opt .idx { font-family: var(--font-mono); color: var(--dim); margin-right: 9px; }
 .opt.sel { border-color: var(--brand); background: var(--brand-soft); }
-.opt.right { border-color: var(--accent); background: var(--accent-soft); animation: optRight 320ms var(--ease); }
-.opt.wrong { border-color: var(--neg); background: var(--neg-soft); }
-
-@keyframes optRight {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.012); }
-  100% { transform: scale(1); }
+/* Visual Rework, Bloque 2c: render() grades and reveals right/wrong in the same synchronous
+   click handler (submitAnswer is called directly, unchanged — session-driving test scripts
+   click an option and immediately look for the "Next question" button with no wait, so this
+   deliberately does NOT introduce a real async gap there). The "selected, then revealed"
+   SENSATION instead comes purely from how the reveal is painted: the option's border/
+   background holds at the same brand-blue .sel would use for the animation's first ~45%,
+   THEN eases into its real accent/neg verdict colour — a reader sees "this is what I picked"
+   for a beat before the colour resolves to right/wrong, even though the underlying DOM/class
+   state (and any test assertion reading it) is already final the instant the click handler
+   returns. */
+.opt.right { border-color: var(--accent); background: var(--accent-soft); animation: optRevealRight 480ms var(--ease-out); }
+.opt.wrong { border-color: var(--neg); background: var(--neg-soft); animation: optRevealWrong 480ms var(--ease-out); }
+@keyframes optRevealRight {
+  0%, 42% { border-color: var(--brand); background: var(--brand-soft); transform: scale(1.01); }
+  100% { border-color: var(--accent); background: var(--accent-soft); transform: scale(1); }
+}
+@keyframes optRevealWrong {
+  0%, 42% { border-color: var(--brand); background: var(--brand-soft); transform: scale(1.01); }
+  100% { border-color: var(--neg); background: var(--neg-soft); transform: scale(1); }
 }
 
 .qtable { width: 100%; border-collapse: collapse; margin: var(--sp-3) 0; font-family: var(--font-mono); font-size: 12.5px; }
