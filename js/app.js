@@ -624,7 +624,9 @@
     // rest of this set) — a forward-arrow-in-circle for "When to use it" (apply/put into
     // action) and a lightbulb for "Intuition" (the plain-language why behind the formula).
     compass: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5 14 12l-4 3.5"/>',
-    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>'
+    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>',
+    // Visual Rework, Bloque 4: a closed padlock for the locked/premium content component.
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.3" fill="currentColor" stroke="none"/>'
   };
   const TRACK_ICONS = {
     quant: '<path d="M3 17 9 9l4 4 8-9"/><path d="M15 3.5h4.5V8"/>',
@@ -732,6 +734,27 @@
      name everywhere, not two names for the same thing depending on when it was recorded. */
   const MOCK_LABEL = { Wincent: 'Extended Timed Mock', SIG: 'No-Skip Timed Mock' };
   function mockLabel(key) { return MOCK_LABEL[key] || key;
+  }
+  /* Visual Rework, Bloque 4: the reusable "locked/premium" overlay — PURELY visual, no
+     entitlement logic. `blurredHtml` is the real card content to render dimmed underneath;
+     the overlay itself (lock icon, "Premium" pill, Unlock CTA) sits on top via .locked-card's
+     positioning. onUnlock defaults to a no-op toast, exactly as the brief specifies ("a
+     placeholder/no-op for now") — wiring it to a real purchase/auth flow is a future task,
+     not this one. */
+  function lockedOverlay(opts) {
+    opts = opts || {};
+    return `<div class="locked-overlay">
+      <span class="lock-icon-box">${icon('lock')}</span>
+      ${pillBadge('accent', icon('lock'), 'Premium')}
+      <span class="locked-title">${esc(opts.title || 'Unlock to access')}</span>
+      ${opts.sub ? `<span class="locked-sub">${esc(opts.sub)}</span>` : ''}
+      <button type="button" class="locked-cta" data-locked-cta>${esc(opts.ctaLabel || 'Unlock')}</button>
+    </div>`;
+  }
+  function wireLockedCtas(scope) {
+    $$('[data-locked-cta]', scope || document).forEach((btn) => {
+      btn.onclick = (e) => { e.stopPropagation(); toast('Premium unlocking isn\'t connected yet — coming soon.'); };
+    });
   }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
@@ -1303,6 +1326,20 @@
       };
       tgrid.appendChild(card);
     });
+    // Visual Rework, Bloque 4: a live demonstration of the locked/premium component — an
+    // always-present 7th card, clearly additive (none of the 6 real tracks are restricted by
+    // this or anything else) so the design system has a real, screenshottable example of
+    // what locked content looks like once a future task wires up real entitlement logic.
+    const lockedDemo = el('div', 'track-card gradient-card tone-warm locked-card');
+    lockedDemo.innerHTML = `
+      <div class="locked-blurred">
+        <span class="track-card-top">${iconBox('accent', icon('flame'), 'lg')}</span>
+        <span class="track-card-title">More tracks</span>
+        <span class="track-card-desc">Additional specialised tracks and mock formats.</span>
+      </div>
+      ${lockedOverlay({ title: 'More tracks', sub: 'Unlocked with Premium', ctaLabel: 'Unlock' })}`;
+    tgrid.appendChild(lockedDemo);
+    wireLockedCtas(tgrid);
 
     /* ---- core stat tiles (scoped to this track) ----
        Visual Rework, Bloque 2e: the headline numbers on the app's flagship screen count up
