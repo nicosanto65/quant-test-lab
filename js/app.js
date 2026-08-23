@@ -1202,20 +1202,31 @@
     const streak = S.dayStreak();
 
     /* ---- first-run onboarding (global, not per-track — disappears the moment the
-       user has done ANYTHING anywhere, never blocks the primary action below it) ---- */
+       user has done ANYTHING anywhere, never blocks the primary action below it) ----
+       Visual Rework, Bloque 3: this is very plausibly the first screen a brand-new visitor
+       (or an evaluator sizing up the product) ever sees, so its track picker gets the SAME
+       large gradient-card + icon-box treatment as "Progress by track" below rather than a
+       plain text chip list — a first-time visitor and a returning one now land on visually
+       equivalent hero material, not two different-looking track pickers depending on when
+       they show up. */
     if (!S.state.attempts.length && !S.state.sessions.length) {
-      const ob = el('div', 'panel');
-      ob.style.borderColor = 'var(--brand-line)';
-      ob.innerHTML = `<span class="eyebrow">Six tracks, one offline lab</span>
-        <p class="mt-2">This runs entirely on your device — no account, no network calls after
-        the first load. Pick a track below (quant trading, reasoning speed, IB, AM, WM or consulting),
-        then use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong> for
-        practice. Your progress, streak and history are saved locally and never leave this browser.</p>
-        <div class="chips mt-2">
-          ${S.tracks().map((t) => `<span class="chip" data-ob-track="${esc(t.id)}">${esc(t.label)}</span>`).join('')}
-        </div>`;
-      ob.querySelectorAll('[data-ob-track]').forEach((c) => {
-        c.onclick = () => { S.setTrack(c.dataset.obTrack); render(); buildTrackPill(); };
+      const ob = el('div', 'panel onboarding-panel');
+      ob.innerHTML = `<span class="kicker" style="color:var(--brand-2)">Six tracks, one offline lab</span>
+        <h2 style="font-size:var(--fs-2xl);font-family:var(--font-display);margin:2px 0 8px">Pick a track to start.</h2>
+        <p class="mt-2">Runs entirely on your device — no account, no network calls after the
+        first load. Use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong>
+        for practice. Progress, streak and history are saved locally and never leave this browser.</p>
+        <div class="grid c3 mt-3" id="ob-track-grid"></div>`;
+      const obGrid = $('#ob-track-grid', ob);
+      S.tracks().forEach((t) => {
+        const colorVar = TRACK_COLOR_VAR[t.id];
+        const card = el('button', 'track-card gradient-card' + (t.id === track ? ' active' : ''));
+        card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+        card.innerHTML = `${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          <span class="track-card-title">${esc(t.label)}</span>
+          <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>`;
+        card.onclick = () => { S.setTrack(t.id); render(); buildTrackPill(); };
+        obGrid.appendChild(card);
       });
       root.appendChild(ob);
     }
@@ -1280,7 +1291,7 @@
       card.innerHTML = `
         <span class="track-card-top">
           ${iconBox(colorVar, trackIcon(t.id), 'lg')}
-          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
+          ${ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false })}
         </span>
         <span class="track-card-title">${esc(t.label)}</span>
         <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
@@ -2360,6 +2371,12 @@
     const moreBtn = $('#more-tab');
     if (moreBtn) moreBtn.classList.toggle('active', VIEWS.some((v) => v.id === current && v.group === 'secondary'));
     if (view !== 'runner' && view !== 'pattern') stopTick();
+    // Visual Rework, Bloque 2b/2e: every view swap gets the same quiet fade-in + slide-up the
+    // rest of the app already uses for individual reveals (verdict banners, expand-cards),
+    // now applied once at the container level so a full content swap doesn't feel like an
+    // instant, jarring replace — and any progress ring just rendered animates in from 0.
+    main.classList.remove('view-enter'); void main.offsetWidth; main.classList.add('view-enter');
+    activateRings(main);
   }
 
   /* ------------------------------- bottom sheets ---------------------------- */
@@ -2475,15 +2492,26 @@
     // colorVar: an explicit "--<name>" CSS var to stroke the value arc with (e.g. a track's
     // own identity colour) — overrides the .accent class-based colour when supplied.
     const strokeStyle = opts.colorVar ? ` style="stroke:var(--${opts.colorVar})"` : '';
+    // Visual Rework, Bloque 2e: rings mount at 0% (dashoffset = full circumference) and carry
+    // their real target in data-ring-offset; activateRings() (called once per render() pass)
+    // flips them to the real value a frame later so the CSS transition on .ring .val actually
+    // plays, instead of the ring appearing already-complete on first paint.
     return `<span class="ring-label" style="width:${size}px;height:${size}px">
       <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
         <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"/>
         <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"
-          stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
+          stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}" data-ring-offset="${off.toFixed(1)}"
           transform="rotate(-90 ${size / 2} ${size / 2})"${strokeStyle}/>
       </svg>
       ${opts.showNum === false ? '' : `<span class="num" style="font-size:${Math.max(10, size * 0.28)}px">${Math.round(v)}</span>`}
     </span>`;
+  }
+  function activateRings(scope) {
+    const vals = $$('.ring .val[data-ring-offset]', scope || document);
+    if (!vals.length) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      vals.forEach((v) => { v.style.strokeDashoffset = v.dataset.ringOffset; });
+    }));
   }
 
   function buildTrackSheet() {
