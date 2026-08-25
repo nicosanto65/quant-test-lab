@@ -86,7 +86,16 @@
   --text: #E6EBF0;
   --text-color: var(--text);
   --muted: #8996A5;
-  --dim: #57646F;
+  /* Skill audit (ui-ux-pro-max, WCAG 4.5:1 check): the original #57646F failed contrast
+     against every panel shade it's actually rendered on (2.9-3.2:1) — real small text
+     (eyebrow labels, stat labels, kbd hints) was below the readable threshold. Lightened
+     just enough to clear 4.5:1 against panel-3 (the worst case) with margin; this leaves
+     --dim very close to --muted in raw value — there simply isn't headroom for a third,
+     dimmer-still shade that also passes 4.5:1, since --muted itself only cleared the floor
+     by ~1.1-1.4 ratio units. The two stay visually distinguishable through their existing
+     typographic treatment (uppercase+tracking, italic, monospace) rather than through hue
+     alone. */
+  --dim: #84929E;
 
   /* brand — desaturated steel navy */
   --brand: #7FA6C9;
@@ -112,7 +121,9 @@
   --nav-bg: #16386B;
   --nav-bg-2: #1E4680;
   --nav-text: rgba(255, 255, 255, 0.86);
-  --nav-text-dim: rgba(255, 255, 255, 0.52);
+  /* Skill audit: 0.52 alpha gave inactive sidenav/tabbar labels 4.33:1 against --nav-bg,
+     just under the 4.5:1 floor. Raised to the minimum alpha that clears it with margin. */
+  --nav-text-dim: rgba(255, 255, 255, 0.56);
   --nav-border: rgba(255, 255, 255, 0.12);
   --nav-hover-bg: rgba(255, 255, 255, 0.08);
   --nav-active-bg: #FFFFFF;
@@ -123,6 +134,13 @@
   --pos-soft: rgba(95, 174, 133, 0.14);
   --pos-line: rgba(95, 174, 133, 0.4);
   --pos-ink: #0D2016;
+  /* Skill audit: --pos as TEXT on its own -soft background (difficulty-1 badges via
+     diffPill/pillBadge) measured 4.49:1 against the composited card surface — just under
+     4.5:1. --pos itself stays untouched (borders/bar-fills/icon-boxes all keep using it);
+     -2 is the same "slightly stronger, for text" variant --brand/--accent/--info/--teal
+     already have, and pillBadge()/kicker() already prefer `var(--X-2, var(--X))` — so this
+     alone fixes every real render site with no JS change. */
+  --pos-2: #66B18A;
   --neg: #D08886;
   --neg-soft: rgba(208, 136, 134, 0.14);
   --neg-line: rgba(208, 136, 134, 0.4);
@@ -172,6 +190,9 @@
   --track-consulting-soft: rgba(201, 143, 92, 0.14);
   --track-consulting-line: rgba(201, 143, 92, 0.4);
   --track-consulting-ink: #241407;
+  /* Skill audit: same "-2 for text" fix as --pos-2 above — Consulting's own accuracy/
+     progress pill-badge text measured 4.38:1 on its composited card surface. */
+  --track-consulting-2: #CD9767;
 
   /* Visual Rework, Bloque 1c: real elevation scale. Previously only shadow-sm/shadow
      existed and appeared in exactly 2 rules app-wide — every panel/card sat flush against
@@ -206,7 +227,10 @@ html[data-theme="light"] {
   --text: #1A1D23;
   --text-color: var(--text);
   --muted: #5C6570;
-  --dim: #939BA4;
+  /* Skill audit (ui-ux-pro-max, WCAG 4.5:1 check): #939BA4 measured 2.3-2.8:1 against every
+     panel shade it's actually used on (eyebrow, kbd, stat labels, micro-label, formula-label)
+     — see the matching dark-theme comment above for why this lands close to --muted. */
+  --dim: #5E6770;
 
   --brand: #2E4A66;
   --brand-2: #3E5F82;
@@ -217,8 +241,15 @@ html[data-theme="light"] {
   --formula-line: var(--brand-line);
 
   --accent: #A9822E;
-  --accent-2: #8E6D22;
-  --accent-ink: #FFFCF5;
+  /* Skill audit: #8E6D22 measured 4.17:1 as verdict.ok's text-on-accent-soft. */
+  --accent-2: #846520;
+  /* Skill audit: light mode's --accent (#A9822E) is dark/saturated enough that white ink
+     (the old #FFFCF5) only reached 3.46:1 on .btn.primary/.locked-cta text — below 4.5:1 for
+     normal-weight text at button size. Dark theme's own --accent-ink was ALREADY dark
+     (#211A08, correct for its lighter accent) — light mode's accent needed the same
+     direction, not the opposite. Reusing that exact dark-theme value: same hue family, and
+     it clears 4.5:1 against light's accent with comfortable margin (4.9:1). */
+  --accent-ink: #211A08;
   --accent-soft: #F6EEDC;
   --accent-line: #D9C494;
 
@@ -228,7 +259,11 @@ html[data-theme="light"] {
   --nav-bg: #2563EB;
   --nav-bg-2: #1D4ED8;
   --nav-text: rgba(255, 255, 255, 0.92);
-  --nav-text-dim: rgba(255, 255, 255, 0.62);
+  /* Skill audit: 0.62 alpha gave inactive nav labels 2.95:1 against this saturated blue —
+     well under 4.5:1. Raised to the minimum alpha that clears it with margin; the active/
+     inactive distinction is still carried mainly by the active item's solid white pill
+     background, not by this text-alpha difference alone, so this doesn't flatten that. */
+  --nav-text-dim: rgba(255, 255, 255, 0.93);
   --nav-border: rgba(255, 255, 255, 0.16);
   --nav-hover-bg: rgba(255, 255, 255, 0.12);
   --nav-active-bg: #FFFFFF;
@@ -238,6 +273,8 @@ html[data-theme="light"] {
   --pos-soft: #E4F1EA;
   --pos-line: #A9D6BE;
   --pos-ink: #FFFFFF;
+  /* Skill audit: see the dark-theme --pos-2 comment above — same fix, same reasoning. */
+  --pos-2: #2E7651;
   --neg: #AB4C4A;
   --neg-soft: #F5E7E6;
   --neg-line: #E3BDBB;
@@ -254,6 +291,10 @@ html[data-theme="light"] {
   --warn-soft: #F6EFDC;
   --warn-line: #E3CE97;
   --warn-ink: #FFFFFF;
+  /* Skill audit: --warn as text (the "Common trap" block-header kicker) measured 3.51:1 on
+     warn-soft — well under 4.5:1; unlike dark mode (where --warn already passes at 4.75:1),
+     light mode needed its own darker text-only variant. */
+  --warn-2: #82661A;
 
   --teal: #2B8A82;
   --teal-2: #1F6F68;
@@ -272,6 +313,8 @@ html[data-theme="light"] {
   --track-consulting-soft: #F6EAE0;
   --track-consulting-line: #E8C7AC;
   --track-consulting-ink: #FFFFFF;
+  /* Skill audit: see the dark-theme --track-consulting-2 comment above — same fix. */
+  --track-consulting-2: #99562C;
 
   --shadow-sm: 0 1px 2px rgba(30, 40, 50, 0.06);
   --shadow: 0 8px 24px rgba(30, 40, 50, 0.08);
