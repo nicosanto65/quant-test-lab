@@ -95,11 +95,15 @@ anyway as defense-in-depth.
 drawn through the single `icon(name)` → `ICONS` map helper as inline `<svg>` paths (confirmed in
 prior reports and re-confirmed here) — no separate icon system exists to have missed.
 
-One accessibility refinement surfaced by the skill's icon-domain guidance (not an emoji issue,
-a labeling one): decorative icons sitting beside their own visible text label should carry
-`aria-hidden="true"` so screen readers don't announce a redundant, unlabeled glyph. `topicPill`'s
-icon already does this (`aria-hidden="true"` on its `<svg>`); most others (icon-box, pill-badge,
-sidenav/tabbar nav icons) do not yet. See Step 3f.
+Checked against the skill's icon-domain guidance (decorative icons beside their own visible text
+label should carry `aria-hidden="true"`): every `<svg>` produced by `icon()`, `trackIcon()`, and
+the two inline icon strings already sets `aria-hidden="true"` — a `grep '<svg'` across the whole
+file confirms it. Two real gaps *were* found by the same sweep, both fixed in Step 3f: `barChart()`
+had neither `aria-hidden` nor a `role`/`aria-label` (a genuinely meaningful chart with zero
+accessible summary — now `role="img" aria-label="..."`, matching the sibling `lineChart()`
+function that already did this correctly), and the progress-`ring()` SVG had neither (now
+`aria-hidden="true"`, since every call site already shows the same percentage as visible text
+elsewhere on the card).
 
 ## 7. Visible focus states for keyboard navigation
 
@@ -122,6 +126,6 @@ reliable keyboard-focus indicator on its own. See Step 3f.
 | 3a | Color contrast | **FAIL** (10 combos, both themes) | Darken `--dim`, `--nav-text-dim`, `accent-2`, `--pos`, `--warn`, `--teal`, `--track-consulting` where used as text-on-soft; fix `accent-ink`-on-`accent` button text |
 | 3b | Cursor/hover | PASS | No change needed |
 | 3c | `prefers-reduced-motion` | PASS | No change needed |
-| 3d | Badge/chip wrap | PASS (verified live) | One small defensive hardening only |
+| 3d | Badge/chip wrap | PASS (verified live) | Added `title` on `pillBadge`/`topicPill` for full-text exposure as defense-in-depth |
 | 3e | Emoji icons | PASS | No change needed |
-| 3f | Focus states | Mostly PASS, 1 gap | Restore a real focus indicator on `.sector-concept-row`; add `aria-hidden` to remaining decorative icons |
+| 3f | Focus states | Mostly PASS, 1 gap | Restored a real focus indicator on `.sector-concept-row`; added `role`/`aria-label` to `barChart()` and `aria-hidden` to the progress ring SVG |

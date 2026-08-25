@@ -1107,7 +1107,13 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   padding: var(--sp-3); border-radius: var(--radius-sm); cursor: pointer;
   transition: background var(--dur) var(--ease);
 }
-.sector-concept-row:hover, .sector-concept-row:focus-visible { background: var(--panel-2); outline: none; }
+.sector-concept-row:hover { background: var(--panel-2); }
+/* Skill audit: this rule used to fold :focus-visible into the same hover rule and set
+   outline:none with only that same subtle background shift as a substitute — exactly the
+   "removed the outline without a real replacement" anti-pattern the skill's own focus-state
+   guidance calls out. Split out so keyboard focus keeps the global :focus-visible ring
+   (styles.css bottom) instead of losing it. */
+.sector-concept-row:focus-visible { background: var(--panel-2); }
 .sector-concept-row .sc-idx {
   flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--panel-3);
   color: var(--dim); font-family: var(--font-mono); font-size: 11px; font-weight: 600;
