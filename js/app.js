@@ -624,7 +624,9 @@
     // rest of this set) — a forward-arrow-in-circle for "When to use it" (apply/put into
     // action) and a lightbulb for "Intuition" (the plain-language why behind the formula).
     compass: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5 14 12l-4 3.5"/>',
-    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>'
+    bulb: '<path d="M12 3.2a5.8 5.8 0 0 0-3.3 10.6c.5.35.8.9.8 1.5V16h5v-.7c0-.6.3-1.15.8-1.5A5.8 5.8 0 0 0 12 3.2z"/><path d="M9.7 19h4.6M10.6 21.3h2.8"/>',
+    // Visual Rework, Bloque 4: a closed padlock for the locked/premium content component.
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.3" fill="currentColor" stroke="none"/>'
   };
   const TRACK_ICONS = {
     quant: '<path d="M3 17 9 9l4 4 8-9"/><path d="M15 3.5h4.5V8"/>',
@@ -700,14 +702,18 @@
     return `<span class="${cls}" style="--ib-bg:var(--${colorVar});--ib-fg:var(--${colorVar}-ink)">${iconSvg}</span>`;
   }
   function pillBadge(colorVar, iconSvg, text) {
-    return `<span class="pill-badge" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
+    // Skill audit (badge/chip wrap guidance): a badge's label is meant to stay on one line
+    // (see .pill-badge's white-space:nowrap) rather than wrap internally — title exposes the
+    // full text to a pointer/keyboard/touch user even in a hypothetical future case where a
+    // longer string gets visually truncated, matching the skill's exact "expose full text" Do.
+    return `<span class="pill-badge" title="${esc(text)}" style="--pb-bg:var(--${colorVar}-soft);--pb-fg:var(--${colorVar}-2, var(--${colorVar}))">${iconSvg}<span>${esc(text)}</span></span>`;
   }
   const TAG_ICON = '<path d="M12.5 2.5h6a2 2 0 0 1 2 2v6L11 20 2.5 11.5 12.5 2.5z"/><circle cx="16.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/>';
   // topic/subtopic have no assigned colour anywhere in the app (unlike difficulty) — a
   // neutral icon+pill keeps the same STRUCTURE (icon, translucent fill, full pill) the
   // reference established, without inventing a colour meaning that doesn't exist.
   function topicPill(text) {
-    return `<span class="pill-badge neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TAG_ICON}</svg><span>${esc(text)}</span></span>`;
+    return `<span class="pill-badge neutral" title="${esc(text)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TAG_ICON}</svg><span>${esc(text)}</span></span>`;
   }
   function kicker(text, colorVar) {
     const style = colorVar ? ` style="color:var(--${colorVar}-2, var(--${colorVar}))"` : '';
@@ -732,6 +738,27 @@
      name everywhere, not two names for the same thing depending on when it was recorded. */
   const MOCK_LABEL = { Wincent: 'Extended Timed Mock', SIG: 'No-Skip Timed Mock' };
   function mockLabel(key) { return MOCK_LABEL[key] || key;
+  }
+  /* Visual Rework, Bloque 4: the reusable "locked/premium" overlay — PURELY visual, no
+     entitlement logic. `blurredHtml` is the real card content to render dimmed underneath;
+     the overlay itself (lock icon, "Premium" pill, Unlock CTA) sits on top via .locked-card's
+     positioning. onUnlock defaults to a no-op toast, exactly as the brief specifies ("a
+     placeholder/no-op for now") — wiring it to a real purchase/auth flow is a future task,
+     not this one. */
+  function lockedOverlay(opts) {
+    opts = opts || {};
+    return `<div class="locked-overlay">
+      <span class="lock-icon-box">${icon('lock')}</span>
+      ${pillBadge('accent', icon('lock'), 'Premium')}
+      <span class="locked-title">${esc(opts.title || 'Unlock to access')}</span>
+      ${opts.sub ? `<span class="locked-sub">${esc(opts.sub)}</span>` : ''}
+      <button type="button" class="locked-cta" data-locked-cta>${esc(opts.ctaLabel || 'Unlock')}</button>
+    </div>`;
+  }
+  function wireLockedCtas(scope) {
+    $$('[data-locked-cta]', scope || document).forEach((btn) => {
+      btn.onclick = (e) => { e.stopPropagation(); toast('Premium unlocking isn\'t connected yet — coming soon.'); };
+    });
   }
   /* three difficulty TIERS (not five distinct icons) — matches the existing d1-d5 colour
      grouping exactly (d1 alone = pos green, d2+d3 = brand blue, d4+d5 = neg red), so the new
@@ -837,7 +864,7 @@
     }).join('');
     const labels = rows.length <= 8 ? rows.map((r, i) =>
       `<text x="${(pad + i * bw + bw / 2).toFixed(1)}" y="${h - 6}" fill="var(--dim)" font-size="7" font-family="monospace" text-anchor="middle">${esc(String(r.key).slice(0, 9))}</text>`).join('') : '';
-    return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${bars}${labels}</svg>
+    return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(opts.label || 'chart')}">${bars}${labels}</svg>
       <div class="chart-legend">${esc(opts.label || '')}</div>`;
   }
 
@@ -1202,20 +1229,31 @@
     const streak = S.dayStreak();
 
     /* ---- first-run onboarding (global, not per-track — disappears the moment the
-       user has done ANYTHING anywhere, never blocks the primary action below it) ---- */
+       user has done ANYTHING anywhere, never blocks the primary action below it) ----
+       Visual Rework, Bloque 3: this is very plausibly the first screen a brand-new visitor
+       (or an evaluator sizing up the product) ever sees, so its track picker gets the SAME
+       large gradient-card + icon-box treatment as "Progress by track" below rather than a
+       plain text chip list — a first-time visitor and a returning one now land on visually
+       equivalent hero material, not two different-looking track pickers depending on when
+       they show up. */
     if (!S.state.attempts.length && !S.state.sessions.length) {
-      const ob = el('div', 'panel');
-      ob.style.borderColor = 'var(--brand-line)';
-      ob.innerHTML = `<span class="eyebrow">Six tracks, one offline lab</span>
-        <p class="mt-2">This runs entirely on your device — no account, no network calls after
-        the first load. Pick a track below (quant trading, reasoning speed, IB, AM, WM or consulting),
-        then use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong> for
-        practice. Your progress, streak and history are saved locally and never leave this browser.</p>
-        <div class="chips mt-2">
-          ${S.tracks().map((t) => `<span class="chip" data-ob-track="${esc(t.id)}">${esc(t.label)}</span>`).join('')}
-        </div>`;
-      ob.querySelectorAll('[data-ob-track]').forEach((c) => {
-        c.onclick = () => { S.setTrack(c.dataset.obTrack); render(); buildTrackPill(); };
+      const ob = el('div', 'panel onboarding-panel');
+      ob.innerHTML = `<span class="kicker" style="color:var(--brand-2)">Six tracks, one offline lab</span>
+        <h2 style="font-size:var(--fs-2xl);font-family:var(--font-display);margin:2px 0 8px">Pick a track to start.</h2>
+        <p class="mt-2">Runs entirely on your device — no account, no network calls after the
+        first load. Use <strong>Learn</strong> for theory or jump straight into <strong>Drill</strong>
+        for practice. Progress, streak and history are saved locally and never leave this browser.</p>
+        <div class="grid c3 mt-3" id="ob-track-grid"></div>`;
+      const obGrid = $('#ob-track-grid', ob);
+      S.tracks().forEach((t) => {
+        const colorVar = TRACK_COLOR_VAR[t.id];
+        const card = el('button', 'track-card gradient-card' + (t.id === track ? ' active' : ''));
+        card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
+        card.innerHTML = `${iconBox(colorVar, trackIcon(t.id), 'lg')}
+          <span class="track-card-title">${esc(t.label)}</span>
+          <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>`;
+        card.onclick = () => { S.setTrack(t.id); render(); buildTrackPill(); };
+        obGrid.appendChild(card);
       });
       root.appendChild(ob);
     }
@@ -1280,7 +1318,7 @@
       card.innerHTML = `
         <span class="track-card-top">
           ${iconBox(colorVar, trackIcon(t.id), 'lg')}
-          ${started ? ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false }) : ''}
+          ${ring(sum.accuracy, { size: 32, stroke: 3, colorVar, showNum: false })}
         </span>
         <span class="track-card-title">${esc(t.label)}</span>
         <span class="track-card-desc">${esc(TRACK_TAGLINE[t.id] || '')}</span>
@@ -1292,19 +1330,37 @@
       };
       tgrid.appendChild(card);
     });
+    // Visual Rework, Bloque 4: a live demonstration of the locked/premium component — an
+    // always-present 7th card, clearly additive (none of the 6 real tracks are restricted by
+    // this or anything else) so the design system has a real, screenshottable example of
+    // what locked content looks like once a future task wires up real entitlement logic.
+    const lockedDemo = el('div', 'track-card gradient-card tone-warm locked-card');
+    lockedDemo.innerHTML = `
+      <div class="locked-blurred">
+        <span class="track-card-top">${iconBox('accent', icon('flame'), 'lg')}</span>
+        <span class="track-card-title">More tracks</span>
+        <span class="track-card-desc">Additional specialised tracks and mock formats.</span>
+      </div>
+      ${lockedOverlay({ title: 'More tracks', sub: 'Unlocked with Premium', ctaLabel: 'Unlock' })}`;
+    tgrid.appendChild(lockedDemo);
+    wireLockedCtas(tgrid);
 
-    /* ---- core stat tiles (scoped to this track) ---- */
+    /* ---- core stat tiles (scoped to this track) ----
+       Visual Rework, Bloque 2e: the headline numbers on the app's flagship screen count up
+       from 0 on mount instead of appearing already-complete (data-count-to + animateCounters,
+       called once per render() pass alongside activateRings — see there for how the two stay
+       in sync with the app's fully-synchronous render). */
     root.appendChild(el('div', 'grid c4', `
-      <div class="stat accent"><span class="label">Accuracy</span><span class="value">${s.accuracy}%</span><span class="sub">${s.correct}/${s.total}</span></div>
-      <div class="stat"><span class="label">Completed</span><span class="value">${s.total}</span><span class="sub">questions</span></div>
-      <div class="stat"><span class="label">Avg time</span><span class="value">${s.avgTime}s</span><span class="sub">per question</span></div>
-      <div class="stat brand"><span class="label">Best run</span><span class="value">${S.summary().bestStreak}</span><span class="sub">consecutive correct</span></div>`));
+      <div class="stat accent"><span class="label">Accuracy</span><span class="value" data-count-to="${s.accuracy}" data-count-suffix="%">0%</span><span class="sub">${s.correct}/${s.total}</span></div>
+      <div class="stat"><span class="label">Completed</span><span class="value" data-count-to="${s.total}">0</span><span class="sub">questions</span></div>
+      <div class="stat"><span class="label">Avg time</span><span class="value" data-count-to="${s.avgTime}" data-count-suffix="s">0s</span><span class="sub">per question</span></div>
+      <div class="stat brand"><span class="label">Best run</span><span class="value" data-count-to="${S.summary().bestStreak}">0</span><span class="sub">consecutive correct</span></div>`));
 
     if (track === 'quant') {
       root.appendChild(el('div', 'grid c3', `
-        <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value">${rd.wincent}</span><span class="sub">internal metric</span></div>
-        <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value">${rd.sig}</span><span class="sub">internal metric</span></div>
-        <div class="stat"><span class="label">IMC readiness</span><span class="value">${rd.imc}</span><span class="sub">internal metric</span></div>`));
+        <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value" data-count-to="${rd.wincent}">0</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value" data-count-to="${rd.sig}">0</span><span class="sub">internal metric</span></div>
+        <div class="stat"><span class="label">IMC readiness</span><span class="value" data-count-to="${rd.imc}">0</span><span class="sub">internal metric</span></div>`));
     }
 
     const cols = el('div', 'grid c2');
@@ -2360,6 +2416,13 @@
     const moreBtn = $('#more-tab');
     if (moreBtn) moreBtn.classList.toggle('active', VIEWS.some((v) => v.id === current && v.group === 'secondary'));
     if (view !== 'runner' && view !== 'pattern') stopTick();
+    // Visual Rework, Bloque 2b/2e: every view swap gets the same quiet fade-in + slide-up the
+    // rest of the app already uses for individual reveals (verdict banners, expand-cards),
+    // now applied once at the container level so a full content swap doesn't feel like an
+    // instant, jarring replace — and any progress ring just rendered animates in from 0.
+    main.classList.remove('view-enter'); void main.offsetWidth; main.classList.add('view-enter');
+    activateRings(main);
+    animateCounters(main);
   }
 
   /* ------------------------------- bottom sheets ---------------------------- */
@@ -2475,15 +2538,49 @@
     // colorVar: an explicit "--<name>" CSS var to stroke the value arc with (e.g. a track's
     // own identity colour) — overrides the .accent class-based colour when supplied.
     const strokeStyle = opts.colorVar ? ` style="stroke:var(--${opts.colorVar})"` : '';
+    // Visual Rework, Bloque 2e: rings mount at 0% (dashoffset = full circumference) and carry
+    // their real target in data-ring-offset; activateRings() (called once per render() pass)
+    // flips them to the real value a frame later so the CSS transition on .ring .val actually
+    // plays, instead of the ring appearing already-complete on first paint.
     return `<span class="ring-label" style="width:${size}px;height:${size}px">
-      <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <svg class="ring${opts.accent ? ' accent' : ''}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
         <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"/>
         <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${sw}"
-          stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
+          stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}" data-ring-offset="${off.toFixed(1)}"
           transform="rotate(-90 ${size / 2} ${size / 2})"${strokeStyle}/>
       </svg>
       ${opts.showNum === false ? '' : `<span class="num" style="font-size:${Math.max(10, size * 0.28)}px">${Math.round(v)}</span>`}
     </span>`;
+  }
+  function activateRings(scope) {
+    const vals = $$('.ring .val[data-ring-offset]', scope || document);
+    if (!vals.length) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      vals.forEach((v) => { v.style.strokeDashoffset = v.dataset.ringOffset; });
+    }));
+  }
+  /* Visual Rework, Bloque 2e: counts a .value span up from 0 to its real number over ~650ms
+     on mount, using data-count-to (+ optional data-count-suffix, e.g. "%" or "s"). Applied to
+     Dashboard's headline stat tiles — the numbers a returning user (or an evaluator sizing up
+     the product) looks at first — rather than retrofitted onto every numeric display in the
+     app; a deliberate, documented scope choice, not an oversight. */
+  function animateCounters(scope) {
+    const els = $$('[data-count-to]', scope || document);
+    if (!els.length) return;
+    const dur = 650;
+    els.forEach((elm) => {
+      const to = parseFloat(elm.dataset.countTo);
+      if (!isFinite(to)) return;
+      const suffix = elm.dataset.countSuffix || '';
+      const start = performance.now();
+      function step(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        elm.textContent = Math.round(to * eased) + suffix;
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
   }
 
   function buildTrackSheet() {
