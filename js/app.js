@@ -1247,7 +1247,7 @@
       const obGrid = $('#ob-track-grid', ob);
       S.tracks().forEach((t) => {
         const colorVar = TRACK_COLOR_VAR[t.id];
-        const card = el('button', 'track-card gradient-card' + (t.id === track ? ' active' : ''));
+        const card = el('button', 'track-card gradient-card reveal-on-scroll' + (t.id === track ? ' active' : ''));
         card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
         card.innerHTML = `${iconBox(colorVar, trackIcon(t.id), 'lg')}
           <span class="track-card-title">${esc(t.label)}</span>
@@ -1259,7 +1259,7 @@
     }
 
     /* ---- hero: one-tap continue + day streak ---- */
-    const hero = el('div', 'hero-cta');
+    const hero = el('div', 'hero-cta reveal-on-scroll');
     const hasHistory = s.total > 0;
     hero.innerHTML = `
       ${HERO_DECO_SVG}
@@ -1284,7 +1284,7 @@
     root.appendChild(hero);
 
     /* ---- quick-length sessions (still one tap once a length is picked) ---- */
-    const quick = el('div', 'btn-row');
+    const quick = el('div', 'btn-row reveal-on-scroll');
     quick.style.marginBottom = 'var(--sp-3)';
     [['5 min', 5], ['10 min', 10], ['20 min', 20], ['45 min', 45]].forEach(([label, min]) => {
       const b = el('button', 'btn sm', label);
@@ -1298,7 +1298,7 @@
     root.appendChild(quick);
 
     /* ---- usage streak / contribution history ---- */
-    const hp = el('div', 'panel');
+    const hp = el('div', 'panel reveal-on-scroll');
     hp.innerHTML = `<span class="eyebrow">Consistency</span>
       <div class="mt-2">${heatmap(S.contributionDays(70))}</div>`;
     root.appendChild(hp);
@@ -1313,7 +1313,7 @@
       const started = sum.total > 0;
       const active = t.id === track;
       const colorVar = TRACK_COLOR_VAR[t.id];
-      const card = el('button', 'track-card gradient-card' + (active ? ' active' : ''));
+      const card = el('button', 'track-card gradient-card reveal-on-scroll' + (active ? ' active' : ''));
       card.style.cssText = `--gc-tint:var(--${colorVar}-soft);--gc-line:var(--${colorVar}-line)`;
       card.innerHTML = `
         <span class="track-card-top">
@@ -1334,7 +1334,7 @@
     // always-present 7th card, clearly additive (none of the 6 real tracks are restricted by
     // this or anything else) so the design system has a real, screenshottable example of
     // what locked content looks like once a future task wires up real entitlement logic.
-    const lockedDemo = el('div', 'track-card gradient-card tone-warm locked-card');
+    const lockedDemo = el('div', 'track-card gradient-card tone-warm locked-card reveal-on-scroll');
     lockedDemo.innerHTML = `
       <div class="locked-blurred">
         <span class="track-card-top">${iconBox('accent', icon('flame'), 'lg')}</span>
@@ -1350,20 +1350,20 @@
        from 0 on mount instead of appearing already-complete (data-count-to + animateCounters,
        called once per render() pass alongside activateRings — see there for how the two stay
        in sync with the app's fully-synchronous render). */
-    root.appendChild(el('div', 'grid c4', `
+    root.appendChild(el('div', 'grid c4 reveal-on-scroll', `
       <div class="stat accent"><span class="label">Accuracy</span><span class="value" data-count-to="${s.accuracy}" data-count-suffix="%">0%</span><span class="sub">${s.correct}/${s.total}</span></div>
       <div class="stat"><span class="label">Completed</span><span class="value" data-count-to="${s.total}">0</span><span class="sub">questions</span></div>
       <div class="stat"><span class="label">Avg time</span><span class="value" data-count-to="${s.avgTime}" data-count-suffix="s">0s</span><span class="sub">per question</span></div>
       <div class="stat brand"><span class="label">Best run</span><span class="value" data-count-to="${S.summary().bestStreak}">0</span><span class="sub">consecutive correct</span></div>`));
 
     if (track === 'quant') {
-      root.appendChild(el('div', 'grid c3', `
+      root.appendChild(el('div', 'grid c3 reveal-on-scroll', `
         <div class="stat"><span class="label">${esc(mockLabel('Wincent'))} readiness</span><span class="value" data-count-to="${rd.wincent}">0</span><span class="sub">internal metric</span></div>
         <div class="stat"><span class="label">${esc(mockLabel('SIG'))} readiness</span><span class="value" data-count-to="${rd.sig}">0</span><span class="sub">internal metric</span></div>
         <div class="stat"><span class="label">IMC readiness</span><span class="value" data-count-to="${rd.imc}">0</span><span class="sub">internal metric</span></div>`));
     }
 
-    const cols = el('div', 'grid c2');
+    const cols = el('div', 'grid c2 reveal-on-scroll');
     const p1 = el('div', 'panel');
     p1.innerHTML = '<span class="eyebrow">Accuracy by topic</span><div class="mt-2">' +
       bars(S.byKey('topic', track).sort((a, b) => b.n - a.n)) + '</div>';
@@ -1373,7 +1373,7 @@
     cols.appendChild(p1); cols.appendChild(p2);
     root.appendChild(cols);
 
-    const cols2 = el('div', 'grid c2');
+    const cols2 = el('div', 'grid c2 reveal-on-scroll');
     const w = S.weakestTopics(3, 3, track), st = S.strongestTopics(3, 3, track);
     const p3 = el('div', 'panel');
     p3.innerHTML = '<span class="eyebrow">Weakest 3 topics</span>' +
@@ -1387,7 +1387,7 @@
     root.appendChild(cols2);
 
     const m = S.recentMocks(null, 5);
-    const p5 = el('div', 'panel');
+    const p5 = el('div', 'panel reveal-on-scroll');
     p5.innerHTML = '<span class="eyebrow">Recent mock scores</span>' +
       (m.length ? '<ul class="list">' + m.map((x) => `<li>${esc(mockLabel(x.type))} — <strong>${x.score}/${x.total}</strong>
         <span class="dim mono-sm" style="float:right">${new Date(x.ts).toLocaleDateString()} · ${fmtTime(x.timeSec)}</span></li>`).join('') + '</ul>'
@@ -2388,7 +2388,33 @@
     window.scrollTo(0, 0);
   }
 
+  /* Showcase 2030, Bloque 2b: real section/track navigation gets the native View Transitions
+     API (a before/after screenshot cross-fade the browser animates automatically) instead of
+     the plain instant DOM swap — but render() is also the SAME function every in-session
+     redraw uses (next question, answer feedback, flag toggle...), and wrapping every one of
+     those in a view transition would add visible cost to the most rapid, frequent interaction
+     in the app for no real benefit (the brief specifically scopes this to navigating between
+     sections/tracks, not every re-render). isNavigation compares the view/track this render
+     call resolves to against what was last actually painted, so a genuine "next question"
+     redraw within the SAME runner session never triggers one, while every dashboard<->learn/
+     drill/etc. swap and every track switch does. */
+  let lastRenderedView = null, lastRenderedTrack = null;
+  function prefersReducedMotion() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+    catch (e) { return false; }
+  }
   function render() {
+    const view = session ? 'runner' : current;
+    const track = S.activeTrack();
+    const isNavigation = view !== lastRenderedView || track !== lastRenderedTrack;
+    lastRenderedView = view; lastRenderedTrack = track;
+    if (isNavigation && typeof document.startViewTransition === 'function' && !prefersReducedMotion()) {
+      document.startViewTransition(() => renderNow());
+    } else {
+      renderNow();
+    }
+  }
+  function renderNow() {
     const main = $('#main');
     main.innerHTML = '';
     const view = session ? 'runner' : current;
@@ -2423,6 +2449,7 @@
     main.classList.remove('view-enter'); void main.offsetWidth; main.classList.add('view-enter');
     activateRings(main);
     animateCounters(main);
+    initScrollReveal(main);
   }
 
   /* ------------------------------- bottom sheets ---------------------------- */
@@ -2580,6 +2607,40 @@
         if (t < 1) requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
+    });
+  }
+  /* Showcase 2030, Bloque 2a: elements marked .reveal-on-scroll (CSS: opacity:0 + a slight
+     translateY at rest) fade/slide into place the moment they cross into the viewport, via a
+     single shared IntersectionObserver rather than a scroll-event listener (no scroll-jank
+     risk — the browser's own compositor drives this, not JS on every scroll tick). One
+     observer instance is reused across renders (disconnected and rebuilt each call, since
+     render() fully replaces #main's contents every time — the previous instance's targets no
+     longer exist to unobserve). Elements already on-screen at mount (e.g. the hero, above the
+     fold) still get their .in-view class almost immediately: IntersectionObserver reports the
+     current intersection state on first observe(), it doesn't require an actual scroll. No
+     IntersectionObserver support (or no matching elements, e.g. jsdom in the test suite) ->
+     everything just appears at full opacity immediately, never silently stuck invisible. */
+  let scrollRevealObserver = null;
+  function initScrollReveal(scope) {
+    const els = $$('.reveal-on-scroll', scope || document);
+    if (scrollRevealObserver) { scrollRevealObserver.disconnect(); scrollRevealObserver = null; }
+    if (!els.length) return;
+    if (typeof IntersectionObserver !== 'function') {
+      els.forEach((elm) => elm.classList.add('in-view'));
+      return;
+    }
+    scrollRevealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('in-view');
+        scrollRevealObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+    els.forEach((elm, i) => {
+      // a light stagger (capped so a long list doesn't end with a multi-second wait) so a
+      // grid of cards cascades in rather than every card appearing in the same instant
+      elm.style.transitionDelay = Math.min(i * 55, 330) + 'ms';
+      scrollRevealObserver.observe(elm);
     });
   }
 

@@ -1439,5 +1439,39 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
 }
 .milestone .mtext strong { color: var(--accent-2); }
 
+/* ============================================================================
+   SHOWCASE 2030 — scroll-driven reveal, section-navigation view transitions.
+   Bloque 2a: any element marked .reveal-on-scroll starts faded/lowered and animates into
+   place once initScrollReveal()'s IntersectionObserver marks it .in-view (see app.js). The
+   translateY distance is deliberately larger than a hover-lift (16px vs. the 1-3px card
+   hover elsewhere) — this is a page-load entrance, not a micro-interaction, and reads as
+   "arriving" rather than "responding to a pointer." */
+.reveal-on-scroll {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+}
+.reveal-on-scroll.in-view { opacity: 1; transform: translateY(0); }
+
+/* Bloque 2b: document.startViewTransition wraps real section/track navigation (see render()
+   in app.js — NOT every re-render, in-session redraws like "next question" are excluded on
+   purpose). The browser's default is a plain cross-fade; overridden here so the outgoing view
+   fades out quickly while the incoming one fades AND slides up, matching the same "arriving"
+   motion .reveal-on-scroll uses, for one consistent motion language across the app. Browsers
+   without support (anything but Chromium as of this writing) simply never call
+   startViewTransition — render() falls back to the plain instant DOM swap it already used
+   before this Bloque, which still gets the existing #main .view-enter fade+slide (see
+   viewEnter above) as its own fallback motion, so every browser gets SOME transition, just
+   via two different mechanisms. */
+::view-transition-old(root) { animation: vtOut 160ms var(--ease) both; }
+::view-transition-new(root) { animation: vtIn 320ms var(--ease-out) both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+/* `*` never matches pseudo-elements, so the blanket reduced-motion rule below can't reach
+   ::view-transition-old/new on its own — this is the one motion this app introduces that
+   needs its own explicit reduced-motion override rather than inheriting the global one. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
