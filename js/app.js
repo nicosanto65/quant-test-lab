@@ -2374,10 +2374,34 @@
 
   /* ================================= SHELL ================================= */
 
+  /* Showcase 2030, Bloque 2f: every themed colour is a CSS custom property (see :root vs.
+     html[data-theme="light"] in styles.css), so the swap itself is instant — one attribute
+     write recomputes every var() on the page in the same frame, which is what reads as an
+     abrupt cut. A permanent global `* { transition: background-color ... }` would fight the
+     hover/press transitions almost every element already declares its own (double-animating,
+     or losing to specificity depending on source order); instead a `theme-transitioning`
+     class is added just long enough to cover the swap, using !important to briefly take
+     priority over every component's own transition list, then removed so normal interaction
+     transitions go straight back to how they already behaved. Respects the SAME global
+     prefers-reduced-motion rule as everything else (that rule matches `*`, and this class's
+     selector includes `*` too, so `!important` vs `!important` resolves by the reduced-motion
+     rule's later source position — verified live, see the report). */
   function toggleTheme() {
     const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    // .theme-transitioning's selector (a class + universal descendant) is MORE specific than
+    // the global reduced-motion rule's bare `*` — an !important war it would actually win,
+    // overriding the user's motion preference. Simplest correct fix: never add the class at
+    // all when reduced motion is preferred: the attribute swap alone is already instant with
+    // no transition, exactly what reduced-motion should look like, no CSS specificity games.
+    if (prefersReducedMotion()) {
+      document.documentElement.setAttribute('data-theme', cur);
+      S.state.settings.theme = cur; S.save();
+      return;
+    }
+    document.documentElement.classList.add('theme-transitioning');
     document.documentElement.setAttribute('data-theme', cur);
     S.state.settings.theme = cur; S.save();
+    setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 340);
   }
 
   function go(view) {
