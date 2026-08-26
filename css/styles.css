@@ -737,17 +737,22 @@ html[data-theme="light"] .locked-overlay {
   color: var(--text); border-radius: var(--radius-sm); padding: 12px 16px;
   font-size: var(--fs-base); font-family: var(--font-body); cursor: pointer; min-height: 46px;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease),
-    transform 80ms var(--ease), box-shadow var(--dur) var(--ease);
+    transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
 }
-.btn:hover { border-color: var(--brand-line); }
+/* Showcase 2030, Bloque 2c: every button now lifts + gains a real shadow on hover, not just a
+   border-colour shift — the same transform+shadow language .gradient-card/.chip/.opt already
+   established elsewhere, extended to the one interactive-element family that was still
+   colour-only. .btn:active's existing press-down transform (translateY(1px) scale(0.99))
+   already reads correctly against this new hover-lift baseline: lift up, then press down. */
+.btn:hover { border-color: var(--brand-line); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .btn:active { transform: translateY(1px) scale(0.99); }
 .btn.primary {
   background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650;
   box-shadow: 0 2px 10px var(--accent-soft);
 }
-.btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); box-shadow: var(--shadow-sm), 0 2px 16px var(--accent-soft); }
 .btn.secondary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); font-weight: 600; }
-.btn.secondary:hover { background: var(--brand-2); border-color: var(--brand-2); }
+.btn.secondary:hover { background: var(--brand-2); border-color: var(--brand-2); box-shadow: var(--shadow-sm), 0 2px 16px var(--brand-soft); }
 .btn.ghost { background: none; }
 .btn.sm { padding: 7px 11px; font-size: var(--fs-sm); min-height: 36px; }
 .btn.lg { padding: 16px 20px; font-size: var(--fs-lg); min-height: 56px; border-radius: var(--radius); }
@@ -1438,6 +1443,49 @@ textarea { min-height: 140px; line-height: 1.4; font-size: var(--fs-sm); }
   display: flex; align-items: center; justify-content: center; flex: none;
 }
 .milestone .mtext strong { color: var(--accent-2); }
+
+/* ============================================================================
+   SHOWCASE 2030 — scroll-driven reveal, section-navigation view transitions.
+   Bloque 2a: any element marked .reveal-on-scroll starts faded/lowered and animates into
+   place once initScrollReveal()'s IntersectionObserver marks it .in-view (see app.js). The
+   translateY distance is deliberately larger than a hover-lift (16px vs. the 1-3px card
+   hover elsewhere) — this is a page-load entrance, not a micro-interaction, and reads as
+   "arriving" rather than "responding to a pointer." */
+.reveal-on-scroll {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+}
+.reveal-on-scroll.in-view { opacity: 1; transform: translateY(0); }
+
+/* Bloque 2b: document.startViewTransition wraps real section/track navigation (see render()
+   in app.js — NOT every re-render, in-session redraws like "next question" are excluded on
+   purpose). The browser's default is a plain cross-fade; overridden here so the outgoing view
+   fades out quickly while the incoming one fades AND slides up, matching the same "arriving"
+   motion .reveal-on-scroll uses, for one consistent motion language across the app. Browsers
+   without support (anything but Chromium as of this writing) simply never call
+   startViewTransition — render() falls back to the plain instant DOM swap it already used
+   before this Bloque, which still gets the existing #main .view-enter fade+slide (see
+   viewEnter above) as its own fallback motion, so every browser gets SOME transition, just
+   via two different mechanisms. */
+::view-transition-old(root) { animation: vtOut 160ms var(--ease) both; }
+::view-transition-new(root) { animation: vtIn 320ms var(--ease-out) both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+/* `*` never matches pseudo-elements, so the blanket reduced-motion rule below can't reach
+   ::view-transition-old/new on its own — this is the one motion this app introduces that
+   needs its own explicit reduced-motion override rather than inheriting the global one. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Bloque 2f: see toggleTheme() in app.js for why this is a temporary class added only for
+   the swap's duration rather than a permanent global rule, and why reduced-motion is handled
+   in JS (never adding this class) rather than here. */
+.theme-transitioning, .theme-transitioning * {
+  transition: background-color 320ms var(--ease-out), color 320ms var(--ease-out),
+    border-color 320ms var(--ease-out), box-shadow 320ms var(--ease-out),
+    fill 320ms var(--ease-out), stroke 320ms var(--ease-out) !important;
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
